@@ -1,0 +1,9 @@
+This folder is used to store builds.
+
+THe usual format for the folder names is as follows.
+
+DEV BUILD:
+Name_MainFeatureToTest
+
+TEST BUILD:
+Name_{Version} where {Version} = vMajor.Minor.Update.RevNumber.  Example: v1.0.3.157
