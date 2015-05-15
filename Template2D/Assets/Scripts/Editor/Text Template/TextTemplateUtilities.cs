@@ -1,14 +1,16 @@
 /* --------------------------
  *
- * ScriptCreationUtilities.cs
+ * TextTemplateUtilities.cs
  *
  * Description: 
  *
- * Author: 
+ * Author: Jeremy Smellie
  *
  * Editors:
  *
- * 5/12/2015 9:10:06 PM - Starvoxel - All rights reserved
+ * 5/12/2015 9:10:06 PM - Starvoxel
+ * 
+ * All rights reserved
  *
  * -------------------------- */
 
@@ -31,25 +33,69 @@ namespace Template2D
     {
         #region Fields & Properties
 		//const
-        private const string LICENSE_FILE_KEY = "ScriptKeywordReplacer_LicenseFile";
+        private const string LICENSE_FILE_KEY = "TextTemplateMacroReplacer_LicenseFile";
+        private const string AUTHOR_KEY = "TextTemplateMacroReplacer_Author";
         private const string DEFAULT_LICENSE = "All rights reserved.";
         
 		//properties
-        private static string licenseFilePath
+        private static string LicenseFilePath
         {
             get { return EditorPrefs.GetString(LICENSE_FILE_KEY, null); }
             set { EditorPrefs.SetString(LICENSE_FILE_KEY, value); }
         }
+
+        private static string Author
+        {
+            get { return EditorPrefs.GetString(AUTHOR_KEY, null); }
+            set { EditorPrefs.SetString(AUTHOR_KEY, value); }
+        }
 		#endregion
 
 		#region Public Methods
-        [MenuItem("Editor/Text Template/Select License File...", false, 50)]
-        public static void SetLicenseLocation()
+		#endregion
+
+		#region Protected Methods
+		#endregion
+
+		#region Private Methods
+        [PreferenceItem("Text Template")]
+        private static void OnPreferenceItem()
         {
-            licenseFilePath = EditorUtility.OpenFilePanel("Select License File", string.IsNullOrEmpty(licenseFilePath) ? Application.dataPath : licenseFilePath, "txt");
+            EditorGUILayout.BeginHorizontal();
+            {
+                GUILayout.Label("License File:", GUILayout.Width(100));
+
+                GUI.enabled = !string.IsNullOrEmpty(LicenseFilePath);
+                {
+                    string compressedPath = LicenseFilePath.Replace(Application.dataPath, "");
+
+                    GUILayout.Label(compressedPath, GUI.skin.textField, GUILayout.MaxWidth(218));
+                }
+                GUI.enabled = true;
+
+                if (GUILayout.Button("Set", GUILayout.ExpandWidth(false)))
+                {
+                    LicenseFilePath = EditorUtility.OpenFilePanel("Select License File", string.IsNullOrEmpty(LicenseFilePath) ? Application.dataPath : LicenseFilePath, "txt");
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            {
+                GUILayout.Label("Author: ", GUILayout.Width(100));
+                Author = EditorGUILayout.TextField(Author);
+            }
         }
 
-        public static void OnWillCreateAsset(string path)
+        [MenuItem("Editor/Text Template/Select License File...", false, 50)]
+        private static void SetLicenseLocation()
+        {
+            LicenseFilePath = EditorUtility.OpenFilePanel("Select License File", string.IsNullOrEmpty(LicenseFilePath) ? Application.dataPath : LicenseFilePath, "txt");
+        }
+
+        private static void OnWillCreateAsset(string path)
         {
             path = path.Replace(".meta", "");
             int index = path.LastIndexOf(".");
@@ -63,30 +109,22 @@ namespace Template2D
             file = file.Replace("#PROJECTNAME#", PlayerSettings.productName);
             file = file.Replace("#CODE-PROJECTNAME#", TextTemplateMacroReplacer.CodifyString(PlayerSettings.productName));
             file = file.Replace("#COMPANYNAME#", PlayerSettings.companyName);
+            file = file.Replace("#AUTHOR#", string.IsNullOrEmpty(Author) ? "" : Author);
             file = file.Replace("#CODE-COMPANYNAME#", TextTemplateMacroReplacer.CodifyString(PlayerSettings.companyName));
 
             string licenseMsg = DEFAULT_LICENSE;
-            if (!string.IsNullOrEmpty(licenseFilePath))
+            if (!string.IsNullOrEmpty(LicenseFilePath))
             {
-                licenseMsg = System.IO.File.ReadAllText(licenseFilePath);
+                licenseMsg = System.IO.File.ReadAllText(LicenseFilePath);
                 licenseMsg = licenseMsg.Replace("\n", "\n * ");
             }
 
             file = file.Replace("#SOURCELICENSE#", licenseMsg);
 
-            /* TODO:
-             * - Somehow figure out the author thing like we do at work...  I have no fucking clue how that works
-             * */
-
             System.IO.File.WriteAllText(path, file);
             AssetDatabase.Refresh();
         }
-		#endregion
 
-		#region Protected Methods
-		#endregion
-
-		#region Private Methods
         private static string CodifyString(string value)
         {
             while (value.Length > 0 && value[0] >= '0' && value[0] <= '9')
