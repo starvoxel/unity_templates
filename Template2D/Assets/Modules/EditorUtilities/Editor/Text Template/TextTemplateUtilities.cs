@@ -34,7 +34,7 @@ namespace EditorUtilities
         //const
         private const string LICENSE_FILE_KEY = "TextTemplateMacroReplacer_LicenseFile";
         private const string AUTHOR_KEY = "TextTemplateMacroReplacer_Author";
-        private const string USE_NAMESPACE_KEY = "TextTemplateMacroReplacer_UseNamespace";
+        private const string USE_LONG_NAMESPACE_KEY = "TextTemplateMacroReplacer_UseNamespace";
 
         private const string SCRIPT_TEMPLATE_PATH = "Data/Resources/ScriptTemplates/";
         private const string CSHARP_TEMPLATE_FILENAME = "81-C# Script-NewBehaviourScript.cs.text";
@@ -54,10 +54,10 @@ namespace EditorUtilities
             set { EditorPrefs.SetString(AUTHOR_KEY, value); }
         }
 
-        private static bool UseNamespace
+        private static bool UseDescriptiveNamespace
         {
-            get { return EditorPrefs.GetBool(USE_NAMESPACE_KEY, false); }
-            set { EditorPrefs.GetBool(USE_NAMESPACE_KEY, value); }
+            get { return EditorPrefs.GetBool(USE_LONG_NAMESPACE_KEY, false); }
+            set { EditorPrefs.SetBool(USE_LONG_NAMESPACE_KEY, value); }
         }
         #endregion
 
@@ -101,7 +101,7 @@ namespace EditorUtilities
 
             EditorGUILayout.Space();
 
-            UseNamespace = EditorGUILayout.Toggle("Use Namespace: ", UseNamespace);
+            UseDescriptiveNamespace = EditorGUILayout.Toggle("Use Descriptive Namespace: ", UseDescriptiveNamespace);
 
             EditorGUILayout.Space();
 
@@ -139,6 +139,22 @@ namespace EditorUtilities
 
             string file = path.Substring(index);
             if (file != ".cs" && file != ".js" && file != ".boo") return;
+
+            string descNamespace = "";
+            if (UseDescriptiveNamespace)
+            {
+                index = path.LastIndexOf("Scripts") + "Scripts".Length;
+
+                if (index <= 0)
+                {
+                    index = "Assets".Length;
+                }
+
+                descNamespace = Path.GetDirectoryName(path.Substring(index));
+                descNamespace = descNamespace.Replace("/", ".");
+                descNamespace = CodifyString(descNamespace);
+            }
+
             index = Application.dataPath.LastIndexOf("Assets");
             path = Application.dataPath.Substring(0, index) + path;
             file = System.IO.File.ReadAllText(path);
@@ -154,6 +170,7 @@ namespace EditorUtilities
             file = file.Replace("#COMPANYNAME#", PlayerSettings.companyName);
             file = file.Replace("#AUTHOR#", string.IsNullOrEmpty(Author) ? "" : Author);
             file = file.Replace("#CODE-COMPANYNAME#", TextTemplateMacroReplacer.CodifyString(PlayerSettings.companyName));
+            file = file.Replace("#LONG-NAMESPACE#", descNamespace);
 
             string licenseMsg = DEFAULT_LICENSE;
             if (!string.IsNullOrEmpty(LicenseFilePath))
@@ -176,7 +193,6 @@ namespace EditorUtilities
             }
 
             value = value.Replace(" ", "");
-            value = value.Replace(".", "");
 
             return value;
         }

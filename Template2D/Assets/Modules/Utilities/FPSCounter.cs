@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace SmellieCorp.Utility
+namespace Utility
 {
     [RequireComponent(typeof(GUIText))]
     public class FPSCounter : MonoBehaviour
