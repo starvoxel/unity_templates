@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SmellieCorp.Utility
 {
-    [RequireComponent(typeof (GUIText))]
+    [RequireComponent(typeof(GUIText))]
     public class FPSCounter : MonoBehaviour
     {
         //const
@@ -17,12 +17,20 @@ namespace SmellieCorp.Utility
         private GUIText m_GUIText;
 
         #region Unity API
-        private void Start()
+        private void Awake()
         {
+            if (Debug.isDebugBuild)
+            {
+                DontDestroyOnLoad(this.gameObject);
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
+
             m_FpsNextPeriod = Time.realtimeSinceStartup + UPDATE_INTERVAL;
             m_GUIText = GetComponent<GUIText>();
         }
-
 
         private void Update()
         {
@@ -30,7 +38,7 @@ namespace SmellieCorp.Utility
             m_FpsAccumulator++;
             if (Time.realtimeSinceStartup > m_FpsNextPeriod)
             {
-                m_CurrentFps = (int) (m_FpsAccumulator/UPDATE_INTERVAL);
+                m_CurrentFps = (int)(m_FpsAccumulator / UPDATE_INTERVAL);
                 m_FpsAccumulator = 0;
                 m_FpsNextPeriod += UPDATE_INTERVAL;
                 m_GUIText.text = string.Format(DISPLAY_FORMAT, m_CurrentFps);

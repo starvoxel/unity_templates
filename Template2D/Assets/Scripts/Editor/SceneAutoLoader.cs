@@ -29,19 +29,19 @@ namespace Template2D
 {
     [InitializeOnLoad]
     static class SceneAutoLoader
-	{
-		#region Fields & Properties
+    {
+        #region Fields & Properties
         //const
         private const string EDITORPREFS_LOAD_MASTER_ON_PLAY = "SceneAutoLoader.LoadMasterOnPlay";
         private const string EDITORPREFS_MASTER_PATH = "SceneAutoLoader.MasterScene";
         private const string EDITORPREFS_PREV_PATH = "SceneAutoLoader.PreviousScene";
         private const string EDITORPREFS_PREV_SELECTION = "SceneAutoLoader.PreviousSelection";
 
-		//public
+        //public
 
-		//protected
+        //protected
 
-		//private
+        //private
 
         //properties
         private static bool LoadMasterOnPlay
@@ -67,16 +67,16 @@ namespace Template2D
             get { return EditorPrefs.GetString(EDITORPREFS_PREV_SELECTION, null); }
             set { EditorPrefs.SetString(EDITORPREFS_PREV_SELECTION, value); }
         }
-		#endregion
+        #endregion
 
-		#region Unity Methods
-		#endregion
+        #region Unity Methods
+        #endregion
 
-		#region Public Methods
-		#endregion
+        #region Public Methods
+        #endregion
 
-		#region Protected Methods
-		#endregion
+        #region Protected Methods
+        #endregion
 
         #region Private Methods
 
@@ -259,7 +259,7 @@ namespace Template2D
 
             return null;
         }
-		#endregion
+        #endregion
 
         #endregion
     }
