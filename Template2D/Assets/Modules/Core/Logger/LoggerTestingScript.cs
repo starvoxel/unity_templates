@@ -1,28 +1,26 @@
 /* --------------------------
  *
- * FlowParser.cs
+ * LoggerTestingScript.cs
  *
- * Description: Basic parser for the flow manager
+ * Description: 
  *
  * Author: Jeremy Smellie
  *
  * Editors:
  *
- * 6/9/2015 - Starvoxel
+ * 8/28/2015 - Starvoxel
  *
  * All rights reserved.
  *
  * -------------------------- */
 
 #region Includes
-#region Unity Inludes
+#region Unity Includes
 using UnityEngine;
 #endregion
 
 #region System Includes
-using System;
 using System.Collections;
-using System.Xml;
 #endregion
 
 #region Other Includes
@@ -30,37 +28,33 @@ using System.Xml;
 #endregion
 #endregion
 
- namespace Starvoxel.FlowManagement
+ namespace Starvoxel
 {
-	public class FlowParser
+	public class LoggerTestingScript : MonoBehaviour
 	{
 		#region Fields & Properties
-        //const
+		//const
 	
 		//public
-
-        //protected
-        protected Version m_FileVersion;
+	
+		//protected
 	
 		//private
 	
 		//properties
 		#endregion
 	
-		#region Constructor Methods
-		public FlowParser(XmlDocument doc)
-		{
-
-		}
+		#region Unity Methods
+        void Awake()
+        {
+            Logger.Log("Test Log");
+        }
 		#endregion
 	
 		#region Public Methods
-        public void ParseGeneralInfo()
-        {
-        }
 		#endregion
-
-        #region Protected Methods
+	
+		#region Protected Methods
 		#endregion
 	
 		#region Private Methods
