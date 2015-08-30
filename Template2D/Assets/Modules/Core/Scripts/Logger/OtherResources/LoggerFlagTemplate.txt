@@ -24,6 +24,8 @@ using System.Collections;
 #endregion
 #endregion
 
+#define LOGGER_FLAGS
+
 namespace Starvoxel
 {
     public partial class LoggerSettings
