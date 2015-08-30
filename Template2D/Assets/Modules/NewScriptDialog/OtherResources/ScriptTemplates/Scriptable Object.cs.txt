@@ -15,7 +15,7 @@ $Includes
 #endregion
 
 $NamespaceStart
-class $ClassName : ScriptableObject {
+public class $ClassName : ScriptableObject {
 	#region Fields & Properties
 	//const
 

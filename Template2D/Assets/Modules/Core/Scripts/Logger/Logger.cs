@@ -38,7 +38,8 @@ using StackFrame = System.Diagnostics.StackFrame;
 		//const
         public const string SETTINGS_PATH = "ScriptableObjects/LoggerSettings";
         public const string INFO_START = "\n[ ";
-        public const string INFO_END = " ]";
+        public const string INFO_END = " ]\n";
+        public const string STACKTRACE_START = "\n -- Stack Trace --\n";
 	
 		//public
 	
@@ -55,9 +56,7 @@ using StackFrame = System.Diagnostics.StackFrame;
         {
             Initialize();
 
-            string info = CreateInfoLine();
-
-            Debug.LogFormat("<b>" + msg + "</b>" + info, args);
+            Debug.LogFormat(CreateFinalMessage(msg), args);
         }
 
         public static void Log(Object context, string msg, params object[] args)
@@ -68,11 +67,11 @@ using StackFrame = System.Diagnostics.StackFrame;
 
             if (context == null)
             {
-                Debug.LogFormat("<b>" + msg + "</b>" + info, args);
+                Debug.LogFormat(CreateFinalMessage(msg), args);
             }
             else
             {
-                Debug.LogFormat(context, "<b>" + msg + "</b>" + info, args);
+                Debug.LogFormat(context, CreateFinalMessage(msg), args);
             }
         }
 		#endregion
@@ -128,6 +127,11 @@ using StackFrame = System.Diagnostics.StackFrame;
             }
 
             return info;
+        }
+
+        private static string CreateFinalMessage(string msg)
+        {
+            return msg + CreateInfoLine() + STACKTRACE_START;
         }
 
         private static string GetClassName()
