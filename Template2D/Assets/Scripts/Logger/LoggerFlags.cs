@@ -30,7 +30,13 @@ namespace Starvoxel
     {
         public enum eLoggerFlags
         {
-%FLAGS%
+            DEFAULT = 1 << 0,
+            Module = 1 << 1,
+            Core = 1 << 2,
+            NewScriptDialog = 1 << 3,
+            JustOneMoreTest = 1 << 4,
+            Pooling = 1 << 5,
+            SomeTestThing = 1 << 6,
         }
     }
 }

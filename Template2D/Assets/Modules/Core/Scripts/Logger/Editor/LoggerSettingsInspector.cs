@@ -76,7 +76,7 @@ using System.IO;
 
         public LoggerSettingsInspector()
         {
-            m_EnumNames = GetEnumNamesFromLFIFiles();
+            m_EnumNames = GetEnumNames();
         }
 		#endregion
 
@@ -135,12 +135,12 @@ using System.IO;
 
         private void GenerateFlagEnum()
         {
-            string[] enumNames = GetEnumNamesFromLFIFiles();
+            string[] enumNames = GetEnumNames();
 
             UpdateFlagFile(enumNames);
         }
 
-        private string[] GetEnumNamesFromLFIFiles()
+        private string[] GetEnumNames()
         {
             List<string> enumNames = new List<string>();
 
@@ -179,18 +179,6 @@ using System.IO;
             }
 
             return enumNames.ToArray();
-        }
-
-        private string[] GetCurrentEnumNames()
-        {
-            string[] enums = null;
-#if LOGGER_FLAGS
-            enums = System.Enum.GetNames(typeof(LoggerSettings.eLoggerFlags));
-#else
-            GenerateFlagEnum();
-            //enums = GetCurrentEnumNames();
-#endif
-            return enums;
         }
 
         private void UpdateFlagFile(string[] enumNames)
