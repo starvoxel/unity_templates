@@ -42,7 +42,8 @@ using System.IO;
         public static readonly char ENUM_DIVIDER_CHAR = ',';
 
         public static readonly string TEMPLATE_PATH = Application.dataPath + "/Modules/Core/Scripts/Logger/OtherResources/LoggerFlagTemplate.txt";
-        public static readonly string TEMPLATE_REPLACE_MACRO = "%FLAGS%";
+        public static readonly string TEMPLATE_FLAG_MACRO = "%FLAGS%";
+        public static readonly string TEMPLATE_GETVALUE_MACRO = "%GETVAL%";
 
         public static readonly GUIContent FLAG_HEADER_CONTENT = new GUIContent("Flags");
 
@@ -76,7 +77,7 @@ using System.IO;
 
         public LoggerSettingsInspector()
         {
-            m_EnumNames = GetEnumNames();
+            m_EnumNames = GetEnumNamesFromEnum();
         }
 		#endregion
 
@@ -87,6 +88,8 @@ using System.IO;
 
             GUILayout.BeginVertical();
             {
+                m_EnumNames = GetEnumNamesFromLFIs();
+
                 for (int i = 0; i < m_EnumNames.Length; ++i)
                 {
                     FlagElementGUI(m_EnumNames[i]);
@@ -135,12 +138,12 @@ using System.IO;
 
         private void GenerateFlagEnum()
         {
-            string[] enumNames = GetEnumNames();
+            string[] enumNames = GetEnumNamesFromLFIs();
 
             UpdateFlagFile(enumNames);
         }
 
-        private string[] GetEnumNames()
+        private string[] GetEnumNamesFromLFIs()
         {
             List<string> enumNames = new List<string>();
 
@@ -181,6 +184,13 @@ using System.IO;
             return enumNames.ToArray();
         }
 
+        private string[] GetEnumNamesFromEnum()
+        {
+            eLoggerFlags[] testArray = eLoggerFlags.GetFlags();
+
+            return eLoggerFlags.GetNames();
+        }
+
         private void UpdateFlagFile(string[] enumNames)
         {
             if (enumNames != null && enumNames.Length > 0)
@@ -189,7 +199,7 @@ using System.IO;
                 {
                     string template = File.ReadAllText(TEMPLATE_PATH);
 
-                    if (template.Contains(TEMPLATE_REPLACE_MACRO))
+                    if (template.Contains(TEMPLATE_FLAG_MACRO))
                     {
                         string concatenationEnum = string.Empty;
 
@@ -206,7 +216,7 @@ using System.IO;
                             }
                         }
 
-                        template = template.Replace(TEMPLATE_REPLACE_MACRO, concatenationEnum);
+                        template = template.Replace(TEMPLATE_FLAG_MACRO, concatenationEnum);
 
                         if (!Directory.Exists(LoggerSettings.FLAG_FILE_DIRECTORY))
                         {

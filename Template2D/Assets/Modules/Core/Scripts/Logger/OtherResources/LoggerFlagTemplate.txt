@@ -1,6 +1,6 @@
 /* --------------------------
  *
- * LoggerFlag.cs
+ * LoggerFlags.cs
  *
  * Description: Generated class for flags used in the Logger class.
  *
@@ -17,6 +17,7 @@
 #region System Includes
 using System;
 using System.Collections;
+using System.Collections.Generic;
 #endregion
 
 #region Other Includes
@@ -24,13 +25,25 @@ using System.Collections;
 #endregion
 #endregion
 
+
 namespace Starvoxel
 {
-    public partial class LoggerSettings
-    {
-        public enum eLoggerFlags
-        {
+		public partial class eLoggerFlags
+		{
+			/*
 %FLAGS%
-        }
-    }
+			*/
+
+		
+            private static partial void GetPartialEnumValues(ref eLoggerFlags[] flags)
+            {
+                List<eLoggerFlags> flagList = new List<eLoggerFlags>(flags);
+
+				/*
+%GETVAL%
+				*/
+
+                flags = flagList.ToArray();
+            }
+		}
 }

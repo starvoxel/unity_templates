@@ -1,6 +1,6 @@
 /* --------------------------
  *
- * LoggerFlag.cs
+ * LoggerFlags.cs
  *
  * Description: Generated class for flags used in the Logger class.
  *
@@ -17,6 +17,7 @@
 #region System Includes
 using System;
 using System.Collections;
+using System.Collections.Generic;
 #endregion
 
 #region Other Includes
@@ -24,12 +25,14 @@ using System.Collections;
 #endregion
 #endregion
 
+
 namespace Starvoxel
 {
-    public partial class LoggerSettings
+    public partial class eLoggerFlags
     {
-        public enum eLoggerFlags
-        {
+        public static readonly eLoggerFlags RANDOM_TEST = new eLoggerFlags(1 << 3);
+    
+		/*
             DEFAULT = 1 << 0,
             Module = 1 << 1,
             Core = 1 << 2,
@@ -37,6 +40,16 @@ namespace Starvoxel
             JustOneMoreTest = 1 << 4,
             Pooling = 1 << 5,
             SomeTestThing = 1 << 6,
+        */
+		
+        
+        static partial void GetPartialEnumValues(ref eLoggerFlags[] flags)
+        {
+            List<eLoggerFlags> flagList = new List<eLoggerFlags>(flags);
+
+            flagList.Add(RANDOM_TEST);
+
+            flags = flagList.ToArray();
         }
     }
 }

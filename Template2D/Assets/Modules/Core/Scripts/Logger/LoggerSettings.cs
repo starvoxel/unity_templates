@@ -21,6 +21,7 @@ using UnityEngine;
 
 #region System Includes
 using System.Collections;
+using System.Collections.Generic;
 #endregion
 
 #region Other Includes
@@ -71,7 +72,6 @@ namespace Starvoxel
         #region Public Methods
         public LoggerSettings()
         {
-            Logger.Log("Logger Settings Constructor called!");
         }
         #endregion
 
