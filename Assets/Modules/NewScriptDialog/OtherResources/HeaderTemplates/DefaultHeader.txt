@@ -1,0 +1,15 @@
+/* --------------------------
+ *
+ * $ScriptName.cs
+ *
+ * Description: $Description
+ *
+ * Author: $Author
+ *
+ * Editors:
+ *
+ * $CreationData - $CompanyName
+ *
+ * $SourceLicense
+ *
+ * -------------------------- */
