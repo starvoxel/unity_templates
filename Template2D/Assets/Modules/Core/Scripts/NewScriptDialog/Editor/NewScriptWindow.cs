@@ -740,7 +740,7 @@ public class NewScriptWindow : EditorWindow
     #endregion
 
     #region GUI Methods
-    [PreferenceItem("New Script Settings")]
+    [PreferenceItem("New Script")]
     private static void OnPreferenceItem()
     {
         EditorGUILayout.BeginHorizontal();
