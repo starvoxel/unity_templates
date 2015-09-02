@@ -1,0 +1,52 @@
+BASECLASS=CustomScriptableObject
+$Header
+#region Includes
+#region Unity Includes
+using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+#endregion
+
+#region System Includes
+using System.Collections;
+#endregion
+
+#region Other Includes
+$Includes
+#endregion
+#endregion
+
+$NamespaceStart
+public class $ClassName : CustomScriptableObject {
+	#region Fields & Properties
+	//const
+
+	//public
+
+	//protected
+
+	//private
+
+	//properties
+	#endregion
+
+	#region Public Methods
+	#endregion
+
+	#region Protected Methods
+	#endregion
+
+	#region Private Methods
+	#endregion
+
+	#region Editor Functions
+	#if UNITY_EDITOR
+	[MenuItem("Assets/Create/ScriptableObjects/$ClassName", false, 5000)]
+	public static void CreateAsset()
+	{
+		ScriptableObjectUtility.CreateAsset<$ClassName>();
+	}
+	#endif
+	#endregion
+}
