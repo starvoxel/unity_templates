@@ -25,7 +25,10 @@ using System.Collections.Generic;
 #endregion
 
 #region Other Includes
-
+#if UNITY_EDITOR
+using UnityEditor;
+using System.IO;
+#endif
 #endregion
 #endregion
 
@@ -35,13 +38,6 @@ namespace Starvoxel
     {
         #region Fields & Properties
         //const
-        public const string DEFAULT_FLAG = "DEFAULT";
-
-        public static readonly string FLAG_INFO_FILENAME = "LoggerFlag.lfi";
-
-        public static readonly string FLAG_FILENAME = "LoggerFlags";
-        public static readonly string FLAG_FILE_DIRECTORY = Application.dataPath + "/Scripts/Logger";
-        public static readonly string FLAG_FILE_PATH = FLAG_FILE_DIRECTORY + "/" + FLAG_FILENAME + ".cs";
 
         //public
 
@@ -72,6 +68,7 @@ namespace Starvoxel
         #region Public Methods
         public LoggerSettings()
         {
+            EditorConstructor();
         }
         #endregion
 
@@ -81,7 +78,10 @@ namespace Starvoxel
         #region Private Methods
         #endregion
 
-        #region Editor Functions
+        #region Editor Methods
+        private void EditorConstructor()
+        {
+        }
         #endregion
     }
 }

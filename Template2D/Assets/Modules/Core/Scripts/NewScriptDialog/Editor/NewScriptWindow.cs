@@ -68,8 +68,8 @@ public class NewScriptWindow : EditorWindow
     //const
     private const int BUTTON_WIDTH = 120;
     private const int LABEL_WIDTH = 120;
-    private const string TEMPLATE_PATH = "Modules/NewScriptDialog/OtherResources/ScriptTemplates";
-    private const string HEADER_PATH = "Modules/NewScriptDialog/OtherResources/HeaderTemplates";
+    private const string TEMPLATE_PATH = "Modules/Core/Scripts/NewScriptDialog/OtherResources/ScriptTemplates";
+    private const string HEADER_PATH = "Modules/Core/Scripts/NewScriptDialog/OtherResources/HeaderTemplates";
     private const string RESOURCES_TEMPLATE_PATH = "Resources/CustomScriptTemplates";
     private const string MONOBEHAVIOUR_NAME = "MonoBehaviour";
     private const string EMPTY_CLASS_NAME = "Empty Class";

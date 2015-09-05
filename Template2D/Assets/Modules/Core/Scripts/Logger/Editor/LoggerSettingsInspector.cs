@@ -38,12 +38,9 @@ using System.IO;
 	{
 		#region Fields & Properties
 		//const
-        public static readonly char ENUM_START_CHAR = '$';
-        public static readonly char ENUM_DIVIDER_CHAR = ',';
-
-        public static readonly string TEMPLATE_PATH = Application.dataPath + "/Modules/Core/Scripts/Logger/OtherResources/LoggerFlagTemplate.txt";
-        public static readonly string TEMPLATE_FLAG_MACRO = "%FLAGS%";
-        public static readonly string TEMPLATE_GETVALUE_MACRO = "%GETVAL%";
+        public static readonly string INSTANCE_PATH = "Assets/Resources/ScriptableObjects/";
+        public static readonly string INSTANCE_NAME = "LoggerSettings";
+        public static readonly string INSTANCE_FILENAME = INSTANCE_PATH + INSTANCE_NAME + ".asset";
 
         public static readonly GUIContent FLAG_HEADER_CONTENT = new GUIContent("Flags");
 
@@ -52,6 +49,9 @@ using System.IO;
 
         public static readonly GUIContent GENERATE_BUTTON_CONTENT = new GUIContent("Generate", "Force generates the logger flag enum based on the flag info files.  Mostly will just be used for debugging and testing.");
         public static readonly float GENERATE_BUTTON_SIZE = 300;
+
+        public static readonly GUIContent ADD_BUTTON_CONTENT = new GUIContent("Add Flag", "Adds a new flag to the local .lfi file.  If no local .lfi file exists, creates a new one.");
+        public static readonly float ADD_BUTTON_SIZE = 200;
 	
 		//public
 	
@@ -77,7 +77,7 @@ using System.IO;
 
         public LoggerSettingsInspector()
         {
-            m_EnumNames = GetEnumNamesFromEnum();
+            m_EnumNames = LoggerFlagsGenerator.GetEnumNamesFromGeneratedFile();
         }
 		#endregion
 
@@ -88,12 +88,23 @@ using System.IO;
 
             GUILayout.BeginVertical();
             {
-                m_EnumNames = GetEnumNamesFromLFIs();
+                m_EnumNames = LoggerFlagsGenerator.GetEnumNamesFromGeneratedFile();
 
                 for (int i = 0; i < m_EnumNames.Length; ++i)
                 {
                     FlagElementGUI(m_EnumNames[i]);
                 }
+
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.FlexibleSpace();
+                    //if (GUILayout.Button())
+                    {
+
+                    }
+                    GUILayout.FlexibleSpace();
+                }
+                GUILayout.EndHorizontal();
             }
             GUILayout.EndVertical();
 
@@ -104,7 +115,7 @@ using System.IO;
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(GENERATE_BUTTON_CONTENT, GUILayout.MaxWidth(GENERATE_BUTTON_SIZE), GUILayout.MinWidth(GENERATE_BUTTON_SIZE)))
                 {
-                    GenerateFlagEnum();
+                    LoggerFlagsGenerator.GenerateFlagEnum();
                 }
                 GUILayout.FlexibleSpace();
             }
@@ -118,10 +129,6 @@ using System.IO;
                 GUILayout.Label(flagName, EditorStyles.helpBox, GUILayout.ExpandWidth(true));
 
                 bool oldGUIValue = GUI.enabled;
-                if (flagName == LoggerSettings.DEFAULT_FLAG)
-                {
-                    GUI.enabled = false;
-                }
 
                 GUILayout.Button(REMOVE_BUTTON_CONTENT, GUILayout.MaxWidth(REMOVE_BUTTON_SIZE), GUILayout.MinWidth(REMOVE_BUTTON_SIZE));
 
@@ -133,106 +140,23 @@ using System.IO;
         [MenuItem("Assets/Create/ScriptableObjects/LoggerSettings", false, 5000)]
         private static void CreateAsset()
         {
-            ScriptableObjectUtility.CreateAsset<LoggerSettings>();
-        }
+            LoggerSettings asset = ScriptableObject.CreateInstance<LoggerSettings>();
 
-        private void GenerateFlagEnum()
-        {
-            string[] enumNames = GetEnumNamesFromLFIs();
+            //string otherPath = ScriptableObjectUtility.ValidObjectPath<LoggerSettings>();
 
-            UpdateFlagFile(enumNames);
-        }
+            string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(INSTANCE_FILENAME);
 
-        private string[] GetEnumNamesFromLFIs()
-        {
-            List<string> enumNames = new List<string>();
-
-            enumNames.Add(LoggerSettings.DEFAULT_FLAG);
-
-            // -- Get all the enum files and their values
-            string[] loggerInfoFiles = Directory.GetFiles(Application.dataPath, "*" + LoggerSettings.FLAG_INFO_FILENAME, SearchOption.AllDirectories);
-
-            for (int fileIndex = 0; fileIndex < loggerInfoFiles.Length; ++fileIndex)
+            if (string.IsNullOrEmpty(assetPathAndName))
             {
-                string file = File.ReadAllText(loggerInfoFiles[fileIndex]);
-
-                //TODO jsmellie: For now we don't give a damn about the title...  I'll put that in later
-
-                int startIndex = file.IndexOf(ENUM_START_CHAR) + 1;
-
-                // -- Not a valid file format...  It doesn't contain the start char
-                if (startIndex < 1)
-                {
-                    continue;
-                }
-
-                string rawEnumString = file.Substring(startIndex);
-
-                rawEnumString = rawEnumString.RemoveWhitespace();
-
-                string[] rawEnumNames = rawEnumString.Split(ENUM_DIVIDER_CHAR);
-
-                for(int rawEnumCounter = 0; rawEnumCounter < rawEnumNames.Length; ++rawEnumCounter)
-                {
-                    if (!enumNames.Contains(rawEnumNames[rawEnumCounter]))
-                    {
-                        enumNames.Add(rawEnumNames[rawEnumCounter]);
-                    }
-                }
+                return;
             }
 
-            return enumNames.ToArray();
-        }
+            AssetDatabase.CreateAsset(asset, assetPathAndName);
 
-        private string[] GetEnumNamesFromEnum()
-        {
-            eLoggerFlags[] testArray = eLoggerFlags.GetFlags();
-
-            return eLoggerFlags.GetNames();
-        }
-
-        private void UpdateFlagFile(string[] enumNames)
-        {
-            if (enumNames != null && enumNames.Length > 0)
-            {
-                if (File.Exists(TEMPLATE_PATH))
-                {
-                    string template = File.ReadAllText(TEMPLATE_PATH);
-
-                    if (template.Contains(TEMPLATE_FLAG_MACRO))
-                    {
-                        string concatenationEnum = string.Empty;
-
-                        for (int i = 0; i < enumNames.Length; ++i)
-                        {
-                            if (!string.IsNullOrEmpty(enumNames[i]))
-                            {
-                                if (i != 0)
-                                {
-                                    concatenationEnum += "\n";
-                                }
-
-                                concatenationEnum += "            " + enumNames[i] + " = 1 << " + i + ",";
-                            }
-                        }
-
-                        template = template.Replace(TEMPLATE_FLAG_MACRO, concatenationEnum);
-
-                        if (!Directory.Exists(LoggerSettings.FLAG_FILE_DIRECTORY))
-                        {
-                            Directory.CreateDirectory(LoggerSettings.FLAG_FILE_DIRECTORY);
-                        }
-
-                        File.WriteAllText(LoggerSettings.FLAG_FILE_PATH, template);
-
-                        AssetDatabase.Refresh();
-                    }
-                }
-                else
-                {
-                    Logger.Log("No file exists at template path: " + TEMPLATE_PATH);
-                }
-            }
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = asset;
         }
 		#endregion
 	}

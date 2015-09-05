@@ -58,6 +58,23 @@ using System.IO;
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = asset;
         }
+
+        public static string ValidObjectPath<T>()
+        {
+            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+            if (path == "")
+            {
+                path = "Assets";
+            }
+            else if (Path.GetExtension(path) != "")
+            {
+                path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+            }
+
+            string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/New " + typeof(T).ToString() + ".asset");
+
+            return assetPathAndName;
+        }
 		#endregion
 	
 		#region Protected Methods
