@@ -40,7 +40,7 @@ namespace Starvoxel
         public static readonly eLoggerFlags MODULE = new eLoggerFlags(1 << 1);
         public static readonly eLoggerFlags GAME = new eLoggerFlags(1 << 2);
 
-        private static readonly eLoggerFlags[] INCLUDED_FLAGS = new eLoggerFlags[] { DEFAULT, MODULE, GAME };
+        public static readonly eLoggerFlags[] INCLUDED_FLAGS = new eLoggerFlags[] { DEFAULT, MODULE, GAME };
         #endregion
 
         #region Constructors
@@ -56,6 +56,25 @@ namespace Starvoxel
             eLoggerFlags[] allFlags = INCLUDED_FLAGS;
             GetPartialEnumValues(ref allFlags);
             return allFlags;
+        }
+
+        public static string[] GetIncludedNames()
+        {
+            return new string[] { "DEFAULT", "MODULE", "GAME" };
+        }
+
+        public static string[] GetCustomNames()
+        {
+            List<string> names = new List<string>(GetNames());
+
+            string[] includedNames = GetIncludedNames();
+
+            for (int i = 0; i < includedNames.Length; ++i)
+            {
+                names.Remove(includedNames[i]);
+            }
+
+            return names.ToArray();
         }
 
         public static string[] GetNames()
@@ -76,6 +95,7 @@ namespace Starvoxel
         }
 
         static partial void GetPartialEnumValues(ref eLoggerFlags[] flags);
+
         #endregion
     }
 }
