@@ -44,13 +44,10 @@ using System.IO;
 
         public static readonly GUIContent FLAG_HEADER_CONTENT = new GUIContent("Flags");
 
-        public static readonly GUIContent REMOVE_BUTTON_CONTENT = new GUIContent("X", "Clicking this button will remove this flag from the enum.  WARNING: Might take time to re-calculate the enum.");
-        public static readonly float REMOVE_BUTTON_SIZE = 35;
-
         public static readonly GUIContent GENERATE_BUTTON_CONTENT = new GUIContent("Generate", "Force generates the logger flag enum based on the flag info files.  Mostly will just be used for debugging and testing.");
         public static readonly float GENERATE_BUTTON_SIZE = 300;
 
-        public static readonly GUIContent ADD_BUTTON_CONTENT = new GUIContent("Add Flag", "Adds a new flag to the local .lfi file.  If no local .lfi file exists, creates a new one.");
+        public static readonly GUIContent ADD_BUTTON_CONTENT = new GUIContent("Add Flag", "Selects the local .lfi file.  If none exists, creates one.");
         public static readonly float ADD_BUTTON_SIZE = 200;
 	
 		//public
@@ -77,7 +74,7 @@ using System.IO;
 
         public LoggerSettingsInspector()
         {
-            m_EnumNames = LoggerFlagsGenerator.GetEnumNamesFromGeneratedFile();
+            m_EnumNames = LoggerFlagsGenerator.GetFlagNamesFromGeneratedFile();
         }
 		#endregion
 
@@ -88,16 +85,18 @@ using System.IO;
 
             GUILayout.BeginVertical();
             {
-                m_EnumNames = LoggerFlagsGenerator.GetEnumNamesFromGeneratedFile();
+                m_EnumNames = LoggerFlagsGenerator.GetFlagNamesFromGeneratedFile();
 
                 for (int i = 0; i < m_EnumNames.Length; ++i)
                 {
                     FlagElementGUI(m_EnumNames[i]);
                 }
 
+                // Button that will create a .lfi file beside the scriptable object.  If it already exists, select it.
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.FlexibleSpace();
+                    //TODO jsmellie: Implemented proper .lfi file creation.selection here
                     //if (GUILayout.Button())
                     {
 
@@ -122,27 +121,10 @@ using System.IO;
             GUILayout.EndHorizontal();
         }
 
-        private void FlagElementGUI(string flagName)
-        {
-            GUILayout.BeginHorizontal();
-            {
-                GUILayout.Label(flagName, EditorStyles.helpBox, GUILayout.ExpandWidth(true));
-
-                bool oldGUIValue = GUI.enabled;
-
-                GUILayout.Button(REMOVE_BUTTON_CONTENT, GUILayout.MaxWidth(REMOVE_BUTTON_SIZE), GUILayout.MinWidth(REMOVE_BUTTON_SIZE));
-
-                GUI.enabled = oldGUIValue;
-            }
-            GUILayout.EndHorizontal();
-        }
-
         [MenuItem("Assets/Create/ScriptableObjects/LoggerSettings", false, 5000)]
         private static void CreateAsset()
         {
             LoggerSettings asset = ScriptableObject.CreateInstance<LoggerSettings>();
-
-            //string otherPath = ScriptableObjectUtility.ValidObjectPath<LoggerSettings>();
 
             string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(INSTANCE_FILENAME);
 
@@ -157,6 +139,15 @@ using System.IO;
             AssetDatabase.Refresh();
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = asset;
+        }
+
+        private void FlagElementGUI(string flagName)
+        {
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label(flagName, EditorStyles.helpBox, GUILayout.ExpandWidth(true));
+            }
+            GUILayout.EndHorizontal();
         }
 		#endregion
 	}

@@ -64,47 +64,89 @@ using System.Collections.Generic;
         #region Public Methods
         public static string[] GetFlagNamesFromLFIs()
         {
-            List<string> enumNames = new List<string>();
+            List<string> flagNames = new List<string>();
 
             // -- Get all the enum files and their values
             string[] loggerInfoFiles = Directory.GetFiles(Application.dataPath, "*" + FLAG_INFO_FILENAME, SearchOption.AllDirectories);
 
             for (int fileIndex = 0; fileIndex < loggerInfoFiles.Length; ++fileIndex)
             {
-                string file = File.ReadAllText(loggerInfoFiles[fileIndex]);
+                string[] fileFlagNames = GetFlagNamesFromLFI(loggerInfoFiles[fileIndex]);
 
-                //TODO jsmellie: For now we don't give a damn about the title...  I'll put that in later
-
-                int startIndex = file.IndexOf(ENUM_START_CHAR) + 1;
-
-                // -- Not a valid file format...  It doesn't contain the start char
-                if (startIndex < 1)
+                for (int fileFlagCounter = 0; fileFlagCounter < fileFlagNames.Length; ++fileFlagCounter)
                 {
-                    continue;
-                }
+                    string curFlag = FormatFlagName(fileFlagNames[fileFlagCounter]);
 
-                string rawFlagString = file.Substring(startIndex);
-
-                rawFlagString = rawFlagString.RemoveWhitespace();
-
-                string[] rawFlagNames = rawFlagString.Split(ENUM_DIVIDER_CHAR);
-
-                string curFlag = null;
-
-                for (int rawFlagCounter = 0; rawFlagCounter < rawFlagNames.Length; ++rawFlagCounter)
-                {
-                    curFlag = FormatFlagName(rawFlagNames[rawFlagCounter]);
-
-                    if (!enumNames.Contains(curFlag))
+                    if (!flagNames.Contains(curFlag))
                     {
-                        enumNames.Add(curFlag);
+                        flagNames.Add(curFlag);
                     }
                 }
             }
 
-            return enumNames.ToArray();
+            return flagNames.ToArray();
         }
 
+        public static string[] GetFlagNamesFromGeneratedFile()
+        {
+            return eLoggerFlags.GetNames();
+        }
+
+        public static string[] GetFlagNamesFromLFI(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            List<string> flagNames = new List<string>();
+
+            string file = File.ReadAllText(path);
+
+            int startIndex = file.IndexOf(ENUM_START_CHAR) + 1;
+
+            // -- Not a valid file format...  It doesn't contain the start char
+            if (startIndex < 1)
+            {
+                return null;
+            }
+
+            string rawFlagString = file.Substring(startIndex);
+
+            rawFlagString = rawFlagString.RemoveWhitespace();
+
+            string[] rawFlagNames = rawFlagString.Split(ENUM_DIVIDER_CHAR);
+
+            string curFlag = null;
+
+            for (int rawFlagCounter = 0; rawFlagCounter < rawFlagNames.Length; ++rawFlagCounter)
+            {
+                curFlag = FormatFlagName(rawFlagNames[rawFlagCounter]);
+
+                if (!flagNames.Contains(curFlag))
+                {
+                    flagNames.Add(curFlag);
+                }
+            }
+
+            return flagNames.ToArray();
+        }
+
+        //[UnityEditor.Callbacks.DidReloadScripts]
+        public static void GenerateFlagEnum()
+        {
+            string[] enumNames = GetFlagNamesFromLFIs();
+
+            enumNames = RemoveIncludedFlags(enumNames);
+
+            UpdateFlagFile(enumNames);
+        }
+		#endregion
+	
+		#region Protected Methods
+		#endregion
+
+        #region Private Methods
         private static string FormatFlagName(string name)
         {
             if (string.Compare(name.ToUpper(), name) == 0)
@@ -129,21 +171,6 @@ using System.Collections.Generic;
             }
 
             return newName;
-        }
-
-        public static string[] GetEnumNamesFromGeneratedFile()
-        {
-            return eLoggerFlags.GetNames();
-        }
-
-        //[UnityEditor.Callbacks.DidReloadScripts]
-        public static void GenerateFlagEnum()
-        {
-            string[] enumNames = GetFlagNamesFromLFIs();
-
-            enumNames = RemoveIncludedFlags(enumNames);
-
-            UpdateFlagFile(enumNames);
         }
 
         private static string[] RemoveIncludedFlags(string[] enumNames)
@@ -218,12 +245,6 @@ using System.Collections.Generic;
 
             return false;
         }
-		#endregion
-	
-		#region Protected Methods
-		#endregion
-	
-		#region Private Methods
 		#endregion
 	}
 }
