@@ -2,7 +2,7 @@
  *
  * ObjectInspector.cs
  *
- * Description: Override for all basic objects
+ * Description: Abstract base to every Object inspector that we might want.
  *
  * Author: Jeremy Smellie
  *
@@ -17,7 +17,6 @@
 #region Includes
 #region Unity Includes
 using UnityEngine;
-using UnityEditor;
 #endregion
 
 #region System Includes
@@ -31,8 +30,7 @@ using System.Collections;
 
  namespace Starvoxel
 {
-    [CustomEditor(typeof(Object))]
-	public class ObjectInspector : Editor
+    public abstract class ObjectInspector
 	{
 		#region Fields & Properties
 		//const
@@ -47,15 +45,12 @@ using System.Collections;
 		#endregion
 	
 		#region Unity Methods
-        public override void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
-
-            GUILayout.Label("Random label!!");
-        }
 		#endregion
 	
 		#region Public Methods
+        public abstract bool IsValid(string path);
+
+        public abstract void OnInspector();
 		#endregion
 	
 		#region Protected Methods

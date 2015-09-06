@@ -1,8 +1,8 @@
 /* --------------------------
  *
- * TestObject.cs
+ * TestPoolableObject.cs
  *
- * Description: 
+ * Description: This is a test calss to show the basic implementation of a IPoolable
  *
  * Author: Jeremy Smellie
  *
@@ -75,23 +75,23 @@ namespace Utility
 
         public void OnRemoved()
         {
-            //TODO: This is called when this object is no longer being pooled.  Handle clean up here
+            //TODO jsmellie: This is called when this object is no longer being pooled.  Handle clean up here
         }
 
         public void OnActivate()
         {
-            //TODO: This is where you could do some checking for anything if you wanted something to happen as soon as it turned on
+            //TODO jsmellie: This is where you could do some checking for anything if you wanted something to happen as soon as it turned on
         }
 
         public void OnDeactivate()
         {
-            //TODO: This is where you could notify things that you've been deactivated
+            //TODO jsmellie: This is where you could notify things that you've been deactivated
         }
 
 
         public void Reset()
         {
-            //TODO: This is where you'd do all your state and field resets
+            //TODO jsmellie: This is where you'd do all your state and field resets
         }
         #endregion
 
