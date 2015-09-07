@@ -1,14 +1,14 @@
 /* --------------------------
  *
- * LoggerFlagsGeneratorHelper.cs
+ * LoggerIO.cs
  *
- * Description: The rest of the auto-generated partial class that does the actual file creation and such
+ * Description: Everything that has to do with IO for the Logger system
  *
  * Author: Jeremy Smellie
  *
  * Editors:
  *
- * 9/5/2015 - Starvoxel
+ * 9/6/2015 - Starvoxel
  *
  * All rights reserved.
  *
@@ -21,7 +21,6 @@ using UnityEditor;
 #endregion
 
 #region System Includes
-using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,22 +33,25 @@ using System.Collections.Generic;
 
  namespace Starvoxel
 {
-    public partial class LoggerFlagsGenerator
+	public class LoggerIO : MonoBehaviour
 	{
 		#region Fields & Properties
         //const
-        public static readonly char ENUM_START_CHAR = '$';
-        public static readonly char ENUM_DIVIDER_CHAR = ',';
+        public static readonly char FLAG_START_CHAR = '$';
+        public static readonly char FLAG_DIVIDER_CHAR = ',';
 
-        public static readonly string FLAG_INFO_FILENAME = "LoggerFlag.lfi";
+        public static readonly string FLAG_INFO_FILENAME = "LoggerFlags.lfi";
+        private static readonly string LOCAL_LFI_INTERNAL_PATH = "/Other Resources/Logger/Game" + FLAG_INFO_FILENAME;
 
         public static readonly string FLAG_FILENAME = "LoggerFlags";
         public static readonly string FLAG_FILE_DIRECTORY = Application.dataPath + "/Scripts/Logger";
         public static readonly string FLAG_FILE_PATH = FLAG_FILE_DIRECTORY + "/" + FLAG_FILENAME + ".cs";
 
+        public static readonly string LOCAL_LFI_PROJECT_PATH = "Assets" + LOCAL_LFI_INTERNAL_PATH;
+        public static readonly string LOCAL_LFI_FULL_PATH = Application.dataPath + LOCAL_LFI_INTERNAL_PATH;
+
+        public static readonly string LOCAL_LFI_TEMPLATE = "Game Flags\n$";
         //public
-        public int StartingValue = 0;
-        public string[] FlagNames = null;
 	
 		//protected
 	
@@ -57,11 +59,23 @@ using System.Collections.Generic;
 	
 		//properties
 		#endregion
-	
-		#region Unity Methods
-		#endregion
 
         #region Public Methods
+        public static void CreateLocalLFI()
+        {
+            if (!File.Exists(LOCAL_LFI_FULL_PATH))
+            {
+                if (!Directory.Exists(Path.GetDirectoryName(LOCAL_LFI_FULL_PATH)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(LOCAL_LFI_FULL_PATH));
+                }
+
+                File.WriteAllText(LOCAL_LFI_FULL_PATH, LOCAL_LFI_TEMPLATE);
+
+                AssetDatabase.Refresh();
+            }
+        }
+
         public static string[] GetFlagNamesFromLFIs()
         {
             List<string> flagNames = new List<string>();
@@ -75,7 +89,7 @@ using System.Collections.Generic;
 
                 for (int fileFlagCounter = 0; fileFlagCounter < fileFlagNames.Length; ++fileFlagCounter)
                 {
-                    string curFlag = FormatFlagName(fileFlagNames[fileFlagCounter]);
+                    string curFlag = LoggerHelper.FormatFlagName(fileFlagNames[fileFlagCounter]);
 
                     if (!flagNames.Contains(curFlag))
                     {
@@ -103,7 +117,7 @@ using System.Collections.Generic;
 
             string file = File.ReadAllText(path);
 
-            int startIndex = file.IndexOf(ENUM_START_CHAR) + 1;
+            int startIndex = file.IndexOf(FLAG_START_CHAR) + 1;
 
             // -- Not a valid file format...  It doesn't contain the start char
             if (startIndex < 1)
@@ -115,13 +129,13 @@ using System.Collections.Generic;
 
             rawFlagString = rawFlagString.RemoveWhitespace();
 
-            string[] rawFlagNames = rawFlagString.Split(ENUM_DIVIDER_CHAR);
+            string[] rawFlagNames = rawFlagString.Split(FLAG_DIVIDER_CHAR);
 
             string curFlag = null;
 
             for (int rawFlagCounter = 0; rawFlagCounter < rawFlagNames.Length; ++rawFlagCounter)
             {
-                curFlag = FormatFlagName(rawFlagNames[rawFlagCounter]);
+                curFlag = LoggerHelper.FormatFlagName(rawFlagNames[rawFlagCounter]);
 
                 if (!flagNames.Contains(curFlag))
                 {
@@ -132,64 +146,115 @@ using System.Collections.Generic;
             return flagNames.ToArray();
         }
 
-        //[UnityEditor.Callbacks.DidReloadScripts]
+        public static string AddFlagNameToLFI(string path, string flagName)
+        {
+            if (!File.Exists(path))
+            {
+                return "No file exists at provided location.  If you are seeing this error, something is really wrong.";
+            }
+
+            string file = File.ReadAllText(path);
+
+            int startIndex = file.IndexOf(FLAG_START_CHAR) + 1;
+
+            // -- Not a valid file format...  It doesn't contain the start char
+            if (startIndex < 1)
+            {
+                return "Invalid file format.  No starting character found.";
+            }
+
+            string rawFlagString = file.Substring(startIndex);
+
+            rawFlagString = rawFlagString.RemoveWhitespace();
+
+            if (!string.IsNullOrEmpty(rawFlagString))
+            {
+                file += FLAG_DIVIDER_CHAR;
+            }
+
+            file += "\n" + flagName;
+
+            File.WriteAllText(path, file);
+
+            GenerateFlagEnum();
+
+            return null;
+        }
+
+        public static string RemoveFlagNameFromLFI(string path, string flagName)
+        {
+            if (!File.Exists(path))
+            {
+                return "No file exists at provided location.  If you are seeing this error, something is really wrong.";
+            }
+
+            List<string> flagNames = new List<string>();
+
+            string file = File.ReadAllText(path);
+
+            int startIndex = file.IndexOf(FLAG_START_CHAR) + 1;
+
+            // -- Not a valid file format...  It doesn't contain the start char
+            if (startIndex < 1)
+            {
+                return "Invalid file format.  No starting character found.";
+            }
+
+            string rawFlagString = file.Substring(startIndex);
+
+            rawFlagString = rawFlagString.RemoveWhitespace();
+
+            string[] rawFlagNames = rawFlagString.Split(FLAG_DIVIDER_CHAR);
+
+            string curFlag = null;
+
+            for (int rawFlagCounter = 0; rawFlagCounter < rawFlagNames.Length; ++rawFlagCounter)
+            {
+                curFlag = LoggerHelper.FormatFlagName(rawFlagNames[rawFlagCounter]);
+
+                if (!flagNames.Contains(curFlag))
+                {
+                    flagNames.Add(curFlag);
+                }
+            }
+
+            if (!flagNames.Contains(flagName))
+            {
+                return "Specified flag was not found in the file.";
+            }
+
+            flagNames.Remove(flagName);
+
+            file = file.Substring(0, startIndex);
+
+            for (int flagIndex = 0; flagIndex < flagNames.Count; ++flagIndex)
+            {
+                if (flagIndex > 0)
+                {
+                    file += FLAG_DIVIDER_CHAR;
+                }
+                file += "\n" + flagNames[flagIndex];
+            }
+
+            File.WriteAllText(path, file);
+
+            GenerateFlagEnum();
+
+            return null;
+        }
+
+        [UnityEditor.Callbacks.DidReloadScripts]
         public static void GenerateFlagEnum()
         {
             string[] enumNames = GetFlagNamesFromLFIs();
 
-            enumNames = RemoveIncludedFlags(enumNames);
+            enumNames = LoggerHelper.RemoveIncludedFlags(enumNames);
 
             UpdateFlagFile(enumNames);
         }
-		#endregion
-	
-		#region Protected Methods
-		#endregion
+        #endregion
 
         #region Private Methods
-        private static string FormatFlagName(string name)
-        {
-            if (string.Compare(name.ToUpper(), name) == 0)
-            {
-                return name;
-            }
-
-            string newName = string.Empty;
-
-            for (int i = 0; i < name.Length; ++i)
-            {
-                char curChar = name[i];
-
-                if (i > 0 && Char.IsUpper(curChar))
-                {
-                    newName += "_" + curChar;
-                }
-                else
-                {
-                    newName += Char.ToUpper(curChar);
-                }
-            }
-
-            return newName;
-        }
-
-        private static string[] RemoveIncludedFlags(string[] enumNames)
-        {
-            List<string> enumNameList = new List<string>(enumNames);
-
-            string[] includedNames = eLoggerFlags.GetIncludedNames();
-
-            for (int i = 0; i < includedNames.Length; ++i)
-            {
-                if (enumNameList.Contains(includedNames[i]))
-                {
-                    enumNameList.Remove(includedNames[i]);
-                }
-            }
-
-            return enumNameList.ToArray();
-        }
-
         private static void UpdateFlagFile(string[] enumNames)
         {
             if (enumNames != null && enumNames.Length > 0 && NeedToRegenerateFile(enumNames))
@@ -245,6 +310,6 @@ using System.Collections.Generic;
 
             return false;
         }
-		#endregion
-	}
+        #endregion
+    }
 }

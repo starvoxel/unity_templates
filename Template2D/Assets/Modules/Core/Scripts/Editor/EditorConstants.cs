@@ -1,14 +1,14 @@
 /* --------------------------
  *
- * ObjectInspector.cs
+ * EditorConstants.cs
  *
- * Description: Abstract base to every Object inspector that we might want.
+ * Description: Basic constants needed for editor work.
  *
  * Author: Jeremy Smellie
  *
  * Editors:
  *
- * 9/5/2015 - Starvoxel
+ * 9/6/2015 - Starvoxel
  *
  * All rights reserved.
  *
@@ -17,6 +17,7 @@
 #region Includes
 #region Unity Includes
 using UnityEngine;
+using UnityEditor;
 #endregion
 
 #region System Includes
@@ -30,30 +31,28 @@ using System.Collections;
 
  namespace Starvoxel
 {
-    public abstract class ObjectInspector
+	public partial class EditorConstants
 	{
 		#region Fields & Properties
 		//const
+        public const int EDITOR_HEADER_HEIGHT = 44;
+
+        public const int EDGE_PADDING = 10;
 	
 		//public
 	
 		//protected
-	
-		//private
-	
-		//properties
-		#endregion
-	
-		#region Unity Methods
+
+        //private
+
+        //properties
+        public static float CUR_VIEW_WIDTH
+        {
+            get { return EditorGUIUtility.currentViewWidth - (EDGE_PADDING * 2);  }
+        }
 		#endregion
 	
 		#region Public Methods
-        public abstract bool IsValid(string path);
-
-        public abstract void OnInspector(ObjectEditor editor);
-		#endregion
-	
-		#region Protected Methods
 		#endregion
 	
 		#region Private Methods

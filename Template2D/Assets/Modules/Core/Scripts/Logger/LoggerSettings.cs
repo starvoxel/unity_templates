@@ -50,6 +50,9 @@ namespace Starvoxel
         [SerializeField]
         protected bool m_IncludeLineNumber = true;
 
+        [SerializeField, HideInInspector]
+        protected eLoggerFlags[] m_ActiveFlags;
+
         //properties
         public bool IncludeClassName
         {
@@ -62,6 +65,24 @@ namespace Starvoxel
         public bool IncludeLineNumber
         {
             get { return m_IncludeLineNumber; }
+        }
+
+        public int ActiveFlagValue
+        {
+            get
+            {
+                int value = 0;
+
+                if (m_ActiveFlags != null)
+                {
+                    for(int i = 0; i < m_ActiveFlags.Length; ++i)
+                    {
+                        value |= m_ActiveFlags[i].Value;
+                    }
+                }
+
+                return value;
+            }
         }
         #endregion
 
@@ -79,9 +100,7 @@ namespace Starvoxel
         #endregion
 
         #region Editor Methods
-        private void EditorConstructor()
-        {
-        }
+        partial void EditorConstructor();
         #endregion
     }
 }

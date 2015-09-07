@@ -55,7 +55,7 @@ using System.IO;
 		//protected
         protected LoggerSettings m_Target;
 
-        protected string[] m_EnumNames;
+        protected string[] m_FlagNames;
 	
 		//private
 	
@@ -74,7 +74,7 @@ using System.IO;
 
         public LoggerSettingsInspector()
         {
-            m_EnumNames = LoggerFlagsGenerator.GetFlagNamesFromGeneratedFile();
+            m_FlagNames = LoggerIO.GetFlagNamesFromGeneratedFile();
         }
 		#endregion
 
@@ -85,11 +85,11 @@ using System.IO;
 
             GUILayout.BeginVertical();
             {
-                m_EnumNames = LoggerFlagsGenerator.GetFlagNamesFromGeneratedFile();
+                m_FlagNames = LoggerIO.GetFlagNamesFromGeneratedFile();
 
-                for (int i = 0; i < m_EnumNames.Length; ++i)
+                for (int i = 0; i < m_FlagNames.Length; ++i)
                 {
-                    FlagElementGUI(m_EnumNames[i]);
+                    FlagElementGUI(m_FlagNames[i]);
                 }
 
                 // Button that will create a .lfi file beside the scriptable object.  If it already exists, select it.
@@ -97,9 +97,9 @@ using System.IO;
                 {
                     GUILayout.FlexibleSpace();
                     //TODO jsmellie: Implemented proper .lfi file creation.selection here
-                    //if (GUILayout.Button())
+                    if (GUILayout.Button("Test Button"))
                     {
-
+                        LoggerHelper.SelectLocalLFI();
                     }
                     GUILayout.FlexibleSpace();
                 }
@@ -114,7 +114,7 @@ using System.IO;
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button(GENERATE_BUTTON_CONTENT, GUILayout.MaxWidth(GENERATE_BUTTON_SIZE), GUILayout.MinWidth(GENERATE_BUTTON_SIZE)))
                 {
-                    LoggerFlagsGenerator.GenerateFlagEnum();
+                    LoggerIO.GenerateFlagEnum();
                 }
                 GUILayout.FlexibleSpace();
             }

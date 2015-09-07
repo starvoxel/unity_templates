@@ -32,12 +32,8 @@ namespace Starvoxel
     {
         public static readonly eLoggerFlags CORE = new eLoggerFlags(1 << 3);
         public static readonly eLoggerFlags NEW_SCRIPT_DIALOG = new eLoggerFlags(1 << 4);
-        public static readonly eLoggerFlags JUST_ONE_MORE_TEST = new eLoggerFlags(1 << 5);
-        public static readonly eLoggerFlags BLAH = new eLoggerFlags(1 << 6);
-        public static readonly eLoggerFlags POOLING = new eLoggerFlags(1 << 7);
-        public static readonly eLoggerFlags ONE_LAST_ONE_JUST_BECAUSE = new eLoggerFlags(1 << 8);
 
-        public static readonly eLoggerFlags[] CUSTOM_FLAGS = new eLoggerFlags[] { CORE, NEW_SCRIPT_DIALOG, JUST_ONE_MORE_TEST, BLAH, POOLING, ONE_LAST_ONE_JUST_BECAUSE};
+        public static readonly eLoggerFlags[] CUSTOM_FLAGS = new eLoggerFlags[] { CORE, NEW_SCRIPT_DIALOG};
 		
         static partial void GetPartialEnumValues(ref eLoggerFlags[] flags)
         {

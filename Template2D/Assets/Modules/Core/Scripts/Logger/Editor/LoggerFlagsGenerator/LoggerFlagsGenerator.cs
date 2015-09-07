@@ -17,22 +17,13 @@ namespace Starvoxel
     /// Class to produce the template output
     /// </summary>
 
-#line 1 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
     public partial class LoggerFlagsGenerator : LoggerFlagsGeneratorBase
     {
-#line hidden
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-
-#line 6 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-
-
-
-#line default
-#line hidden
             this.Write(@"/* --------------------------
  *
  * LoggerFlags.cs
@@ -66,71 +57,34 @@ namespace Starvoxel
     public partial class eLoggerFlags
     {
 ");
-
-#line 40 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
             if (FlagNames != null && FlagNames.Length > 0)
             {
-
-#line default
-#line hidden
-
-#line 42 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                 for (int i = 0; i < FlagNames.Length; ++i)
                 {
-
-#line default
-#line hidden
                     this.Write("        public static readonly eLoggerFlags ");
 
-#line 44 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                     this.Write(this.ToStringHelper.ToStringWithCulture(FlagNames[i]));
 
-#line default
-#line hidden
                     this.Write(" = new eLoggerFlags(1 << ");
 
-#line 44 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                     this.Write(this.ToStringHelper.ToStringWithCulture(StartingValue + i));
 
-#line default
-#line hidden
                     this.Write(");\r\n");
-
-#line 45 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                 }
 
-#line default
-#line hidden
                 this.Write("\r\n        public static readonly eLoggerFlags[] CUSTOM_FLAGS = new eLoggerFlags[]" +
                         " { ");
 
-#line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                 for (int i = 0; i < FlagNames.Length; ++i)
                 {
                     if (i != 0)
                     {
-
-#line default
-#line hidden
                         this.Write(", ");
-
-#line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                     }
 
-#line default
-#line hidden
-
-#line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                     this.Write(this.ToStringHelper.ToStringWithCulture(FlagNames[i]));
-
-#line default
-#line hidden
-
-#line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
                 }
 
-#line default
-#line hidden
                 this.Write(@"};
 		
         static partial void GetPartialEnumValues(ref eLoggerFlags[] flags)
@@ -142,21 +96,11 @@ namespace Starvoxel
             flags = flagList.ToArray();
         }
 ");
-
-#line 57 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
             }
             else
             {
-
-#line default
-#line hidden
                 this.Write("        SOMETHING WENT WRONG!\r\n        */\r\n");
-
-#line 62 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
             }
-
-#line default
-#line hidden
             this.Write("    }\r\n}");
             return this.GenerationEnvironment.ToString();
         }

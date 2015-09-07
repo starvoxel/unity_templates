@@ -77,9 +77,9 @@ namespace Starvoxel
         {
             if (m_ValidInspectors.Count > 0)
             {
-                for(int i = 0; i < m_ValidInspectors.Count; ++i)
+                for (int i = 0; i < m_ValidInspectors.Count; ++i)
                 {
-                    m_ValidInspectors[i].OnInspector();
+                    m_ValidInspectors[i].OnInspector(this);
                 }
             }
         }
