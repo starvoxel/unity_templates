@@ -165,10 +165,12 @@ namespace Starvoxel
                     GUILayout.Space(15);
 
                     AddButtonGUI();
-
-                    GUILayout.Label("Current State: " + m_NewFlagState.ToString() + " | Focused Control: " + GUI.GetNameOfFocusedControl());
                 }
                 GUILayout.EndVertical();
+            }
+            else
+            {
+                AddButtonGUI();
             }
 
             GUI.enabled = oldStatus;

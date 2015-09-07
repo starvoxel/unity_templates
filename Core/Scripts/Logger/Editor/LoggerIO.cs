@@ -143,7 +143,7 @@ using System.Collections.Generic;
                 }
             }
 
-            return flagNames.ToArray();
+            return LoggerHelper.RemoveInvalidFlags(flagNames.ToArray());
         }
 
         public static string AddFlagNameToLFI(string path, string flagName)
@@ -248,7 +248,7 @@ using System.Collections.Generic;
         {
             string[] enumNames = GetFlagNamesFromLFIs();
 
-            enumNames = LoggerHelper.RemoveIncludedFlags(enumNames);
+            enumNames = LoggerHelper.RemoveIncludedAndInvalidFlags(enumNames);
 
             UpdateFlagFile(enumNames);
         }

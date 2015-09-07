@@ -83,7 +83,7 @@ namespace Starvoxel
             return newName;
         }
 
-        public static string[] RemoveIncludedFlags(string[] enumNames)
+        public static string[] RemoveIncludedAndInvalidFlags(string[] enumNames)
         {
             List<string> enumNameList = new List<string>(enumNames);
 
@@ -94,6 +94,22 @@ namespace Starvoxel
                 if (enumNameList.Contains(includedNames[i]))
                 {
                     enumNameList.Remove(includedNames[i]);
+                }
+            }
+
+            return RemoveInvalidFlags(enumNameList.ToArray());
+        }
+
+        public static string[] RemoveInvalidFlags(string[] enumNames)
+        {
+            List<string> enumNameList = new List<string>(enumNames);
+
+            for (int i = 0; i < enumNameList.Count; ++i)
+            {
+                if (string.IsNullOrEmpty(enumNameList[i]))
+                {
+                    enumNameList.RemoveAt(i);
+                    i -= 1;
                 }
             }
 
