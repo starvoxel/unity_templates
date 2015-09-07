@@ -83,6 +83,10 @@ using System.IO;
         {
             GUILayout.Label(FLAG_HEADER_CONTENT, EditorStyles.boldLabel);
 
+            //TODO jsmellie: Instead of just showing all the flags in a row without saying what file they are in and stuff,
+            // we should divide it up into the files they are in and make a button so that when you click on it, it selects
+            // that file so you can edit the flags from there.
+
             GUILayout.BeginVertical();
             {
                 m_FlagNames = LoggerIO.GetFlagNamesFromGeneratedFile();
@@ -96,7 +100,6 @@ using System.IO;
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.FlexibleSpace();
-                    //TODO jsmellie: Implemented proper .lfi file creation.selection here
                     if (GUILayout.Button("Test Button"))
                     {
                         LoggerHelper.SelectLocalLFI();
