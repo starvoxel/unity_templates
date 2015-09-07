@@ -51,6 +51,40 @@ namespace Starvoxel
         #endregion
 
         #region Methods
+        public static eLoggerFlags GetFlagForName(string name)
+        {
+            string[] names = GetNames();
+
+            eLoggerFlags[] flags = GetFlags();
+
+            for(int i = 0; i < names.Length; ++i)
+            {
+                if(string.Compare(names[i], name) == 0)
+                {
+                    return flags[i];
+                }
+            }
+
+            return null;
+        }
+
+        public static string GeNameForFlag(eLoggerFlags flag)
+        {
+            string[] names = GetNames();
+
+            eLoggerFlags[] flags = GetFlags();
+
+            for (int i = 0; i < names.Length; ++i)
+            {
+                if (flags[i] == flag)
+                {
+                    return names[i];
+                }
+            }
+
+            return null;
+        }
+
         public static eLoggerFlags[] GetFlags()
         {
             eLoggerFlags[] allFlags = INCLUDED_FLAGS;
