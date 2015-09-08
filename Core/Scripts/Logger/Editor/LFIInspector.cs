@@ -33,21 +33,24 @@ using System.Collections.Generic;
 
 namespace Starvoxel
 {
-	public class LFIInspector : ObjectInspector
-	{
-		#region Fields & Properties
+    public class LFIInspector : ObjectInspector
+    {
+        #region Fields & Properties
         //const
         private const string NEW_FLAG_CONTROL_NAME = "NewFlagText";
         private const string FINISHED_CONTROL_NAME = "FinishedButton";
 
         private static readonly GUIContent REMOVE_BUTTON_CONTENT = new GUIContent("X", "Clicking this button will remove this flag from the enum.  WARNING: Might take time to re-calculate the enum.");
-        private static readonly float REMOVE_BUTTON_SIZE = 35;
+        private static readonly float REMOVE_BUTTON_SIZE = 20;
+
+        private static readonly GUIContent NO_FLAG_LABEL_CONTENT = new GUIContent("No current defined flags");
+        //private static readonly 
 
         private static readonly GUIContent ADD_BUTTON_CONTENT = new GUIContent("+", "Clicking this button will start the new flag process.");
         private static readonly float ADD_BUTTON_SIZE = 200;
 
         private static readonly GUIContent FINISHED_EDITING_BUTTON_CONTENT = new GUIContent("Done", "Clicking this button will add the new flag to this file.");
-        private static readonly float FINISHED_EDITING_BUTTON_SIZE = 50;	
+        private static readonly float FINISHED_EDITING_BUTTON_SIZE = 50;
         //enums
         private enum eNewFlagState
         {
@@ -58,19 +61,19 @@ namespace Starvoxel
             SAVING
         }
 
-		//public
-	
-		//protected
-	
-		//private
+        //public
+
+        //protected
+
+        //private
         string m_Path;
 
         string m_NewFlagName = null;
 
         eNewFlagState m_NewFlagState = eNewFlagState.NONE;
-	
-		//properties
-		#endregion
+
+        //properties
+        #endregion
 
         #region Public Methods
         public override bool IsValid(string path)
@@ -118,69 +121,72 @@ namespace Starvoxel
                         FlagElementGUI(flagNames[flagIndex]);
                     }
 
-                    GUILayout.Space(5);
-
-                    if (m_NewFlagName != null)
-                    {
-                        switch(m_NewFlagState)
-                        {
-                            case eNewFlagState.ADD_PRESSED:
-                            case eNewFlagState.EDITING:
-                            case eNewFlagState.FOCUSING_TEXT:
-                                NewFlagGUI();
-
-                                if (m_NewFlagState == eNewFlagState.ADD_PRESSED)
-                                {
-                                    EditorGUI.FocusTextInControl(NEW_FLAG_CONTROL_NAME);
-                                    m_NewFlagState = eNewFlagState.FOCUSING_TEXT;
-                                }
-                                break;
-                            case eNewFlagState.SAVING:
-                                string formattedName = LoggerHelper.FormatFlagName(m_NewFlagName);
-
-                                List<string> flagNameList = new List<string>(flagNames);
-
-                                if (flagNameList.Contains(formattedName))
-                                {
-                                    //TODO jsmellie: Show an error...  The name already exists
-                                }
-                                else
-                                {
-                                    string error = LoggerIO.AddFlagNameToLFI(m_Path, formattedName);
-
-                                    if(!string.IsNullOrEmpty(error))
-                                    {
-                                        //TODO jsmellie: Display this error in some way
-                                    }
-
-                                    EditorUtility.SetDirty(editor.target);
-                                }
-
-                                m_NewFlagName = null;
-                                m_NewFlagState = eNewFlagState.NONE;
-                                break;
-                        }
-                    }
-
-                    GUILayout.Space(15);
-
-                    AddButtonGUI();
+                    CustomGUI.Splitter();
                 }
                 GUILayout.EndVertical();
             }
-            else
+            else if(string.IsNullOrEmpty(m_NewFlagName) && m_NewFlagState == eNewFlagState.NONE)
             {
+                GUILayout.Label(NO_FLAG_LABEL_CONTENT, EditorStyles.boldLabel);
+            }
+
+            GUILayout.BeginVertical();
+            {
+                if (m_NewFlagName != null)
+                {
+                    switch (m_NewFlagState)
+                    {
+                        case eNewFlagState.ADD_PRESSED:
+                        case eNewFlagState.EDITING:
+                        case eNewFlagState.FOCUSING_TEXT:
+                            NewFlagGUI();
+
+                            if (m_NewFlagState == eNewFlagState.ADD_PRESSED)
+                            {
+                                EditorGUI.FocusTextInControl(NEW_FLAG_CONTROL_NAME);
+                                m_NewFlagState = eNewFlagState.FOCUSING_TEXT;
+                            }
+                            break;
+                        case eNewFlagState.SAVING:
+                            string formattedName = LoggerHelper.FormatFlagName(m_NewFlagName);
+
+                            List<string> flagNameList = new List<string>(flagNames);
+
+                            if (flagNameList.Contains(formattedName))
+                            {
+                                //TODO jsmellie: Show an error...  The name already exists
+                            }
+                            else
+                            {
+                                string error = LoggerIO.AddFlagNameToLFI(m_Path, formattedName);
+
+                                if (!string.IsNullOrEmpty(error))
+                                {
+                                    //TODO jsmellie: Display this error in some way
+                                }
+
+                                EditorUtility.SetDirty(editor.target);
+                            }
+
+                            m_NewFlagName = null;
+                            m_NewFlagState = eNewFlagState.NONE;
+                            break;
+                    }
+                    GUILayout.Space(5);
+                }
+
                 AddButtonGUI();
             }
+            GUILayout.EndVertical();
 
             GUI.enabled = oldStatus;
         }
-		#endregion
-	
-		#region Protected Methods
-		#endregion
-	
-		#region Private Methods
+        #endregion
+
+        #region Protected Methods
+        #endregion
+
+        #region Private Methods
         private void AddButtonGUI()
         {
             bool oldEnableState = GUI.enabled;
@@ -211,7 +217,7 @@ namespace Starvoxel
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Label(flagName, EditorStyles.helpBox, GUILayout.ExpandWidth(true));
+                GUILayout.Label(flagName, GUILayout.ExpandWidth(true));
 
                 if (GUILayout.Button(REMOVE_BUTTON_CONTENT, GUILayout.MaxWidth(REMOVE_BUTTON_SIZE), GUILayout.MinWidth(REMOVE_BUTTON_SIZE)))
                 {
@@ -224,20 +230,56 @@ namespace Starvoxel
         private void NewFlagGUI()
         {
             //TODO jsmellie: Should definitely put some checking here.  Make it so that you can't add a flag if it already exists in the file
+            GUILayout.BeginVertical();
 
             GUILayout.BeginHorizontal();
-            {
-                GUI.SetNextControlName(NEW_FLAG_CONTROL_NAME);
-                m_NewFlagName = GUILayout.TextField(m_NewFlagName, GUILayout.ExpandWidth(true));
+            GUI.SetNextControlName(NEW_FLAG_CONTROL_NAME);
+            m_NewFlagName = GUILayout.TextField(m_NewFlagName, GUILayout.ExpandWidth(true));
 
-                GUI.SetNextControlName(FINISHED_CONTROL_NAME);
-                if (GUILayout.Button(FINISHED_EDITING_BUTTON_CONTENT, GUILayout.MaxWidth(FINISHED_EDITING_BUTTON_SIZE), GUILayout.MinWidth(FINISHED_EDITING_BUTTON_SIZE)))
-                {
-                    GUI.FocusControl(FINISHED_CONTROL_NAME);
-                }
+            bool isUniqueName = IsUniqueName(m_NewFlagName);
+
+            bool oldState = GUI.enabled;
+
+            GUI.enabled = isUniqueName;
+
+            GUI.SetNextControlName(FINISHED_CONTROL_NAME);
+            if (GUILayout.Button(FINISHED_EDITING_BUTTON_CONTENT, GUILayout.MaxWidth(FINISHED_EDITING_BUTTON_SIZE), GUILayout.MinWidth(FINISHED_EDITING_BUTTON_SIZE)))
+            {
+                GUI.FocusControl(FINISHED_CONTROL_NAME);
+            }
+
+            GUI.enabled = oldState;
+
+            if (GUILayout.Button(REMOVE_BUTTON_CONTENT, GUILayout.MaxWidth(REMOVE_BUTTON_SIZE), GUILayout.MinWidth(REMOVE_BUTTON_SIZE)))
+            {
+                GUI.FocusControl(null);
             }
             GUILayout.EndHorizontal();
+
+            if (!isUniqueName)
+            {
+                Color oldColor = GUI.color;
+                GUI.color = Color.red;
+                GUILayout.Label("Current name is already in this flag list.", EditorStyles.helpBox);
+                GUI.color = oldColor;
+            }
+
+            GUILayout.EndVertical();
         }
-		#endregion
-	}
+
+        private bool IsUniqueName(string name)
+        {
+            List<string> flagNameList = new List<string>(LoggerIO.GetFlagNamesFromLFI(m_Path));
+
+            string formattedName = LoggerHelper.FormatFlagName(name);
+
+            if (flagNameList.Contains(formattedName))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        #endregion
+    }
 }

@@ -51,6 +51,23 @@ using System.Collections.Generic;
         public static readonly string LOCAL_LFI_FULL_PATH = Application.dataPath + LOCAL_LFI_INTERNAL_PATH;
 
         public static readonly string LOCAL_LFI_TEMPLATE = "Game Flags\n$";
+
+        public static readonly sLFIInfo DEFAULT_INFO = new sLFIInfo("Default Flags", string.Empty, eLoggerFlags.GetIncludedNames());
+        // struct
+        public struct sLFIInfo
+        {
+            public string Name;
+            public string Path;
+            public string[] Flags;
+
+            public sLFIInfo(string name, string path, string[] flags)
+            {
+                Name = name;
+                Path = path;
+                Flags = flags;
+            }
+        }
+
         //public
 	
 		//protected
@@ -76,12 +93,28 @@ using System.Collections.Generic;
             }
         }
 
+        public static sLFIInfo[] GetLFIInfos()
+        {
+            string[] loggerInfoFiles = GetLFIList();
+
+            sLFIInfo[] infos = new sLFIInfo[loggerInfoFiles.Length + 1];
+
+            infos[0] = DEFAULT_INFO;
+
+            for(int fileIndex = 0; fileIndex < loggerInfoFiles.Length; ++fileIndex)
+            {
+                infos[fileIndex + 1] = GetLFIInfo(loggerInfoFiles[fileIndex]);
+            }
+
+            return infos;
+        }
+
         public static string[] GetFlagNamesFromLFIs()
         {
             List<string> flagNames = new List<string>();
 
             // -- Get all the enum files and their values
-            string[] loggerInfoFiles = Directory.GetFiles(Application.dataPath, "*" + FLAG_INFO_FILENAME, SearchOption.AllDirectories);
+            string[] loggerInfoFiles = GetLFIList();
 
             for (int fileIndex = 0; fileIndex < loggerInfoFiles.Length; ++fileIndex)
             {
@@ -104,6 +137,38 @@ using System.Collections.Generic;
         public static string[] GetFlagNamesFromGeneratedFile()
         {
             return eLoggerFlags.GetNames();
+        }
+
+        public static sLFIInfo GetLFIInfo(string path)
+        {
+            sLFIInfo info;
+
+            info.Path = path;
+            info.Flags = GetFlagNamesFromLFI(path);
+            info.Name = GetNameFromLFI(path);
+
+            return info;
+        }
+
+        public static string GetNameFromLFI(string path)
+        {
+            string name = string.Empty;
+
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            string file = File.ReadAllText(path);
+
+            int flagStartIndex = file.IndexOf(FLAG_START_CHAR);
+
+            if (flagStartIndex != -1)
+            {
+                name = file.Substring(0, flagStartIndex);
+            }
+
+            return name;
         }
 
         public static string[] GetFlagNamesFromLFI(string path)
@@ -309,6 +374,11 @@ using System.Collections.Generic;
             }
 
             return false;
+        }
+
+        private static string[] GetLFIList()
+        {
+           return Directory.GetFiles(Application.dataPath, "*" + FLAG_INFO_FILENAME, SearchOption.AllDirectories);
         }
         #endregion
     }

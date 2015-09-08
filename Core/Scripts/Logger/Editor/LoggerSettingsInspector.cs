@@ -55,7 +55,7 @@ using System.IO;
 		//protected
         protected LoggerSettings m_Target;
 
-        protected string[] m_FlagNames;
+        protected LoggerIO.sLFIInfo[] m_LFIInfo;
 	
 		//private
 	
@@ -74,14 +74,13 @@ using System.IO;
 
         public LoggerSettingsInspector()
         {
-            m_FlagNames = LoggerIO.GetFlagNamesFromGeneratedFile();
         }
 		#endregion
 
         #region Private Methods
         private void FlagGUI()
         {
-            GUILayout.Label(FLAG_HEADER_CONTENT, EditorStyles.boldLabel);
+            GUILayout.Label(FLAG_HEADER_CONTENT, CustomGUI.HeaderStyle);
 
             //TODO jsmellie: Instead of just showing all the flags in a row without saying what file they are in and stuff,
             // we should divide it up into the files they are in and make a button so that when you click on it, it selects
@@ -89,11 +88,15 @@ using System.IO;
 
             GUILayout.BeginVertical();
             {
-                m_FlagNames = LoggerIO.GetFlagNamesFromGeneratedFile();
+                m_LFIInfo = LoggerIO.GetLFIInfos();
 
-                for (int i = 0; i < m_FlagNames.Length; ++i)
+                for (int i = 0; i < m_LFIInfo.Length; ++i)
                 {
-                    FlagElementGUI(m_FlagNames[i]);
+                    if (i > 0)
+                    {
+                        CustomGUI.Splitter();
+                    }
+                    LFIInfoGUI(m_LFIInfo[i]);
                 }
 
                 // Button that will create a .lfi file beside the scriptable object.  If it already exists, select it.
@@ -144,13 +147,26 @@ using System.IO;
             Selection.activeObject = asset;
         }
 
-        private void FlagElementGUI(string flagName)
+        private void LFIInfoGUI(LoggerIO.sLFIInfo info)
         {
-            GUILayout.BeginHorizontal();
+            bool isClicked = false;
+
+            isClicked |= GUILayout.Button(info.Name, EditorStyles.boldLabel);
+
+            for(int i = 0; i < info.Flags.Length; ++i)
             {
-                GUILayout.Label(flagName, EditorStyles.helpBox, GUILayout.ExpandWidth(true));
+                isClicked |= FlagElementGUI(info.Flags[i]);
             }
-            GUILayout.EndHorizontal();
+
+            if(isClicked)
+            {
+                LoggerHelper.SelectLFI(info.Path);
+            }
+        }
+
+        private bool FlagElementGUI(string flagName)
+        {
+            return GUILayout.Button(flagName, EditorStyles.label, GUILayout.ExpandWidth(true));
         }
 		#endregion
 	}
