@@ -52,13 +52,29 @@ namespace Starvoxel
         {
             LoggerIO.CreateLocalLFI();
 
-            DefaultAsset localFile = AssetDatabase.LoadAssetAtPath(LoggerIO.LOCAL_LFI_PROJECT_PATH, typeof(DefaultAsset)) as DefaultAsset;
+            SelectLFI(LoggerIO.LOCAL_LFI_PROJECT_PATH);
+        }
 
-            Selection.objects = new UnityEngine.Object[] { localFile };
+        public static void SelectLFI(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            int startIndex = path.IndexOf("Assets");
+
+            path = path.Substring(startIndex);
+
+            DefaultAsset lfiFile = AssetDatabase.LoadAssetAtPath(path, typeof(DefaultAsset)) as DefaultAsset;
+
+            Selection.objects = new UnityEngine.Object[] { lfiFile };
         }
 
         public static string FormatFlagName(string name)
         {
+            name = name.RemoveWhitespace();
+
             if (string.Compare(name.ToUpper(), name) == 0)
             {
                 return name;

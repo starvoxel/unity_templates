@@ -34,11 +34,21 @@ namespace Starvoxel
 {
     static class CustomGUI
     {
-        private static GUIStyle m_Style;
+        private static GUIStyle m_RegularStyle;
+        public static GUIStyle RegularStyle
+        {
+            get { return m_RegularStyle; }
+        }
+
+        private static GUIStyle m_HeaderStyle;
+        public static GUIStyle HeaderStyle
+        {
+            get { return m_HeaderStyle; }
+        }
 
         static CustomGUI()
         {
-            InitStyle();
+            InitStyles();
         }
 
         private static readonly Color splitterColor = EditorGUIUtility.isProSkin ? new Color(0.157f, 0.157f, 0.157f) : new Color(0.5f, 0.5f, 0.5f);
@@ -46,13 +56,13 @@ namespace Starvoxel
         // GUILayout Style
         public static void Splitter(Color rgb, float thickness = 1)
         {
-            Rect position = GUILayoutUtility.GetRect(GUIContent.none, m_Style, GUILayout.Height(thickness));
+            Rect position = GUILayoutUtility.GetRect(GUIContent.none, m_RegularStyle, GUILayout.Height(thickness));
 
             if (Event.current.type == EventType.Repaint)
             {
                 Color restoreColor = GUI.color;
                 GUI.color = rgb;
-                m_Style.Draw(position, false, false, false, false);
+                m_RegularStyle.Draw(position, false, false, false, false);
                 GUI.color = restoreColor;
             }
         }
@@ -72,7 +82,7 @@ namespace Starvoxel
 
         public static void Splitter(float thickness = 1)
         {
-            Splitter(thickness, m_Style);
+            Splitter(thickness, m_RegularStyle);
         }
 
         // GUI Style
@@ -82,17 +92,29 @@ namespace Starvoxel
             {
                 Color restoreColor = GUI.color;
                 GUI.color = splitterColor;
-                m_Style.Draw(position, false, false, false, false);
+                m_RegularStyle.Draw(position, false, false, false, false);
                 GUI.color = restoreColor;
             }
         }
 
-        private static void InitStyle()
+        private static void InitStyles()
         {
-            m_Style = new GUIStyle();
-            m_Style.normal.background = EditorGUIUtility.whiteTexture;
-            m_Style.stretchWidth = true;
-            m_Style.margin = new RectOffset(0, 0, EditorConstants.EDGE_PADDING, EditorConstants.EDGE_PADDING);
+            m_RegularStyle = BasicStyleInit();
+            m_RegularStyle.normal.background = EditorGUIUtility.whiteTexture;
+
+            m_HeaderStyle = BasicStyleInit();
+            m_HeaderStyle.fontSize = Mathf.RoundToInt(m_RegularStyle.fontSize * 1.5f);
+            m_HeaderStyle.fontStyle = FontStyle.Bold;
+        }
+
+        private static GUIStyle BasicStyleInit()
+        {
+            GUIStyle style = new GUIStyle();
+            //style.normal.background = EditorGUIUtility.whiteTexture;
+            style.stretchWidth = true;
+            style.margin = new RectOffset(0, 0, EditorConstants.EDGE_PADDING, EditorConstants.EDGE_PADDING);
+
+            return style;
         }
     }
 }
