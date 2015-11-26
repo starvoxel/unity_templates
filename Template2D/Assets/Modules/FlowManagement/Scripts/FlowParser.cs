@@ -40,7 +40,7 @@ using System.Xml;
 		//public
 
         //protected
-        protected Version m_FileVersion;
+        protected FlowManager.FlowData m_FlowData = new FlowManager.FlowData();
 	
 		//private
 	
@@ -48,22 +48,34 @@ using System.Xml;
 		#endregion
 	
 		#region Constructor Methods
-		public FlowParser(XmlDocument doc)
+		public FlowParser(XmlReader reader, Version currentVersion)
 		{
 
 		}
 		#endregion
 	
 		#region Public Methods
-        public void ParseGeneralInfo()
-        {
-        }
 		#endregion
 
         #region Protected Methods
+        protected FlowManager.GeneralInfo ParseInfo()
+        {
+            FlowManager.GeneralInfo info = new FlowManager.GeneralInfo();
+            return info;
+        }
+
+        protected FlowManager.ActionNode ParseAction()
+        {
+            FlowManager.ActionNode action = new FlowManager.ActionNode();
+            return action;
+        }
 		#endregion
-	
-		#region Private Methods
+
+        #region Private Methods
+        protected bool IsInvalidNodeType(XmlReader reader)
+        {
+            return reader.NodeType == XmlNodeType.Whitespace || reader.NodeType == XmlNodeType.SignificantWhitespace || reader.NodeType == XmlNodeType.XmlDeclaration;
+        }
 		#endregion
 	}
 }

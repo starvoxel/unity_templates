@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<flow>
+<flow fileVersion="1.0.0">
     <!-- Flow specific information -->
-    <info fileVersion="1.0.0" modalDepthOffset="-50" startingView="SPLASH" closeAllModals="false" />
+    <info modalDepthOffset="-50" startingView="SPLASH" closeAllModals="false" />
     <!-- General actions shared by all views -->
     <generalActions>
         <action id="PAUSE" view="PAUSE" />

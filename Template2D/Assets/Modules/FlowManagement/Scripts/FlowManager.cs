@@ -24,6 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
+using System.IO;
 #endregion
 #endregion
 
@@ -64,22 +65,24 @@ namespace Starvoxel.FlowManagement
         }
     }
 
-	public class FlowManager : MonoBehaviour
+	public partial class FlowManager : MonoBehaviour
     {
         #region Internal Classes
         public struct ActionNode
         {
-            string m_Name;
+            string m_ID;
+            string m_View;
             Hashtable m_Parameters;
 
-            public ActionNode(string name)
+            public ActionNode(string id, string view)
             {
-                m_Name = name;
+                m_ID = id;
+                m_View = view;
                 m_Parameters = new Hashtable();
             }
 
-            public ActionNode(string name, Hashtable parameters)
-                : this(name)
+            public ActionNode(string id, string view, Hashtable parameters)
+                : this(id, view)
             {
                 m_Parameters = parameters;
             }
@@ -88,25 +91,81 @@ namespace Starvoxel.FlowManagement
 
         public struct ViewNode
         {
-            public string m_Name;
-            public string m_ViewName;
-
-            public bool m_IsModal;
+            public string m_ID;
+            public string m_SceneName;
 
             public ActionNode[] m_Actions;
         }
 
-        public struct FlowData
+        public class ViewGroup
         {
-            public ActionNode[] m_GlobalActions;
-            public View[] m_Views;
+            private string m_Name;
+            private string m_Note;
+            private List<int> m_ViewIndices = new List<int>();
+
+            public string Name
+            {
+                get { return m_Name;  }
+            }
+
+            public string Note
+            {
+                get { return m_Note; }
+            }
+
+            public int[] ViewIndices
+            {
+                get { return m_ViewIndices.ToArray(); }
+            }
+
+            public ViewGroup(string name, string note)
+            {
+                Initialize(name, note);
+            }
+
+            public void Initialize(string name, string note)
+            {
+                m_Name = name;
+                m_Note = note;
+                m_ViewIndices.Clear();
+            }
+
+            public void AddIndex(int index)
+            {
+                if (index >= 0 && !m_ViewIndices.Contains(index))
+                {
+                    m_ViewIndices.Add(index);
+                }
+            }
+
+            public bool DoesContainIndex(int index)
+            {
+                return m_ViewIndices.Contains(index);
+            }
+        }
+
+        public struct GeneralInfo
+        {
+            private string m_StartingView;
+
+            public GeneralInfo(string startingView)
+            {
+                m_StartingView = startingView;
+            }
+        }
+
+        public class FlowData
+        {
+            public ActionNode[] GlobalActions;
+            public ViewNode[] Views;
+            public ViewGroup[] ViewGroups;
+            public GeneralInfo Information;
         }
         #endregion
 
         #region Fields & Properties
         //const
         public static readonly Version CURRENT_VERSION = new Version("1.0.0");
-        protected const string FILE_PATH = "XML/Flow";
 
 		//public
 	
@@ -118,24 +177,20 @@ namespace Starvoxel.FlowManagement
 		#endregion
 	
 		#region Unity Methods
-        protected virtual void Awake()
+		#endregion
+	
+		#region Public Methods
+        public void LaunchWithFile(string filePath)
         {
-            TextAsset flowFile = Resources.Load<TextAsset>(FILE_PATH);
+            TextAsset flowFile = Resources.Load<TextAsset>(filePath);
 
             if (flowFile != null)
             {
                 string error = string.Empty;
-
-                XmlDocument xmlDoc = new XmlDocument();
-
-                xmlDoc.LoadXml(flowFile.text);
-
-                FlowParser parser = new FlowParser(xmlDoc);
+                XmlReader reader = XmlReader.Create(new StringReader(flowFile.text));
+                FlowParser parser = new FlowParser(reader, CURRENT_VERSION);
             }
         }
-		#endregion
-	
-		#region Public Methods
 		#endregion
 	
 		#region Protected Methods
