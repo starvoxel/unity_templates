@@ -24,7 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using System.IO;
+using System.Xml.Linq;
 #endregion
 #endregion
 
@@ -67,109 +67,15 @@ namespace Starvoxel.FlowManagement
 
 	public partial class FlowManager : MonoBehaviour
     {
-        #region Internal Classes
-        public struct ActionNode
-        {
-            string m_ID;
-            string m_View;
-            Hashtable m_Parameters;
-
-            public ActionNode(string id, string view)
-            {
-                m_ID = id;
-                m_View = view;
-                m_Parameters = new Hashtable();
-            }
-
-            public ActionNode(string id, string view, Hashtable parameters)
-                : this(id, view)
-            {
-                m_Parameters = parameters;
-            }
-
-        }
-
-        public struct ViewNode
-        {
-            public string m_ID;
-            public string m_SceneName;
-
-            public ActionNode[] m_Actions;
-        }
-
-        public class ViewGroup
-        {
-            private string m_Name;
-            private string m_Note;
-            private List<int> m_ViewIndices = new List<int>();
-
-            public string Name
-            {
-                get { return m_Name;  }
-            }
-
-            public string Note
-            {
-                get { return m_Note; }
-            }
-
-            public int[] ViewIndices
-            {
-                get { return m_ViewIndices.ToArray(); }
-            }
-
-            public ViewGroup(string name, string note)
-            {
-                Initialize(name, note);
-            }
-
-            public void Initialize(string name, string note)
-            {
-                m_Name = name;
-                m_Note = note;
-                m_ViewIndices.Clear();
-            }
-
-            public void AddIndex(int index)
-            {
-                if (index >= 0 && !m_ViewIndices.Contains(index))
-                {
-                    m_ViewIndices.Add(index);
-                }
-            }
-
-            public bool DoesContainIndex(int index)
-            {
-                return m_ViewIndices.Contains(index);
-            }
-        }
-
-        public struct GeneralInfo
-        {
-            private string m_StartingView;
-
-            public GeneralInfo(string startingView)
-            {
-                m_StartingView = startingView;
-            }
-        }
-
-        public class FlowData
-        {
-            public ActionNode[] GlobalActions;
-            public ViewNode[] Views;
-            public ViewGroup[] ViewGroups;
-            public GeneralInfo Information;
-        }
-        #endregion
-
         #region Fields & Properties
         //const
+        public const string DEFAULT_STARTING_VIEW = "SPLASH";
         public static readonly Version CURRENT_VERSION = new Version("1.0.0");
 
 		//public
 	
 		//protected
+        [SerializeField] protected string m_TestXMLPath;
 	
 		//private
 	
@@ -177,19 +83,22 @@ namespace Starvoxel.FlowManagement
 		#endregion
 	
 		#region Unity Methods
+        private void Start()
+        {
+            LaunchWithFile(m_TestXMLPath);
+        }
 		#endregion
 	
 		#region Public Methods
+        /// <summary>
+        /// Launch the flow of the game.  It will load and parse the XML at the provided path.
+        /// </summary>
+        /// <param name="filePath">Path of the flow XML.</param>
         public void LaunchWithFile(string filePath)
         {
-            TextAsset flowFile = Resources.Load<TextAsset>(filePath);
+            FlowParser parser = FlowParser.Parse(m_TestXMLPath, CURRENT_VERSION);
 
-            if (flowFile != null)
-            {
-                string error = string.Empty;
-                XmlReader reader = XmlReader.Create(new StringReader(flowFile.text));
-                FlowParser parser = new FlowParser(reader, CURRENT_VERSION);
-            }
+            int bp = 0;
         }
 		#endregion
 	
