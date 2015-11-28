@@ -46,12 +46,25 @@ using System.Collections.Generic;
         #region General Info
         public const string INFO_ELEMENT_KEY = "info";
         public const string STARTING_VIEW_ATTRIBUTE_KEY = "startingView";
+        public const string GENERAL_ACTION_ELEMENT_LEY = "generalAction";
         #endregion
 
         #region Actions
+        public const string ACTION_ELEMENT_KEY = "action";
+        public const string ACTION_ID_ATTRIBUTE_KEY = "id";
+        public const string ACTION_VIEW_ID_ATTRIBUTE_KEY = "viewID";
+        public const string ACTION_PARAM_ELEMENT_KEY = "parameter";
+        public const string ACTION_PARAM_KEY_ATTRIBUTE_KEY = "key";
+        public const string ACTION_PARAM_VALUE_ATTRIBUTE_KEY = "value";
         #endregion
 
         #region Views
+        public const string VIEW_ELEMENT_KEY = "view";
+        public const string VIEW_ID_ATTRIBUTE_KEY = "id";
+        public const string VIEW_SCENE_ATTRIBUTE_KEY = "scene";
+        public const string VIEW_PARAM_ELEMENT_KEY = "parameter";
+        public const string VIEW_PARAM_KEY_ATTRIBUTE_KEY = "key";
+        public const string VIEW_PARAM_VALUE_ATTRIBUTE_KEY = "value";
         #endregion
 
         #region Other
@@ -176,20 +189,25 @@ using System.Collections.Generic;
         {
             List<ActionNode> generalActions = new List<ActionNode>();
 
-            XElement generalActionElement = m_XML.Root.Element("generalActions");
+            XElement generalActionElement = m_XML.Root.Element(GENERAL_ACTION_ELEMENT_LEY);
 
             Debug.Log("Found general action element: " + (generalActionElement != null));
 
             if (generalActionElement != null)
             {
-                IEnumerable<XElement> actionElements = generalActionElement.Elements("action");
+                IEnumerable<XElement> actionElements = generalActionElement.Elements(ACTION_ELEMENT_KEY);
 
                 if (actionElements != null)
                 {
                     foreach (XElement actionElement in actionElements)
                     {
-                        Debug.Log(actionElement.Attribute("id"));
+                        Debug.Log(actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY));
                         ActionNode action = ParseAction(actionElement);
+
+                        if (action.IsInitialized)
+                        {
+                            generalActions.Add(action);
+                        }
                     }
                 }
             }
@@ -202,9 +220,67 @@ using System.Collections.Generic;
             throw new NotImplementedException();
         }
 
-        protected ActionNode ParseAction(XElement xmlElement)
+        protected ActionNode ParseAction(XElement actionElement)
         {
-            throw new NotImplementedException();
+            ActionNode action = new ActionNode();
+
+            if (actionElement != null && actionElement.HasAttributes)
+            {
+                action.ID = actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY).Value;
+                action.ViewID = actionElement.Attribute("view").Value;
+
+                if (actionElement.HasElements)
+                {
+                    //Iterate over all the elements, if any of them are parameters, add em to the hashtable
+                    foreach(XElement childElement in actionElement.Descendants())
+                    {
+                        if (childElement.Name == ACTION_PARAM_ELEMENT_KEY)
+                        {
+                            string key = childElement.Attribute(ACTION_PARAM_KEY_ATTRIBUTE_KEY).Value;
+                            string dataType = childElement.Attribute("dataType").Value;
+                            string value = childElement.Attribute(ACTION_PARAM_VALUE_ATTRIBUTE_KEY).Value;
+                            
+                            if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+                            {
+                                if (!string.IsNullOrEmpty(dataType))
+                                {
+                                    try
+                                    {
+                                        switch (dataType)
+                                        {
+                                            case "int":
+                                                action.Parameters.Add(key, System.Convert.ToInt32(value));
+                                                break;
+                                            case "float":
+                                                action.Parameters.Add(key, System.Convert.ToSingle(value));
+                                                break;
+                                            case "bool":
+                                                action.Parameters.Add(key, System.Convert.ToBoolean(value));
+                                                break;
+                                            //If we don't know what it is, put it in as a string
+                                            default:
+                                                action.Parameters.Add(key, value);
+                                                break;
+                                        }
+                                    }
+                                    //While converting, something went wrong
+                                    catch
+                                    {
+                                        action.Parameters.Add(key, value);
+                                    }
+                                }
+                                else
+                                {
+                                    //Didn't specify a type so we just put it in as a string
+                                    action.Parameters.Add(key, value);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return action;
         }
 
         protected ViewNode ParseView(XElement xmlElement)
