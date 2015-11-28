@@ -17,6 +17,7 @@
 #region Includes
 #region System Includes
 using System.Collections;
+using System.Collections.Generic;
 #endregion
 
 #region Other Includes
@@ -36,47 +37,32 @@ using System.Collections;
 		//protected
 	
 		//private
-        private string m_ID;
-        private string m_ViewID;
-        private Hashtable m_Parameters;
+        public string ID;
+        public string ViewID;
+        public Dictionary<string, object> Parameters;
 	
 		//properties
-        public string ID
-        {
-            get { return m_ID; }
-        }
-
-        public string ViewID
-        {
-            get { return m_ViewID; }
-        }
-
-        public Hashtable Parameters
-        {
-            get { return m_Parameters; }
-        }
-
         /// <summary>
         /// Returns true if this instance is initialized.
         /// </summary>
         public bool IsInitialized
         {
-            get { return !string.IsNullOrEmpty(m_ID); }
+            get { return !string.IsNullOrEmpty(ID); }
         }
 		#endregion
 	
 		#region Constructor Methods
         public ActionNode(string id, string viewID)
         {
-            m_ID = id;
-            m_ViewID = viewID;
-            m_Parameters = new Hashtable();
+            ID = id;
+            ViewID = viewID;
+            Parameters = new Dictionary<string, object>();
         }
 
-        public ActionNode(string id, string viewID, Hashtable parameters)
+        public ActionNode(string id, string viewID, Dictionary<string, object> parameters)
             : this(id, viewID)
         {
-            m_Parameters = parameters;
+            Parameters = parameters;
         }
 		#endregion
 	
