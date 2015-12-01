@@ -27,6 +27,7 @@ using System.Collections.Generic;
 
  namespace Starvoxel.FlowManagement
 {
+     [System.Serializable]
 	public struct ActionNode
 	{
 		#region Fields & Properties

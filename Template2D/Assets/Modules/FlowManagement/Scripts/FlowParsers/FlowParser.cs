@@ -46,7 +46,7 @@ using System.Collections.Generic;
         #region General Info
         public const string INFO_ELEMENT_KEY = "info";
         public const string STARTING_VIEW_ATTRIBUTE_KEY = "startingView";
-        public const string GENERAL_ACTION_ELEMENT_LEY = "generalAction";
+        public const string GENERAL_ACTION_ELEMENT_LEY = "generalActions";
         #endregion
 
         #region Actions
@@ -132,7 +132,7 @@ using System.Collections.Generic;
 
                 m_GeneralActions = ParseGeneralActions();
 
-                m_Views = ParseViews();
+                //m_Views = ParseViews();
             }
             else
             {
@@ -185,6 +185,10 @@ using System.Collections.Generic;
             return info;
         }
 
+        /// <summary>
+        /// Parse all of the actions under the general action element from m_XML
+        /// </summary>
+        /// <returns>Array of all the actions nodes found.</returns>
         protected ActionNode[] ParseGeneralActions()
         {
             List<ActionNode> generalActions = new List<ActionNode>();
@@ -220,6 +224,11 @@ using System.Collections.Generic;
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Parse the action data out of the specified XML element
+        /// </summary>
+        /// <param name="actionElement">XML element that wll be parsed</param>
+        /// <returns></returns>
         protected ActionNode ParseAction(XElement actionElement)
         {
             ActionNode action = new ActionNode();
@@ -227,63 +236,84 @@ using System.Collections.Generic;
             if (actionElement != null && actionElement.HasAttributes)
             {
                 action.ID = actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY).Value;
-                action.ViewID = actionElement.Attribute("view").Value;
+                action.ViewID = actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY).Value;
+                action.Parameters = ParseParameters(actionElement);                
+            }
 
-                if (actionElement.HasElements)
+            return action;
+        }
+
+        /// <summary>
+        /// Parses all the contained parameter elements into a dictionary.
+        /// </summary>
+        /// <param name="parentElement">Parent element that contains all the parameter elements we want to parse.</param>
+        /// <returns></returns>
+        protected Dictionary<string, object> ParseParameters(XElement parentElement)
+        {
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+
+            //Parameters can only be there if the parent element has sub-elements
+            if (parentElement != null && parentElement.HasElements)
+            {
+                foreach (XElement childElement in parentElement.Descendants())
                 {
-                    //Iterate over all the elements, if any of them are parameters, add em to the hashtable
-                    foreach(XElement childElement in actionElement.Descendants())
+                    //Only care about elements with the right name
+                    if (childElement.Name == ACTION_PARAM_ELEMENT_KEY)
                     {
-                        if (childElement.Name == ACTION_PARAM_ELEMENT_KEY)
+                        string key = childElement.Attribute(ACTION_PARAM_KEY_ATTRIBUTE_KEY).Value;
+                        string dataType = childElement.Attribute("dataType").Value;
+                        string value = childElement.Attribute(ACTION_PARAM_VALUE_ATTRIBUTE_KEY).Value;
+
+                        if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
                         {
-                            string key = childElement.Attribute(ACTION_PARAM_KEY_ATTRIBUTE_KEY).Value;
-                            string dataType = childElement.Attribute("dataType").Value;
-                            string value = childElement.Attribute(ACTION_PARAM_VALUE_ATTRIBUTE_KEY).Value;
-                            
-                            if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+                            if (!string.IsNullOrEmpty(dataType))
                             {
-                                if (!string.IsNullOrEmpty(dataType))
+                                //Incase something goes wrong with the parsing, we'll put this in a try catch
+                                try
                                 {
-                                    try
+                                    switch (dataType)
                                     {
-                                        switch (dataType)
-                                        {
-                                            case "int":
-                                                action.Parameters.Add(key, System.Convert.ToInt32(value));
-                                                break;
-                                            case "float":
-                                                action.Parameters.Add(key, System.Convert.ToSingle(value));
-                                                break;
-                                            case "bool":
-                                                action.Parameters.Add(key, System.Convert.ToBoolean(value));
-                                                break;
-                                            //If we don't know what it is, put it in as a string
-                                            default:
-                                                action.Parameters.Add(key, value);
-                                                break;
-                                        }
-                                    }
-                                    //While converting, something went wrong
-                                    catch
-                                    {
-                                        action.Parameters.Add(key, value);
+                                        case "int":
+                                            parameters.Add(key, System.Convert.ToInt32(value));
+                                            break;
+                                        case "float":
+                                            parameters.Add(key, System.Convert.ToSingle(value));
+                                            break;
+                                        case "bool":
+                                            parameters.Add(key, System.Convert.ToBoolean(value));
+                                            break;
+                                        //If we don't know what it is, put it in as a string
+                                        default:
+                                            parameters.Add(key, value);
+                                            break;
                                     }
                                 }
-                                else
+                                //While converting, something went wrong
+                                catch (Exception err)
                                 {
-                                    //Didn't specify a type so we just put it in as a string
-                                    action.Parameters.Add(key, value);
+                                    Debug.Log(err.GetType().Name);
+                                    parameters.Add(key, value);
                                 }
+                            }
+                            else
+                            {
+                                //Didn't specify a type so we just put it in as a string
+                                parameters.Add(key, value);
                             }
                         }
                     }
                 }
             }
 
-            return action;
+            return parameters;
         }
 
-        protected ViewNode ParseView(XElement xmlElement)
+        /// <summary>
+        /// Parses the views information from the specified element
+        /// </summary>
+        /// <param name="viewElement"></param>
+        /// <returns></returns>
+        protected ViewNode ParseView(XElement viewElement)
         {
             throw new NotImplementedException();
         }
