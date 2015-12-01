@@ -26,7 +26,8 @@ using System.Collections;
 
  namespace Starvoxel.FlowManagement
 {
-     public struct GeneralInformation
+    [System.Serializable]
+    public struct GeneralInformation
 	{
 		#region Fields & Properties
 		//const

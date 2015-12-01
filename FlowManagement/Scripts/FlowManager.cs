@@ -76,13 +76,16 @@ namespace Starvoxel.FlowManagement
 	
 		//protected
         [SerializeField] protected string m_TestXMLPath;
-	
+
+        protected ActionNode[] m_GeneralActions;
+        protected GeneralInformation m_GeneralInformation;
 		//private
 	
 		//properties
 		#endregion
 	
 		#region Unity Methods
+        // TEMPORARY jsmellie: This is only here for now.  We'll take it out once we actually have the entire flow working properly.
         private void Start()
         {
             LaunchWithFile(m_TestXMLPath);
@@ -97,8 +100,13 @@ namespace Starvoxel.FlowManagement
         public void LaunchWithFile(string filePath)
         {
             FlowParser parser = FlowParser.Parse(m_TestXMLPath, CURRENT_VERSION);
+            m_GeneralInformation = parser.GeneralInformation;
+            m_GeneralActions = parser.GeneralActions;
+        }
 
-            int bp = 0;
+        public void TriggerAction(string actionID)
+        {
+            //TODO jsmellie: Go through all the actions for the curent view.  If nothing is found, then go through the general actions.  If still nothing found, through a warning.
         }
 		#endregion
 	
