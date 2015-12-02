@@ -27,20 +27,21 @@ using UnityEngine;
 
 namespace Starvoxel.FlowManagement
 {
+    [System.Serializable]
     public struct ViewNode
 	{
 		#region Fields & Properties
 		//const
-	
-		//public
+
+        //public
+        public string ID;
+        public string SceneName;
+
+        public ActionNode[] Actions;
 	
 		//protected
 
         //private
-        private string m_ID;
-        private string m_SceneName;
-
-        private List<ActionNode> m_Actions;
 
         //properties
         /// <summary>
@@ -48,35 +49,15 @@ namespace Starvoxel.FlowManagement
         /// </summary>
         public bool IsInitialzed
         {
-            get { return !string.IsNullOrEmpty(m_ID) && !string.IsNullOrEmpty(m_SceneName) && m_Actions != null; }
-        }
-
-        public string ID
-        {
-            get { return m_ID; }
-        }
-
-        public string SceneName
-        {
-            get { return m_SceneName; }
-        }
-
-        public ActionNode[] Actions
-        {
-            get { return m_Actions.ToArray(); }
+            get { return !string.IsNullOrEmpty(ID) && Actions != null; }
         }
 		#endregion
 	
 		#region Constructor Methods
-		public ViewNode(string id, string sceneName)
-		{
-            m_ID = id;
-            m_SceneName = sceneName;
-            m_Actions = new List<ActionNode>();
-		}
 		#endregion
 	
 		#region Public Methods
+
         /// <summary>
         /// Gets an action by the ID.  Returns a empty ActionNode if none exists.
         /// </summary>
@@ -84,31 +65,15 @@ namespace Starvoxel.FlowManagement
         /// <returns></returns>
         public ActionNode GetActionByID(string actionID)
         {
-            for(int i = 0; i < m_Actions.Count; ++i)
+            for(int i = 0; i < Actions.Length; ++i)
             {
-                if (m_Actions[i].ID == actionID)
+                if (Actions[i].ID == actionID)
                 {
-                    return m_Actions[i];
+                    return Actions[i];
                 }
             }
 
             return new ActionNode();
-        }
-
-        /// <summary>
-        /// Adds the action to the action list if one with the same ID doesn't already exist.
-        /// </summary>
-        /// <param name="action">Action to be added.</param>
-        public void AddAction(ActionNode action)
-        {
-            if (!ContainActionForID(action.ID))
-            {
-                m_Actions.Add(action);
-            }
-            else
-            {
-                Debug.LogWarningFormat("ViewNode {0} already contians an action with ID {1}.  Please fix your XML because you should never have a ViewNode with 2 actions with the same name!", this.m_ID, action.ID);
-            }
         }
 
         /// <summary>
@@ -118,9 +83,9 @@ namespace Starvoxel.FlowManagement
         /// <returns>true if the specified ID is in the action list.</returns>
         public bool ContainActionForID(string actionID)
         {
-            for(int i = 0; i < m_Actions.Count; ++i)
+            for(int i = 0; i < Actions.Length; ++i)
             {
-                if (m_Actions[i].ID == actionID)
+                if (Actions[i].ID == actionID)
                 {
                     return true;
                 }

@@ -127,12 +127,23 @@ using System.Collections.Generic;
                     return;
                 }
 
-                m_GeneralInformation = ParseInfo();
-                Log("General Information: " + m_GeneralInformation);
+                m_GeneralInformation = ParseInfo(ref error);
+                if (!string.IsNullOrEmpty(error))
+                {
+                   throw new Exception(string.Format("An error happened while parsing the XML: {0}", error));
+                }
 
-                m_GeneralActions = ParseGeneralActions();
+                m_GeneralActions = ParseGeneralActions(ref error);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    throw new Exception(string.Format("An error happened while parsing the XML: {0}", error));
+                }
 
-                //m_Views = ParseViews();
+                m_Views = ParseViews(ref error);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    throw new Exception(string.Format("An error happened while parsing the XML: {0}", error));
+                }
             }
             else
             {
@@ -170,17 +181,28 @@ using System.Collections.Generic;
         /// <summary>
         /// Parses the general information out of the XML file.
         /// </summary>
+        /// <param name="error">String that is set if an error happens.</param>
         /// <returns>Parsed information.</returns>
-        protected GeneralInformation ParseInfo()
+        protected GeneralInformation ParseInfo(ref string error)
         {
             GeneralInformation info = new GeneralInformation(FlowManager.DEFAULT_STARTING_VIEW);
             XElement infoElement = m_XML.Root.Element(INFO_ELEMENT_KEY);
-            if (infoElement.HasAttributes)
+            if (infoElement != null && infoElement.HasAttributes)
             {
                 if (infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY) != null)
                 {
                     info.StartingView = infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY).Value;
                 }
+                else
+                {
+                    error = INFO_ELEMENT_KEY + " does not contain the attribute " + STARTING_VIEW_ATTRIBUTE_KEY + ".  Invalid element.";
+                    return info;
+                }
+            }
+            else
+            {
+                error = INFO_ELEMENT_KEY + " element in the XML is invalid.";
+                return info;
             }
             return info;
         }
@@ -188,14 +210,13 @@ using System.Collections.Generic;
         /// <summary>
         /// Parse all of the actions under the general action element from m_XML
         /// </summary>
+        /// <param name="error">String that is set if an error happens.</param>
         /// <returns>Array of all the actions nodes found.</returns>
-        protected ActionNode[] ParseGeneralActions()
+        protected ActionNode[] ParseGeneralActions(ref string error)
         {
             List<ActionNode> generalActions = new List<ActionNode>();
 
             XElement generalActionElement = m_XML.Root.Element(GENERAL_ACTION_ELEMENT_LEY);
-
-            Debug.Log("Found general action element: " + (generalActionElement != null));
 
             if (generalActionElement != null)
             {
@@ -206,7 +227,7 @@ using System.Collections.Generic;
                     foreach (XElement actionElement in actionElements)
                     {
                         Debug.Log(actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY));
-                        ActionNode action = ParseAction(actionElement);
+                        ActionNode action = ParseAction(actionElement, ref error);
 
                         if (action.IsInitialized)
                         {
@@ -219,17 +240,40 @@ using System.Collections.Generic;
             return generalActions.ToArray();
         }
 
-        protected ViewNode[] ParseViews()
+        protected ViewNode[] ParseViews(ref string error)
         {
-            throw new NotImplementedException();
+            IEnumerable<XElement> viewElements = m_XML.Root.Elements(VIEW_ELEMENT_KEY);
+
+            List<ViewNode> viewNodes = new List<ViewNode>();
+
+            if (viewElements != null)
+            {
+                foreach(XElement viewElement in viewElements)
+                {
+                    ViewNode viewNode = ParseView(viewElement, ref error);
+
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        return null;
+                    }
+
+                    if (viewNode.IsInitialzed)
+                    {
+                        viewNodes.Add(viewNode);
+                    }
+                }
+            }
+
+            return viewNodes.ToArray();
         }
 
         /// <summary>
         /// Parse the action data out of the specified XML element
         /// </summary>
         /// <param name="actionElement">XML element that wll be parsed</param>
+        /// <param name="error">String that is set if an error happens.</param>
         /// <returns></returns>
-        protected ActionNode ParseAction(XElement actionElement)
+        protected ActionNode ParseAction(XElement actionElement, ref string error)
         {
             ActionNode action = new ActionNode();
 
@@ -237,7 +281,11 @@ using System.Collections.Generic;
             {
                 action.ID = actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY).Value;
                 action.ViewID = actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY).Value;
-                action.Parameters = ParseParameters(actionElement);                
+                action.Parameters = ParseParameters(actionElement, ref error);                
+            }
+            else
+            {
+                error = actionElement.Name + " is an invalid element.";
             }
 
             return action;
@@ -247,58 +295,63 @@ using System.Collections.Generic;
         /// Parses all the contained parameter elements into a dictionary.
         /// </summary>
         /// <param name="parentElement">Parent element that contains all the parameter elements we want to parse.</param>
+        /// <param name="error">String that is set if an error happens.</param>
         /// <returns></returns>
-        protected Dictionary<string, object> ParseParameters(XElement parentElement)
+        protected Dictionary<string, object> ParseParameters(XElement parentElement, ref string error)
         {
             Dictionary<string, object> parameters = new Dictionary<string, object>();
 
             //Parameters can only be there if the parent element has sub-elements
             if (parentElement != null && parentElement.HasElements)
             {
-                foreach (XElement childElement in parentElement.Descendants())
-                {
-                    //Only care about elements with the right name
-                    if (childElement.Name == ACTION_PARAM_ELEMENT_KEY)
-                    {
-                        string key = childElement.Attribute(ACTION_PARAM_KEY_ATTRIBUTE_KEY).Value;
-                        string dataType = childElement.Attribute("dataType").Value;
-                        string value = childElement.Attribute(ACTION_PARAM_VALUE_ATTRIBUTE_KEY).Value;
+                IEnumerable<XElement> parameterElements = parentElement.Elements(ACTION_PARAM_ELEMENT_KEY);
 
-                        if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
+                if (parameterElements != null)
+                {
+                    foreach (XElement parameter in parameterElements)
+                    {
+                        //Only care about elements with the right name
+                        if (parameter.Name == ACTION_PARAM_ELEMENT_KEY)
                         {
-                            if (!string.IsNullOrEmpty(dataType))
+                            string key = parameter.Attribute(ACTION_PARAM_KEY_ATTRIBUTE_KEY).Value;
+                            string dataType = parameter.Attribute("dataType").Value;
+                            string value = parameter.Attribute(ACTION_PARAM_VALUE_ATTRIBUTE_KEY).Value;
+
+                            if (!string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value))
                             {
-                                //Incase something goes wrong with the parsing, we'll put this in a try catch
-                                try
+                                if (!string.IsNullOrEmpty(dataType))
                                 {
-                                    switch (dataType)
+                                    //Incase something goes wrong with the parsing, we'll put this in a try catch
+                                    try
                                     {
-                                        case "int":
-                                            parameters.Add(key, System.Convert.ToInt32(value));
-                                            break;
-                                        case "float":
-                                            parameters.Add(key, System.Convert.ToSingle(value));
-                                            break;
-                                        case "bool":
-                                            parameters.Add(key, System.Convert.ToBoolean(value));
-                                            break;
-                                        //If we don't know what it is, put it in as a string
-                                        default:
-                                            parameters.Add(key, value);
-                                            break;
+                                        switch (dataType)
+                                        {
+                                            case "int":
+                                                parameters.Add(key, System.Convert.ToInt32(value));
+                                                break;
+                                            case "float":
+                                                parameters.Add(key, System.Convert.ToSingle(value));
+                                                break;
+                                            case "bool":
+                                                parameters.Add(key, System.Convert.ToBoolean(value));
+                                                break;
+                                            //If we don't know what it is, put it in as a string
+                                            default:
+                                                parameters.Add(key, value);
+                                                break;
+                                        }
+                                    }
+                                    //While converting, something went wrong
+                                    catch (Exception err)
+                                    {
+                                        parameters.Add(key, value);
                                     }
                                 }
-                                //While converting, something went wrong
-                                catch (Exception err)
+                                else
                                 {
-                                    Debug.Log(err.GetType().Name);
+                                    //Didn't specify a type so we just put it in as a string
                                     parameters.Add(key, value);
                                 }
-                            }
-                            else
-                            {
-                                //Didn't specify a type so we just put it in as a string
-                                parameters.Add(key, value);
                             }
                         }
                     }
@@ -313,9 +366,63 @@ using System.Collections.Generic;
         /// </summary>
         /// <param name="viewElement"></param>
         /// <returns></returns>
-        protected ViewNode ParseView(XElement viewElement)
+        protected ViewNode ParseView(XElement viewElement, ref string error)
         {
-            throw new NotImplementedException();
+            ViewNode viewNode = new ViewNode();
+
+            if (viewElement != null && viewElement.HasAttributes)
+            {
+                XAttribute idAttribute = viewElement.Attribute(VIEW_ID_ATTRIBUTE_KEY);
+                XAttribute sceneNameAttribute = viewElement.Attribute(VIEW_SCENE_ATTRIBUTE_KEY);
+
+                List<ActionNode> actions = new List<ActionNode>();
+
+                IEnumerable<XElement> actionElements = viewElement.Elements(ACTION_PARAM_ELEMENT_KEY);
+
+                if (actionElements != null)
+                {
+                    foreach(XElement actionElement in actionElements)
+                    {
+                        ActionNode actionNode = ParseAction(actionElement, ref error);
+
+                        if (!string.IsNullOrEmpty(error))
+                        {
+                            return viewNode;
+                        }
+
+                        if (actionNode.IsInitialized)
+                        {
+                            actions.Add(actionNode);
+                        }
+                    }
+                }
+
+                if (idAttribute != null&& !string.IsNullOrEmpty(idAttribute.Value))
+                {
+                    viewNode.ID = idAttribute.Value;
+
+                    if (sceneNameAttribute != null)
+                    {
+                        viewNode.SceneName = sceneNameAttribute.Value;
+                    }
+
+                    viewNode.Actions = actions.ToArray();
+                }
+            }
+            else
+            {
+                if (viewElement == null)
+                {
+                    error = "Null view element.";
+                    return viewNode;
+                }
+                else
+                {
+                    error = viewElement.Name + " is an invalid view element.  It does not contain any attributes.";
+                }
+            }
+
+            return viewNode;
         }
 		#endregion
 
