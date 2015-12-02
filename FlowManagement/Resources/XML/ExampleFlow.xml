@@ -9,7 +9,7 @@
         </action>
     </generalActions>
     <!-- @INTRO@ All views that are used in the intro -->
-    <view id="SPLASH">
+    <view id="SPLASH" scene="Splash">
         <action id="COMPLETE" viewID="MAIN_MENU" />
     </view>
     <!-- @BASE@ Base classes used throughout the flow -->
