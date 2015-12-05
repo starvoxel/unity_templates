@@ -1,0 +1,22 @@
+$Header
+#region Includes
+#region System Includes
+using System.Collections;
+#endregion
+
+#region Other Includes
+$Includes
+#endregion
+#endregion
+
+$NamespaceStart
+public interface $ClassName {
+	#region Fields & Properties
+	//fields
+
+	//properties
+	#endregion
+
+	#region Methods
+	#endregion
+}
