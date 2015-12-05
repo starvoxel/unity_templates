@@ -24,36 +24,33 @@ using System.Collections;
 #endregion
 #endregion
 
- namespace Starvoxel.Services
+ namespace Starvoxel.Core
 {
-	public class Services
+	public static class Services
 	{
 		#region Fields & Properties
 		//const
 	
 		//public
-	
-		//protected
-	
-		//private
+
+        //private
+        private static ILogger m_Logger;
 	
 		//properties
-		#endregion
-	
-		#region Constructor Methods
-		public Services()
-		{
-			
-		}
+        public static ILogger Logger
+        {
+            get { return m_Logger; }
+        }
 		#endregion
 	
 		#region Public Methods
-		#endregion
-	
-		#region Protected Methods
-		#endregion
-	
-		#region Private Methods
+        public static void InitializeLogger(ILogger logger)
+        {
+            if (m_Logger == null)
+            {
+                m_Logger = logger;
+            }
+        }
 		#endregion
 	}
 }

@@ -31,13 +31,18 @@ public class NewScriptWindow : EditorWindow
     {
         private int GetRank(string s)
         {
-            if (s == MONOBEHAVIOUR_NAME)
-                return 0;
-            if (s == EMPTY_CLASS_NAME)
-                return 1;
+            for (int i = 0; i < PRIORITY_TEMPLATE_NAMES.Length; ++i)
+            {
+                if (string.Compare(s, PRIORITY_TEMPLATE_NAMES[i]) == 0)
+                {
+                    return i;
+                }
+            }
             if (s.StartsWith(COMPARER_EDITOR_CLASS_PREFIX))
-                return 100;
-            return 2;
+            {
+                return PRIORITY_TEMPLATE_NAMES.Length + 100;
+            }
+            return PRIORITY_TEMPLATE_NAMES.Length;
         }
 
         public int Compare(string x, string y)
@@ -71,9 +76,17 @@ public class NewScriptWindow : EditorWindow
     private const string TEMPLATE_PATH = "Modules/Core/NewScriptDialog/OtherResources/ScriptTemplates";
     private const string HEADER_PATH = "Modules/Core/NewScriptDialog/OtherResources/HeaderTemplates";
     private const string RESOURCES_TEMPLATE_PATH = "Resources/CustomScriptTemplates";
-    private const string MONOBEHAVIOUR_NAME = "MonoBehaviour";
-    private const string EMPTY_CLASS_NAME = "Empty Class";
     private const string CUSTOM_EDITOR_NAME = "Editor";
+
+    //Over this list in the order that you want specific templates
+    private static readonly string[] PRIORITY_TEMPLATE_NAMES = new string[]
+    {
+        "Custom MonoBehaviour",
+        "Empty Class",
+        "Empty Interface",
+        "Custom Scriptable Object"
+    };
+
     private const string COMPARER_EDITOR_CLASS_PREFIX = "E:";
     private const string NO_TEMPLATE_FOUND_STRING = "No Template Found";
     private const string NO_HEADER_FOUND_STRING = "";
@@ -971,10 +984,6 @@ public class NewScriptWindow : EditorWindow
     {
         CreateScript();
 
-        if (CanAddComponent())
-            InternalEditorUtility.AddScriptComponentUnchecked(m_GameObjectToAddTo,
-                AssetDatabase.LoadAssetAtPath(TargetPath(), typeof(MonoScript)) as MonoScript);
-
         Close();
         GUIUtility.ExitGUI();
     }
@@ -1039,7 +1048,7 @@ public class NewScriptWindow : EditorWindow
 
     private bool CanAddComponent()
     {
-        return (m_GameObjectToAddTo != null && m_BaseClass == MONOBEHAVIOUR_NAME);
+        return false;// (m_GameObjectToAddTo != null && m_BaseClass == MONOBEHAVIOUR_NAME);
     }
 
     private void OptionsGUI()
@@ -1446,7 +1455,7 @@ public class NewScriptWindow : EditorWindow
 
     private string GetCreateButtonText()
     {
-        return CanAddComponent() ? "Create and Attach" : "Create";
+        return /*CanAddComponent() ? "Create and Attach" :*/ "Create";
     }
     #endregion
 
