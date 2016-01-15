@@ -61,6 +61,7 @@ using System.Collections.Generic;
         #region Views
         public const string VIEW_ELEMENT_KEY = "view";
         public const string VIEW_ID_ATTRIBUTE_KEY = "id";
+        public const string VIEW_IS_MODAL_ATTRIBUTE_KEY = "isModal";
         public const string VIEW_SCENE_ATTRIBUTE_KEY = "scene";
         public const string VIEW_PARAM_ELEMENT_KEY = "parameter";
         public const string VIEW_PARAM_KEY_ATTRIBUTE_KEY = "key";
@@ -226,7 +227,7 @@ using System.Collections.Generic;
                 {
                     foreach (XElement actionElement in actionElements)
                     {
-                        Debug.Log(actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY));
+                        Log(actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY).ToString());
                         ActionNode action = ParseAction(actionElement, ref error);
 
                         if (action.IsInitialized)
@@ -372,13 +373,16 @@ using System.Collections.Generic;
 
             if (viewElement != null && viewElement.HasAttributes)
             {
+                // Grab all the attributes we need
                 XAttribute idAttribute = viewElement.Attribute(VIEW_ID_ATTRIBUTE_KEY);
                 XAttribute sceneNameAttribute = viewElement.Attribute(VIEW_SCENE_ATTRIBUTE_KEY);
+                XAttribute isModalAttribute = viewElement.Attribute(VIEW_IS_MODAL_ATTRIBUTE_KEY);
 
                 List<ActionNode> actions = new List<ActionNode>();
 
                 IEnumerable<XElement> actionElements = viewElement.Elements(ACTION_PARAM_ELEMENT_KEY);
 
+                // Parse out the actions if there are any
                 if (actionElements != null)
                 {
                     foreach(XElement actionElement in actionElements)
@@ -397,6 +401,7 @@ using System.Collections.Generic;
                     }
                 }
 
+                // If we have valid info, populate the view node
                 if (idAttribute != null&& !string.IsNullOrEmpty(idAttribute.Value))
                 {
                     viewNode.ID = idAttribute.Value;
@@ -404,6 +409,15 @@ using System.Collections.Generic;
                     if (sceneNameAttribute != null)
                     {
                         viewNode.SceneName = sceneNameAttribute.Value;
+                    }
+
+                    if (isModalAttribute != null)
+                    {
+                        viewNode.IsModal = System.Convert.ToBoolean(isModalAttribute.Value);
+                    }
+                    else
+                    {
+                        viewNode.IsModal = false;
                     }
 
                     viewNode.Actions = actions.ToArray();
