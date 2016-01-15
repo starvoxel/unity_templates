@@ -37,6 +37,9 @@ namespace Starvoxel.FlowManagement
         public string ID;
         public string SceneName;
 
+        public bool IsModal;
+        public bool ShowOverlay;
+
         public ActionNode[] Actions;
 	
 		//protected
