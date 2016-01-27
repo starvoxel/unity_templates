@@ -18,6 +18,7 @@
 #region Unity Includes
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 #endregion
 
 #region System Includes
@@ -58,8 +59,7 @@ namespace EditorUtilities
         private static string MasterScene
         {
             get { return EditorPrefs.GetString(EDITORPREFS_MASTER_PATH_KEY, "Assets/Scenes/AppLauncher.unity"); }
-            set
-            { EditorPrefs.SetString(EDITORPREFS_MASTER_PATH_KEY, value); }
+            set { EditorPrefs.SetString(EDITORPREFS_MASTER_PATH_KEY, value); }
         }
 
         private static string MasterSceneGUID
@@ -70,7 +70,7 @@ namespace EditorUtilities
 
         private static string PreviousScene
         {
-            get { return EditorPrefs.GetString(EDITORPREFS_PREV_PATH_KEY, EditorApplication.currentScene); }
+            get { return EditorPrefs.GetString(EDITORPREFS_PREV_PATH_KEY, EditorSceneManager.GetActiveScene().path /*EditorApplication.currentScene*/); }
             set { EditorPrefs.SetString(EDITORPREFS_PREV_PATH_KEY, value); }
         }
 
@@ -151,17 +151,17 @@ namespace EditorUtilities
             if (!EditorApplication.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 // Play pressed, attempt to load master scene
-                PreviousScene = EditorApplication.currentScene;
+                PreviousScene = EditorSceneManager.GetActiveScene().path;
 
                 SaveSelection();
 
-                if (EditorApplication.SaveCurrentSceneIfUserWantsTo())
+                if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                 {
                     int index = Application.dataPath.LastIndexOf("Assets");
 
                     string fullMasterPath = Application.dataPath.Substring(0, index) + MasterScene;
 
-                    if (!EditorApplication.OpenScene(fullMasterPath))
+                    if (!EditorSceneManager.OpenScene(fullMasterPath).IsValid()/*EditorApplication.OpenScene(fullMasterPath)*/)
                     {
                         Debug.LogError(string.Format("error: scene not found: {0}", MasterScene));
                         EditorApplication.isPlaying = false;
@@ -176,7 +176,7 @@ namespace EditorUtilities
             if (EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 // Try to return to the old scene
-                if (!EditorApplication.OpenScene(PreviousScene))
+                if (!EditorSceneManager.OpenScene(PreviousScene).IsValid()/*EditorApplication.OpenScene(PreviousScene)*/)
                 {
                     Debug.LogError(string.Format("error: scene not found: {0}", PreviousScene));
                 }
