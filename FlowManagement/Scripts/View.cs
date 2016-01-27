@@ -57,6 +57,10 @@ namespace Starvoxel.FlowManagement
 
         #region Fields & Properties
         //const
+
+        //static
+        protected static Action<View> s_OnViewClosedAction = null;
+        protected static Action<View> s_OnViewOpenedAction = null;
 	
 		//public
         public event ViewStateChangedEventHandler StateChanged;
@@ -83,6 +87,23 @@ namespace Starvoxel.FlowManagement
 		#endregion
 
         #region Public API
+        /// <summary>
+        /// Assigns actions to the static actions used by all views
+        /// </summary>
+        /// <param name="onViewClosed">On View Closed Action</param>
+        /// <param name="onViewOpened">On View Opened Action</param>
+        public static void SetStaticActions(Action<View> onViewClosed, Action<View> onViewOpened)
+        {
+            s_OnViewClosedAction += onViewClosed;
+            s_OnViewOpenedAction += onViewClosed;
+        }
+
+        public static void ClearStaticActions()
+        {
+            s_OnViewClosedAction = null;
+            s_OnViewOpenedAction = null;
+        }
+
         public object GetParameter(string key)
         {
             if (m_Parameters != null && m_Parameters.Count > 0 && m_Parameters.ContainsKey(key))
