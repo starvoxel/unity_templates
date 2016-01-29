@@ -66,12 +66,21 @@ namespace Starvoxel.FlowManagement
         }
     }
 
+    public struct ActionQueueElement
+    {
+        public ActionNode Action;
+        public Dictionary<string, object> Parameters;
+    }
+
 	public partial class FlowManager : MonoBehaviour
     {
         #region Fields & Properties
         //const
         public const string DEFAULT_STARTING_VIEW = "SPLASH";
         public static readonly Version CURRENT_VERSION = new Version("1.0.0");
+
+        public const string ACTION_NAME_KEY = "ACTION_NAME";
+        public const string FROM_VIEW_NAME_KEY = "FROM_VIEW_NAME";
 
 		//public
 	
@@ -91,9 +100,11 @@ namespace Starvoxel.FlowManagement
         private ViewNode m_OpeningViewNode;
         private Dictionary<string, object> m_CurrentParameters = null;
 
-        private Queue<ActionNode> m_ActionQueue = new Queue<ActionNode>(); // Queue of all actions that are going to be processed
+        private Queue<ActionQueueElement> m_ActionQueue = new Queue<ActionQueueElement>(); // Queue of all actions that are going to be processed
 
         private Coroutine m_LoadingRoutine = null;
+
+        private static FlowManager m_Instance = null;
 		//private
 	
 		//properties
@@ -106,13 +117,21 @@ namespace Starvoxel.FlowManagement
         {
             get { return m_GeneralInformation.IsInitialized && m_Views.Length > 0; }
         }
+        public static FlowManager Instance
+        {
+            get { return m_Instance;  }
+        }
 		#endregion
 	
 		#region Unity Methods
         // TEMPORARY jsmellie: This is only here for now.  We'll take it out once we actually have the entire flow working properly.
         private void Start()
         {
-            LaunchWithFile(m_TestXMLPath);
+            if (m_Instance == null)
+            {
+                m_Instance = this;
+                LaunchWithFile(m_TestXMLPath);
+            }
         }
 		#endregion
 	
@@ -165,7 +184,7 @@ namespace Starvoxel.FlowManagement
         /// Trigger a flow action based on provided ID.  This action can change views, load additive views on top of the current scene.  Eventually they will interact with the state machines of views aswell
         /// </summary>
         /// <param name="actionID">ID for the action</param>
-        public void TriggerAction(string actionID)
+        public void TriggerAction(string actionID, Dictionary<string, object> parameters = null)
         {
             ActionNode action = new ActionNode();
 
@@ -195,7 +214,11 @@ namespace Starvoxel.FlowManagement
 
             if (action.IsInitialized)
             {
-                m_ActionQueue.Enqueue(action);
+                ActionQueueElement newElement = new ActionQueueElement();
+                newElement.Action = action;
+                newElement.Parameters = parameters;
+
+                m_ActionQueue.Enqueue(newElement);
 
                 if (!IsBusy)
                 {
@@ -208,12 +231,69 @@ namespace Starvoxel.FlowManagement
 		#region Private Methods
         private void Initialize()
         {
-            View.SetStaticActions(this.OnViewClosed, this.OnViewOpened);
         }
 
         private void ProcessActions()
         {
-            // TODO jsmellie: This is where we'd iterate over the actions and so all the stuff we need to do!
+            if (m_ActionQueue.Count > 0)
+            {
+                ActionQueueElement curElement = m_ActionQueue.Dequeue();
+
+                m_CurrentParameters = new Dictionary<string, object>();
+
+                //Add default parameters from the action
+                if (curElement.Action.Parameters != null && curElement.Action.Parameters.Count > 0)
+                {
+                    foreach(KeyValuePair<string, object> pair in curElement.Action.Parameters)
+                    {
+                        if (!m_CurrentParameters.ContainsKey(pair.Key))
+                        {
+                            m_CurrentParameters.Add(pair.Key, pair.Value);
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+
+                // Add custom parameters passed when the action was triggered
+                if (curElement.Parameters != null && curElement.Parameters.Count > 0)
+                {
+                    foreach (KeyValuePair<string, object> pair in curElement.Parameters)
+                    {
+                        if (!m_CurrentParameters.ContainsKey(pair.Key))
+                        {
+                            m_CurrentParameters.Add(pair.Key, pair.Value);
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+
+                // Add parameters based off the action that was triggered
+                if (!m_CurrentParameters.ContainsKey(FROM_VIEW_NAME_KEY))
+                {
+                    m_CurrentParameters.Add(FROM_VIEW_NAME_KEY, m_CurrentViewStack.Peek().name);
+                }
+                else
+                {
+
+                }
+
+                if (!m_CurrentParameters.ContainsKey(ACTION_NAME_KEY))
+                {
+                    m_CurrentParameters.Add(ACTION_NAME_KEY, curElement.Action.ID);
+                }
+                else
+                {
+
+                }
+
+                LoadView(GetViewNodeForID(curElement.Action.ViewID));
+            }
         }
 
         private void LoadView(ViewNode view)
@@ -230,12 +310,12 @@ namespace Starvoxel.FlowManagement
             if (!m_OpeningViewNode.IsModal)
             {
                 PartialOnPreCloseAllViews();
-                yield return CloseAllViews();
+                yield return StartCoroutine(CloseAllViews());
             }
             PartialOnPreLoadNewScene();
-            yield return LoadNewScene();
+            yield return StartCoroutine(LoadNewScene());
             PartialOnPreOpenView();
-            yield return OpenView();
+            yield return StartCoroutine(OpenView());
             ProcessActions();
         }
 
@@ -268,7 +348,7 @@ namespace Starvoxel.FlowManagement
 
             if (m_OpeningView != null)
             {
-                yield return m_OpeningView.ViewLoaded(m_CurrentParameters);
+                yield return StartCoroutine(m_OpeningView.ViewLoaded(m_CurrentParameters));
             }
             else
             {
@@ -289,7 +369,7 @@ namespace Starvoxel.FlowManagement
             }
         }
 
-        private void OnViewClosed(View closedView)
+        public void OnViewClosed(View closedView)
         {
             if (m_ClosingViews.Contains(closedView))
             {
@@ -298,8 +378,9 @@ namespace Starvoxel.FlowManagement
             }
         }
 
-        private void OnViewOpened(View openedView)
+        public void OnViewOpened(View openedView)
         {
+            Debug.Log("OnViewOpened called for view: " + openedView);
             if (openedView == m_OpeningView)
             {
                 m_CurrentViewStack.Push(openedView);

@@ -94,9 +94,8 @@ GameObject:
   m_Component:
   - 4: {fileID: 1006394510}
   - 114: {fileID: 1006394509}
-  - 114: {fileID: 1006394511}
   m_Layer: 0
-  m_Name: Splash
+  m_Name: MainMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -125,15 +124,3 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &1006394511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1006394508}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 011ae8aef2ce33941a42e39f9ebeaeba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ActionID: COMPLETE

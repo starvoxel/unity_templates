@@ -59,8 +59,6 @@ namespace Starvoxel.FlowManagement
         //const
 
         //static
-        protected static Action<View> s_OnViewClosedAction = null;
-        protected static Action<View> s_OnViewOpenedAction = null;
 	
 		//public
         public event ViewStateChangedEventHandler StateChanged;
@@ -87,26 +85,6 @@ namespace Starvoxel.FlowManagement
 		#endregion
 
         #region Public API
-        /// <summary>
-        /// Assigns actions to the static actions used by all views
-        /// </summary>
-        /// <param name="onViewClosed">On View Closed Action</param>
-        /// <param name="onViewOpened">On View Opened Action</param>
-        public static void SetStaticActions(Action<View> onViewClosed, Action<View> onViewOpened)
-        {
-            s_OnViewClosedAction += onViewClosed;
-            s_OnViewOpenedAction += onViewClosed;
-        }
-
-        /// <summary>
-        /// Clears the static actions that are used in view flow
-        /// </summary>
-        public static void ClearStaticActions()
-        {
-            s_OnViewClosedAction = null;
-            s_OnViewOpenedAction = null;
-        }
-
         public object GetParameter(string key)
         {
             if (m_Parameters != null && m_Parameters.Count > 0 && m_Parameters.ContainsKey(key))
@@ -212,14 +190,7 @@ namespace Starvoxel.FlowManagement
         {
             ChangeState(eViewState.OPENED);
 
-            if (s_OnViewOpenedAction != null)
-            {
-                s_OnViewOpenedAction(this);
-            }
-            else
-            {
-                Debug.LogError("View's OnViewCLosed static action is null.  View flow broken.");
-            }
+            FlowManager.Instance.OnViewOpened(this);
         }
 
         /// <summary>
@@ -290,14 +261,8 @@ namespace Starvoxel.FlowManagement
         protected virtual void OnViewClosed(Dictionary<string, object> parameters)
         {
             ChangeState(eViewState.CLOSED);
-            if (s_OnViewClosedAction != null)
-            {
-                s_OnViewClosedAction(this);
-            }
-            else
-            {
-                Debug.LogError("View's OnViewCLosed static action is null.  View flow broken.");
-            }
+
+            FlowManager.Instance.OnViewClosed(this);
         }
 		#endregion
 	
