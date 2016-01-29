@@ -70,6 +70,8 @@ using System.Collections.Generic;
 
         #region Other
         public static readonly Version INVALID_VERSION = new Version("0.0.0");
+
+        public const string CLOSE_CURRENT_VIEW = "CLOSE_CURRENT_VIEW";
         #endregion
 
         //public
@@ -281,7 +283,10 @@ using System.Collections.Generic;
             if (actionElement != null && actionElement.HasAttributes)
             {
                 action.ID = actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY).Value;
-                action.ViewID = actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY).Value;
+                if (actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY) != null)
+                {
+                    action.ViewID = actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY).Value;
+                }
                 action.Parameters = ParseParameters(actionElement, ref error);                
             }
             else
@@ -380,7 +385,7 @@ using System.Collections.Generic;
 
                 List<ActionNode> actions = new List<ActionNode>();
 
-                IEnumerable<XElement> actionElements = viewElement.Elements(ACTION_PARAM_ELEMENT_KEY);
+                IEnumerable<XElement> actionElements = viewElement.Elements(ACTION_ELEMENT_KEY);
 
                 // Parse out the actions if there are any
                 if (actionElements != null)
