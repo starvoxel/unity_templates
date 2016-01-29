@@ -68,7 +68,7 @@ namespace Starvoxel.FlowManagement
 		//protected
         protected eViewState m_State;
         protected Dictionary<string, object> m_Parameters;
-        protected Dictionary<string, object> m_TempParameters;
+        protected Dictionary<string, object> m_SequenceParameters;
 	
 		//private
 	
@@ -98,6 +98,9 @@ namespace Starvoxel.FlowManagement
             s_OnViewOpenedAction += onViewClosed;
         }
 
+        /// <summary>
+        /// Clears the static actions that are used in view flow
+        /// </summary>
         public static void ClearStaticActions()
         {
             s_OnViewClosedAction = null;
@@ -131,7 +134,7 @@ namespace Starvoxel.FlowManagement
         /// <param name="parameters">Parameters.</param>
         public void OpenView(Dictionary<string, object> parameters)
         {
-            m_TempParameters = parameters;
+            m_SequenceParameters = parameters;
 
             OnOpeningSequenceStarted();
         }
@@ -142,7 +145,7 @@ namespace Starvoxel.FlowManagement
         /// <param name="parameters"></param>
         public void CloseView(Dictionary<string, object> parameters)
         {
-            m_TempParameters = parameters;
+            m_SequenceParameters = parameters;
 
             OnClosingSequenceStarted();
         }
@@ -187,6 +190,8 @@ namespace Starvoxel.FlowManagement
         protected virtual void OnOpeningSequenceStarted()
         {
             ChangeState(eViewState.OPENING);
+
+            OnOpeningSequeneComplete();
         }
 
         /// <summary>
@@ -195,8 +200,8 @@ namespace Starvoxel.FlowManagement
         /// </summary>
         protected virtual void OnOpeningSequeneComplete()
         {
-            OnViewOpened(m_TempParameters);
-            m_TempParameters = null;
+            OnViewOpened(m_SequenceParameters);
+            m_SequenceParameters = null;
         }
 
         /// <summary>
@@ -206,6 +211,15 @@ namespace Starvoxel.FlowManagement
         protected virtual void OnViewOpened(Dictionary<string, object> parameters)
         {
             ChangeState(eViewState.OPENED);
+
+            if (s_OnViewOpenedAction != null)
+            {
+                s_OnViewOpenedAction(this);
+            }
+            else
+            {
+                Debug.LogError("View's OnViewCLosed static action is null.  View flow broken.");
+            }
         }
 
         /// <summary>
@@ -255,6 +269,8 @@ namespace Starvoxel.FlowManagement
         protected virtual void OnClosingSequenceStarted() 
         {
             ChangeState(eViewState.CLOSING);
+
+            OnClosingSequenceComplete();
         }
 
         /// <summary>
@@ -263,8 +279,8 @@ namespace Starvoxel.FlowManagement
         /// </summary>
         protected virtual void OnClosingSequenceComplete()
         {
-            OnViewClosed(m_TempParameters);
-            m_TempParameters = null;
+            OnViewClosed(m_SequenceParameters);
+            m_SequenceParameters = null;
         }
 
         /// <summary>
@@ -274,6 +290,14 @@ namespace Starvoxel.FlowManagement
         protected virtual void OnViewClosed(Dictionary<string, object> parameters)
         {
             ChangeState(eViewState.CLOSED);
+            if (s_OnViewClosedAction != null)
+            {
+                s_OnViewClosedAction(this);
+            }
+            else
+            {
+                Debug.LogError("View's OnViewCLosed static action is null.  View flow broken.");
+            }
         }
 		#endregion
 	
