@@ -93,7 +93,7 @@ namespace Starvoxel.FlowManagement
 
         private Queue<ActionNode> m_ActionQueue = new Queue<ActionNode>(); // Queue of all actions that are going to be processed
 
-        private AsyncOperation m_SceneLoadingOperation = null;
+        private Coroutine m_LoadingRoutine = null;
 		//private
 	
 		//properties
@@ -113,14 +113,6 @@ namespace Starvoxel.FlowManagement
         private void Start()
         {
             LaunchWithFile(m_TestXMLPath);
-        }
-
-        private void Update()
-        {
-            if (m_SceneLoadingOperation != null)
-            {
-
-            }
         }
 		#endregion
 	
@@ -157,7 +149,7 @@ namespace Starvoxel.FlowManagement
 
                     if (startingView.IsInitialzed)
                     {
-                        //LoadView(startingView);
+                        LoadView(startingView);
                     }
                     else
                     {
@@ -226,17 +218,28 @@ namespace Starvoxel.FlowManagement
 
         private void LoadView(ViewNode view)
         {
-            // TODO jsmellie: We should do some kind of "If this view is already open, reload it" type thing
-
-            // If the new view isn't modal and we aren't reloading, delete all the currentely open views
             m_OpeningViewNode = view;
-            if (!m_OpeningViewNode.IsModal)
-            {
-                CloseAllViews();
-            }
+
+            StartCoroutine(LoadingSequence());
         }
 
-        private void CloseAllViews()
+        private IEnumerator LoadingSequence()
+        {
+            // TODO jsmellie: We should do some kind of "If this view is already open, reload it" type thing
+            // If the new view isn't modal and we aren't reloading, delete all the currentely open views
+            if (!m_OpeningViewNode.IsModal)
+            {
+                PartialOnPreCloseAllViews();
+                yield return CloseAllViews();
+            }
+            PartialOnPreLoadNewScene();
+            yield return LoadNewScene();
+            PartialOnPreOpenView();
+            yield return OpenView();
+            ProcessActions();
+        }
+
+        private IEnumerator CloseAllViews()
         {
             View curClosingView = null;
 
@@ -251,42 +254,38 @@ namespace Starvoxel.FlowManagement
                 }
             }
 
-            if (m_ClosingViews.Count == 0)
+            while (m_ClosingViews.Count > 0)
             {
-                OnAllViewsClosed();
+                yield return null;
             }
         }
 
-        private void OnAllViewsClosed()
-        {
-            OpenView();
-        }
-
-        private void OpenView()
+        private IEnumerator LoadNewScene()
         {
             string newSceneName = m_OpeningViewNode.SceneName;
-
-            m_SceneLoadingOperation = SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
-        }
-
-        private void OnSceneLoaded()
-        {
-            m_SceneLoadingOperation = null;
-
-            View[] views = FindObjectsOfType<View>();
-
-            for(int viewIndex = 0; viewIndex < views.Length; ++viewIndex)
-            {
-                if (views[viewIndex].name == m_OpeningViewNode.SceneName)
-                {
-                    m_OpeningView = views[viewIndex];
-                    break;
-                }
-            }
+            yield return SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
+            m_OpeningView = GetViewForSceneName(newSceneName);
 
             if (m_OpeningView != null)
             {
+                yield return m_OpeningView.ViewLoaded(m_CurrentParameters);
+            }
+            else
+            {
+                Debug.LogErrorFormat("A view with the name {0} was not found.  Make sure that the view has the same name as the scene!", newSceneName);
+            }
+        }
+
+        private IEnumerator OpenView()
+        {
+            if (m_OpeningView != null)
+            {
                 m_OpeningView.OpenView(m_CurrentParameters);
+            }
+
+            while (m_OpeningView != null)
+            {
+                yield return null;
             }
         }
 
@@ -297,11 +296,6 @@ namespace Starvoxel.FlowManagement
                 m_ClosingViews.Remove(closedView);
                 SceneManager.UnloadScene(closedView.gameObject.name);
             }
-
-            if (m_ClosingViews.Count == 0)
-            {
-                OnAllViewsClosed();
-            }
         }
 
         private void OnViewOpened(View openedView)
@@ -310,11 +304,25 @@ namespace Starvoxel.FlowManagement
             {
                 m_CurrentViewStack.Push(openedView);
                 m_OpeningView = null;
-                ProcessActions();
             }
         }
 
         #region Helper Functions
+        private View GetViewForSceneName(string viewName)
+        {
+            View[] views = FindObjectsOfType<View>();
+
+            for (int viewIndex = 0; viewIndex < views.Length; ++viewIndex)
+            {
+                if (views[viewIndex].name == m_OpeningViewNode.SceneName)
+                {
+                    return views[viewIndex];
+                }
+            }
+
+            return null;
+        }
+
         private ViewNode GetViewNodeForView(View view)
         {
             string sceneName = view.gameObject.name;
@@ -347,6 +355,10 @@ namespace Starvoxel.FlowManagement
         #region Partial Methods
         partial void PartialOnPreLaunch();
         partial void PartialOnPostLaunch();
+
+        partial void PartialOnPreCloseAllViews();
+        partial void PartialOnPreLoadNewScene();
+        partial void PartialOnPreOpenView();
 		#endregion
 	}
 }
