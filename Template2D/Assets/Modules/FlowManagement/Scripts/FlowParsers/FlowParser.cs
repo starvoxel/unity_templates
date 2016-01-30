@@ -46,6 +46,7 @@ using System.Collections.Generic;
         #region General Info
         public const string INFO_ELEMENT_KEY = "info";
         public const string STARTING_VIEW_ATTRIBUTE_KEY = "startingView";
+        public const string MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY = "modalDepthOffset";
         public const string GENERAL_ACTION_ELEMENT_LEY = "generalActions";
         #endregion
 
@@ -188,7 +189,7 @@ using System.Collections.Generic;
         /// <returns>Parsed information.</returns>
         protected GeneralInformation ParseInfo(ref string error)
         {
-            GeneralInformation info = new GeneralInformation(FlowManager.DEFAULT_STARTING_VIEW);
+            GeneralInformation info = new GeneralInformation(FlowManager.DEFAULT_STARTING_VIEW, FlowManager.DEFAULT_MODAL_DEPTH_OFFSET);
             XElement infoElement = m_XML.Root.Element(INFO_ELEMENT_KEY);
             if (infoElement != null && infoElement.HasAttributes)
             {
@@ -200,6 +201,11 @@ using System.Collections.Generic;
                 {
                     error = INFO_ELEMENT_KEY + " does not contain the attribute " + STARTING_VIEW_ATTRIBUTE_KEY + ".  Invalid element.";
                     return info;
+                }
+
+                if (infoElement.Attribute(MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY) != null)
+                {
+                    info.ModalDepthOffset = System.Convert.ToInt32(infoElement.Attribute(MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY).Value);
                 }
             }
             else

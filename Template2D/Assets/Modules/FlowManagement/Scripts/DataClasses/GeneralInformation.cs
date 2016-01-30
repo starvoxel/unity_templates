@@ -38,6 +38,7 @@ using System.Collections;
 
         //private
         public string StartingView;
+        public int ModalDepthOffset;
 
         //properties
         /// <summary>
@@ -50,9 +51,10 @@ using System.Collections;
 		#endregion
 	
 		#region Constructor Methods
-        public GeneralInformation(string startingView)
+        public GeneralInformation(string startingView, int modalDepthOffset)
         {
             StartingView = startingView;
+            ModalDepthOffset = modalDepthOffset;
         }
 		#endregion
 	

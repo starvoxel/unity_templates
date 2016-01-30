@@ -77,6 +77,7 @@ namespace Starvoxel.FlowManagement
         #region Fields & Properties
         //const
         public const string DEFAULT_STARTING_VIEW = "SPLASH";
+        public const int DEFAULT_MODAL_DEPTH_OFFSET = -40;
         public static readonly Version CURRENT_VERSION = new Version("1.0.0");
 
         public const string ACTION_NAME_KEY = "ACTION_NAME";
@@ -144,8 +145,6 @@ namespace Starvoxel.FlowManagement
         {
             if (!IsInitialized)
             {
-                Initialize();
-
                 FlowParser parser = FlowParser.Parse(m_TestXMLPath, CURRENT_VERSION);
                 m_GeneralInformation = parser.GeneralInformation;
                 m_GeneralActions = parser.GeneralActions;
@@ -229,10 +228,6 @@ namespace Starvoxel.FlowManagement
 		#endregion
 
 		#region Private Methods
-        private void Initialize()
-        {
-        }
-
         private void ProcessActions()
         {
             if (m_ActionQueue.Count > 0)
@@ -292,7 +287,14 @@ namespace Starvoxel.FlowManagement
 
                 }
 
-                LoadView(GetViewNodeForID(curElement.Action.ViewID));
+                if (!string.IsNullOrEmpty(curElement.Action.ViewID))
+                {
+                    LoadView(GetViewNodeForID(curElement.Action.ViewID));
+                }
+                else if (GetViewNodeForView(m_CurrentViewStack.Peek()).IsModal)
+                {
+                    StartCoroutine(CloseCurrentView());
+                }
             }
         }
 
@@ -312,11 +314,37 @@ namespace Starvoxel.FlowManagement
                 PartialOnPreCloseAllViews();
                 yield return StartCoroutine(CloseAllViews());
             }
+            else if (m_CurrentViewStack.Count > 0)
+            {
+                m_CurrentViewStack.Peek().LoseFocus(m_CurrentParameters);
+            }
+
             PartialOnPreLoadNewScene();
             yield return StartCoroutine(LoadNewScene());
             PartialOnPreOpenView();
             yield return StartCoroutine(OpenView());
             ProcessActions();
+        }
+
+        private IEnumerator CloseCurrentView()
+        {
+            if (m_CurrentViewStack.Count > 0)
+            {
+                View closingView = m_CurrentViewStack.Pop();
+                m_ClosingViews.Clear();
+                m_ClosingViews.Add(closingView);
+                closingView.CloseView(m_CurrentParameters);
+
+                while (m_ClosingViews.Count > 0)
+                {
+                    yield return null;
+                }
+
+                if (m_CurrentViewStack.Count > 0)
+                {
+                    m_CurrentViewStack.Peek().GainFocus(m_CurrentParameters);
+                }
+            }
         }
 
         private IEnumerator CloseAllViews()
@@ -345,6 +373,9 @@ namespace Starvoxel.FlowManagement
             string newSceneName = m_OpeningViewNode.SceneName;
             yield return SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
             m_OpeningView = GetViewForSceneName(newSceneName);
+
+            Vector3 pos = m_OpeningView.transform.position;
+            pos.z = m_CurrentViewStack.Count * m_GeneralInformation.ModalDepthOffset;
 
             if (m_OpeningView != null)
             {
@@ -410,7 +441,7 @@ namespace Starvoxel.FlowManagement
 
             for(int viewIndex = 0; viewIndex < m_Views.Length; ++viewIndex)
             {
-                if (m_Views[viewIndex].SceneName.Equals(sceneName))
+                if ( !string.IsNullOrEmpty(m_Views[viewIndex].SceneName) && m_Views[viewIndex].SceneName.Equals(sceneName))
                 {
                     return m_Views[viewIndex];
                 }
@@ -441,5 +472,17 @@ namespace Starvoxel.FlowManagement
         partial void PartialOnPreLoadNewScene();
         partial void PartialOnPreOpenView();
 		#endregion
-	}
+
+        #region Context Methods
+        [SerializeField]
+        private string m_ActionID;
+
+        [ContextMenu("Run Action")]
+        private void ContextRunAction()
+        {
+            Debug.Log("Running Action: " + m_ActionID);
+            FlowManager.Instance.TriggerAction(m_ActionID);
+        }
+        #endregion
+    }
 }
