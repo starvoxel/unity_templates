@@ -39,6 +39,7 @@ using System.Collections;
         //private
         public string StartingView;
         public int ModalDepthOffset;
+        public string OverlayPrefabPath;
 
         //properties
         /// <summary>
@@ -55,6 +56,7 @@ using System.Collections;
         {
             StartingView = startingView;
             ModalDepthOffset = modalDepthOffset;
+            OverlayPrefabPath = string.Empty;
         }
 		#endregion
 	

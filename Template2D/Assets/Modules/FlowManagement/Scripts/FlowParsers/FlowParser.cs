@@ -47,10 +47,11 @@ using System.Collections.Generic;
         public const string INFO_ELEMENT_KEY = "info";
         public const string STARTING_VIEW_ATTRIBUTE_KEY = "startingView";
         public const string MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY = "modalDepthOffset";
-        public const string GENERAL_ACTION_ELEMENT_LEY = "generalActions";
+        public const string OVERLAY_PREFAB_PATH_ATTRIBUTE_KEY = "overlayPath";
         #endregion
 
         #region Actions
+        public const string GENERAL_ACTION_ELEMENT_LEY = "generalActions";
         public const string ACTION_ELEMENT_KEY = "action";
         public const string ACTION_ID_ATTRIBUTE_KEY = "id";
         public const string ACTION_VIEW_ID_ATTRIBUTE_KEY = "viewID";
@@ -63,6 +64,7 @@ using System.Collections.Generic;
         public const string VIEW_ELEMENT_KEY = "view";
         public const string VIEW_ID_ATTRIBUTE_KEY = "id";
         public const string VIEW_IS_MODAL_ATTRIBUTE_KEY = "isModal";
+        public const string VIEW_SHOW_OVERLAY_ATTRIBUTE_KEY = "showOverlay";
         public const string VIEW_SCENE_ATTRIBUTE_KEY = "scene";
         public const string VIEW_PARAM_ELEMENT_KEY = "parameter";
         public const string VIEW_PARAM_KEY_ATTRIBUTE_KEY = "key";
@@ -193,19 +195,27 @@ using System.Collections.Generic;
             XElement infoElement = m_XML.Root.Element(INFO_ELEMENT_KEY);
             if (infoElement != null && infoElement.HasAttributes)
             {
-                if (infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY) != null)
+                XAttribute curAttribute = infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY);
+                if (curAttribute != null)
                 {
-                    info.StartingView = infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY).Value;
+                    info.StartingView = curAttribute.Value;
                 }
                 else
                 {
-                    error = INFO_ELEMENT_KEY + " does not contain the attribute " + STARTING_VIEW_ATTRIBUTE_KEY + ".  Invalid element.";
+                    error = string.Format("{0} does not contain the attribute {1}.  Invalid XML element.", INFO_ELEMENT_KEY, STARTING_VIEW_ATTRIBUTE_KEY);
                     return info;
                 }
 
-                if (infoElement.Attribute(MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY) != null)
+                curAttribute = infoElement.Attribute(MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY);
+                if (curAttribute != null)
                 {
-                    info.ModalDepthOffset = System.Convert.ToInt32(infoElement.Attribute(MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY).Value);
+                    info.ModalDepthOffset = System.Convert.ToInt32(curAttribute.Value);
+                }
+
+                curAttribute = infoElement.Attribute(OVERLAY_PREFAB_PATH_ATTRIBUTE_KEY);
+                if (curAttribute != null)
+                {
+                    info.OverlayPrefabPath = curAttribute.Value;
                 }
             }
             else
@@ -388,6 +398,7 @@ using System.Collections.Generic;
                 XAttribute idAttribute = viewElement.Attribute(VIEW_ID_ATTRIBUTE_KEY);
                 XAttribute sceneNameAttribute = viewElement.Attribute(VIEW_SCENE_ATTRIBUTE_KEY);
                 XAttribute isModalAttribute = viewElement.Attribute(VIEW_IS_MODAL_ATTRIBUTE_KEY);
+                XAttribute showOverlayAttribute = viewElement.Attribute(VIEW_SHOW_OVERLAY_ATTRIBUTE_KEY);
 
                 List<ActionNode> actions = new List<ActionNode>();
 
@@ -429,6 +440,15 @@ using System.Collections.Generic;
                     else
                     {
                         viewNode.IsModal = false;
+                    }
+
+                    if (showOverlayAttribute != null)
+                    {
+                        viewNode.ShowOverlay = System.Convert.ToBoolean(showOverlayAttribute.Value);
+                    }
+                    else
+                    {
+                        viewNode.ShowOverlay = false;
                     }
 
                     viewNode.Actions = actions.ToArray();

@@ -27,6 +27,10 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
 #endregion
+
+#region Other Includes
+using Starvoxel.Utilities;
+#endregion
 #endregion
 
 namespace Starvoxel.FlowManagement
@@ -72,12 +76,17 @@ namespace Starvoxel.FlowManagement
         public Dictionary<string, object> Parameters;
     }
 
-	public partial class FlowManager : MonoBehaviour
+	public partial class FlowManager
     {
         #region Fields & Properties
         //const
         public const string DEFAULT_STARTING_VIEW = "SPLASH";
         public const int DEFAULT_MODAL_DEPTH_OFFSET = -40;
+        public const int DEFAULT_OVERLAY_DEPTH_OFFSET = 10;
+        public const string DEFAULT_OVERLAY_PATH = "Prefabs/DefaultOverlay";
+
+        public const string COROUTINE_RUNNER_NAME = "FlowManagerCoroutineRunner";
+
         public static readonly Version CURRENT_VERSION = new Version("1.0.0");
 
         public const string ACTION_NAME_KEY = "ACTION_NAME";
@@ -86,7 +95,6 @@ namespace Starvoxel.FlowManagement
 		//public
 	
 		//protected
-        [SerializeField] private string m_TestXMLPath; // Temporary.  Used for testing to load a XML on Start
 
         // Parsed data
         private ViewNode[] m_Views;  // All the view nodes that are were parsed from the XML
@@ -97,15 +105,17 @@ namespace Starvoxel.FlowManagement
 
         private List<View> m_ClosingViews = new List<View>(); // List oif all the views that are currentely closing
         private View m_OpeningView = null; // View that is in the process of opening
-
-        private ViewNode m_OpeningViewNode;
-        private Dictionary<string, object> m_CurrentParameters = null;
+        private ViewNode m_OpeningViewNode; // View node that is in the process of being opened
+        private Dictionary<string, object> m_CurrentParameters = null; // Current parameters that are being used for what ever process is happening
 
         private Queue<ActionQueueElement> m_ActionQueue = new Queue<ActionQueueElement>(); // Queue of all actions that are going to be processed
 
-        private Coroutine m_LoadingRoutine = null;
+        private CoroutineRunner m_CoroutineRunner = null; // Script that we run the coroutines on seeing as FlowManager isn't  monobehaviour
+        private Coroutine m_LoadingRoutine = null; // Ref to the coroutine for the loading sequence.  Will be used to cancel the routine if we need to
 
-        private static FlowManager m_Instance = null;
+        private Overlay m_Overlay; // OVerlay that goes behind modals
+
+        private static FlowManager m_Instance = null; // Ref to the instance of flow manager
 		//private
 	
 		//properties
@@ -116,27 +126,36 @@ namespace Starvoxel.FlowManagement
 
         public bool IsInitialized
         {
-            get { return m_GeneralInformation.IsInitialized && m_Views.Length > 0; }
+            get { return m_GeneralInformation.IsInitialized && m_Views.Length > 0 && m_CoroutineRunner != null; }
         }
+
         public static FlowManager Instance
         {
-            get { return m_Instance;  }
-        }
-		#endregion
-	
-		#region Unity Methods
-        // TEMPORARY jsmellie: This is only here for now.  We'll take it out once we actually have the entire flow working properly.
-        private void Start()
-        {
-            if (m_Instance == null)
-            {
-                m_Instance = this;
-                LaunchWithFile(m_TestXMLPath);
+            get 
+            { 
+                if (m_Instance == null)
+                {
+                    m_Instance = new FlowManager();
+                    m_Instance.Initialize();
+                }
+                return m_Instance;  
             }
         }
 		#endregion
 	
 		#region Public Methods
+        /// <summary>
+        /// Initializes non-file specific functionality
+        /// </summary>
+        public void Initialize()
+        {
+            if (m_CoroutineRunner == null)
+            {
+                m_CoroutineRunner = CoroutineRunner.FetchCoroutineRunner();
+                m_CoroutineRunner.name = COROUTINE_RUNNER_NAME;
+            }
+        }
+
         /// <summary>
         /// Launch the flow of the game.  It will load and parse the XML at the provided path.
         /// </summary>
@@ -145,7 +164,7 @@ namespace Starvoxel.FlowManagement
         {
             if (!IsInitialized)
             {
-                FlowParser parser = FlowParser.Parse(m_TestXMLPath, CURRENT_VERSION);
+                FlowParser parser = FlowParser.Parse(filePath, CURRENT_VERSION);
                 m_GeneralInformation = parser.GeneralInformation;
                 m_GeneralActions = parser.GeneralActions;
                 m_Views = parser.Views;
@@ -153,6 +172,18 @@ namespace Starvoxel.FlowManagement
                 if (m_GeneralInformation.IsInitialized)
                 {
                     PartialOnPreLaunch();
+
+                    LoadOverlay(m_GeneralInformation.OverlayPrefabPath);
+
+                    if (m_Overlay == null)
+                    {
+                        LoadOverlay(DEFAULT_OVERLAY_PATH);
+                    }
+
+                    if (m_Overlay == null)
+                    {
+                        Debug.LogErrorFormat("Default overlay not found.  Please ensure a prefab with a Overlay script exists at {0}.", DEFAULT_OVERLAY_PATH);
+                    }
 
                     ViewNode startingView = new ViewNode();
 
@@ -228,12 +259,31 @@ namespace Starvoxel.FlowManagement
 		#endregion
 
 		#region Private Methods
+        /// <summary>
+        /// Attemps to load the overlay prefab at the provided path
+        /// </summary>
+        /// <param name="overlayPath">PAth of the overlay to load</param>
+        private void LoadOverlay(string overlayPath)
+        {
+            if (!string.IsNullOrEmpty(overlayPath))
+            {
+                Overlay overlayPrefab = Resources.Load<Overlay>(overlayPath);
+
+                if (overlayPrefab != null)
+                {
+                    m_Overlay = GameObject.Instantiate<Overlay>(overlayPrefab);
+                    GameObject.DontDestroyOnLoad(m_Overlay.gameObject);
+                    m_Overlay.Hide(true);
+                }
+            }
+        }
+
         private void ProcessActions()
         {
+            // Only do something if we have actions to process
             if (m_ActionQueue.Count > 0)
             {
                 ActionQueueElement curElement = m_ActionQueue.Dequeue();
-
                 m_CurrentParameters = new Dictionary<string, object>();
 
                 //Add default parameters from the action
@@ -287,24 +337,34 @@ namespace Starvoxel.FlowManagement
 
                 }
 
+                // If the action has a view to load, load it
                 if (!string.IsNullOrEmpty(curElement.Action.ViewID))
                 {
                     LoadView(GetViewNodeForID(curElement.Action.ViewID));
                 }
+                // Otherwise it's a closing action and close the top view
                 else if (GetViewNodeForView(m_CurrentViewStack.Peek()).IsModal)
                 {
-                    StartCoroutine(CloseCurrentView());
+                    m_CoroutineRunner.CreateCoroutine(CloseCurrentView());
                 }
             }
         }
 
+        /// <summary>
+        /// Loads the provided view based on it's information
+        /// </summary>
+        /// <param name="view">ViewNode that should be loaded</param>
         private void LoadView(ViewNode view)
         {
             m_OpeningViewNode = view;
 
-            StartCoroutine(LoadingSequence());
+            m_CoroutineRunner.CreateCoroutine(LoadingSequence());
         }
 
+        /// <summary>
+        /// Loading sequence for the new view
+        /// </summary>
+        /// <returns>Coroutine therefor must return an IEnumerator</returns>
         private IEnumerator LoadingSequence()
         {
             // TODO jsmellie: We should do some kind of "If this view is already open, reload it" type thing
@@ -312,20 +372,25 @@ namespace Starvoxel.FlowManagement
             if (!m_OpeningViewNode.IsModal)
             {
                 PartialOnPreCloseAllViews();
-                yield return StartCoroutine(CloseAllViews());
+                yield return m_CoroutineRunner.CreateCoroutine(CloseAllViews());
             }
+            // If we have open views then we need to tell them that they are losing focus because a modal view is opening
             else if (m_CurrentViewStack.Count > 0)
             {
                 m_CurrentViewStack.Peek().LoseFocus(m_CurrentParameters);
             }
 
             PartialOnPreLoadNewScene();
-            yield return StartCoroutine(LoadNewScene());
+            yield return m_CoroutineRunner.CreateCoroutine(LoadNewScene());
             PartialOnPreOpenView();
-            yield return StartCoroutine(OpenView());
+            yield return m_CoroutineRunner.CreateCoroutine(OpenView());
             ProcessActions();
         }
 
+        /// <summary>
+        /// Close the top view
+        /// </summary>
+        /// <returns>Coroutine therefor must return an IEnumerator</returns>
         private IEnumerator CloseCurrentView()
         {
             if (m_CurrentViewStack.Count > 0)
@@ -340,6 +405,8 @@ namespace Starvoxel.FlowManagement
                     yield return null;
                 }
 
+                UpdateOverlayState(false);
+
                 if (m_CurrentViewStack.Count > 0)
                 {
                     m_CurrentViewStack.Peek().GainFocus(m_CurrentParameters);
@@ -347,6 +414,10 @@ namespace Starvoxel.FlowManagement
             }
         }
 
+        /// <summary>
+        /// Close all currently open views.  Only continues when all views closing sequences are complete.
+        /// </summary>
+        /// <returns>Coroutine therefor must return an IEnumerator</returns>
         private IEnumerator CloseAllViews()
         {
             View curClosingView = null;
@@ -368,18 +439,27 @@ namespace Starvoxel.FlowManagement
             }
         }
 
+        /// <summary>
+        /// Load the scene associated with the new view
+        /// </summary>
+        /// <returns>Coroutine therefor must return an IEnumerator</returns>
         private IEnumerator LoadNewScene()
         {
             string newSceneName = m_OpeningViewNode.SceneName;
             yield return SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
             m_OpeningView = GetViewForSceneName(newSceneName);
-
-            Vector3 pos = m_OpeningView.transform.position;
-            pos.z = m_CurrentViewStack.Count * m_GeneralInformation.ModalDepthOffset;
-
+                        
             if (m_OpeningView != null)
             {
-                yield return StartCoroutine(m_OpeningView.ViewLoaded(m_CurrentParameters));
+                // Position the view based off how many views are open
+                Vector3 pos = m_OpeningView.transform.position;
+                pos.z = m_CurrentViewStack.Count * m_GeneralInformation.ModalDepthOffset;
+                m_OpeningView.transform.position = pos;
+
+                UpdateOverlayState(true);
+
+                //Start loading the view
+                yield return m_CoroutineRunner.CreateCoroutine(m_OpeningView.ViewLoaded(m_CurrentParameters));
             }
             else
             {
@@ -387,6 +467,10 @@ namespace Starvoxel.FlowManagement
             }
         }
 
+        /// <summary>
+        /// Opens the new view and waits until that view is done opening before continuing
+        /// </summary>
+        /// <returns>Coroutine therefor must return an IEnumerator</returns>
         private IEnumerator OpenView()
         {
             if (m_OpeningView != null)
@@ -400,6 +484,10 @@ namespace Starvoxel.FlowManagement
             }
         }
 
+        /// <summary>
+        /// Callback for when a view is done with it's closing sequence
+        /// </summary>
+        /// <param name="closedView">View whose closing sequence is complete</param>
         public void OnViewClosed(View closedView)
         {
             if (m_ClosingViews.Contains(closedView))
@@ -409,9 +497,12 @@ namespace Starvoxel.FlowManagement
             }
         }
 
+        /// <summary>
+        /// Callback for when a view is done with it's opening sequence
+        /// </summary>
+        /// <param name="openedView">View whose opening sequence is complete</param>
         public void OnViewOpened(View openedView)
         {
-            Debug.Log("OnViewOpened called for view: " + openedView);
             if (openedView == m_OpeningView)
             {
                 m_CurrentViewStack.Push(openedView);
@@ -419,10 +510,42 @@ namespace Starvoxel.FlowManagement
             }
         }
 
+        private void UpdateOverlayState(bool useOpeningView)
+        {
+            if (m_CurrentViewStack.Count > 0)
+            {
+                View currentView = m_CurrentViewStack.Peek();
+                if (useOpeningView)
+                {
+                    currentView = m_OpeningView;
+                }
+
+                ViewNode currentViewNode = GetViewNodeForView(currentView);
+
+                // If the new view is a modal view and it wants a overlay, show the overlay and position it properly
+                if (currentViewNode.IsModal && currentViewNode.ShowOverlay)
+                {
+                    if (m_Overlay.State == Overlay.eState.HIDDEN)
+                    {
+                        m_Overlay.Show(false);
+                    }
+
+                    Vector3 pos = m_Overlay.transform.position;
+                    pos.z = currentView.transform.position.z + DEFAULT_OVERLAY_DEPTH_OFFSET;
+                    m_Overlay.transform.position = pos;
+                }
+                // Else if the overlay is showing for what ever reason, hide it
+                else if (m_Overlay.State == Overlay.eState.SHOWING || m_Overlay.State == Overlay.eState.ANIMATING_IN)
+                {
+                    m_Overlay.Hide(false);
+                }
+            }
+        }
+
         #region Helper Functions
         private View GetViewForSceneName(string viewName)
         {
-            View[] views = FindObjectsOfType<View>();
+            View[] views = GameObject.FindObjectsOfType<View>();
 
             for (int viewIndex = 0; viewIndex < views.Length; ++viewIndex)
             {
@@ -464,6 +587,7 @@ namespace Starvoxel.FlowManagement
         }
         #endregion
         #endregion
+
         #region Partial Methods
         partial void PartialOnPreLaunch();
         partial void PartialOnPostLaunch();
@@ -472,17 +596,5 @@ namespace Starvoxel.FlowManagement
         partial void PartialOnPreLoadNewScene();
         partial void PartialOnPreOpenView();
 		#endregion
-
-        #region Context Methods
-        [SerializeField]
-        private string m_ActionID;
-
-        [ContextMenu("Run Action")]
-        private void ContextRunAction()
-        {
-            Debug.Log("Running Action: " + m_ActionID);
-            FlowManager.Instance.TriggerAction(m_ActionID);
-        }
-        #endregion
     }
 }
