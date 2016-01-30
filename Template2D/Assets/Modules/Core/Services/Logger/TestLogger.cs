@@ -61,11 +61,28 @@ using StackFrame = System.Diagnostics.StackFrame;
 
         public void LogWithCategory(string category, string msg, params object[] args)
         {
+            LogWithCategories(new List<string>(new string[] { category }), msg, args);
+        }
+
+        public void LogWithCategories(List<string> categories, string msg, params object[] args)
+        {
             StackTrace stack = new StackTrace(1, true);
 
-            string test = CreateInfoLine(stack) + FormatStackTrace(stack);
+            string test = CreateInfoLine(stack) + CreateCategoryString(categories.ToArray()) + string.Format(msg, args) + FormatStackTrace(stack);
 
-            UnityEngine.Debug.Log(test);
+            // Do a proper Debug log based off the categories passed
+            if (categories.Contains(LoggerConstants.ERROR_CATEGORY))
+            {
+                UnityEngine.Debug.LogError(test);
+            }
+            else if (categories.Contains(LoggerConstants.WARNING_CATEGORY))
+            {
+                UnityEngine.Debug.LogWarning(test);
+            }
+            else
+            {
+                UnityEngine.Debug.Log(test);
+            }
         }
 
         public void Log(string msg, params object[] args)
@@ -93,6 +110,29 @@ using StackFrame = System.Diagnostics.StackFrame;
 		#endregion
 
         #region Private Methods
+        private string CreateCategoryString(string[] categories)
+        {
+            string categoryString = string.Empty;
+
+            if (categories != null && categories.Length > 0)
+            {
+                categoryString = "{ ";
+
+                for(int i = 0; i < categories.Length; ++i)
+                {
+                    if (i > 0)
+                    {
+                        categoryString += ", ";
+                    }
+
+                    categoryString += categories[i];
+                }
+
+                categoryString += " }";
+            }
+
+            return categoryString;
+        }
 
         private string CreateInfoLine(StackTrace stack)
         {
@@ -111,7 +151,7 @@ using StackFrame = System.Diagnostics.StackFrame;
         private string FormatStackTrace(StackTrace stack)
         {
             string formattedStack = "\n\n--- STACK TRACE ---";
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
             int startingIndex = GetIndexForFirstValidFrame(stack);
 
             if (startingIndex >= 0)
@@ -147,6 +187,8 @@ using StackFrame = System.Diagnostics.StackFrame;
 
                     formattedStack += ") (at " + fileName.Substring(assetIndex) + ":" + frame.GetFileLineNumber() + ")";
                 }
+
+                formattedStack += "\n--- STACK TRACE END ---\n\n";
             }
 #endif
 
