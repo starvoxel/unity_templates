@@ -47,6 +47,7 @@ using System.Collections.Generic;
         public const string INFO_ELEMENT_KEY = "info";
         public const string STARTING_VIEW_ATTRIBUTE_KEY = "startingView";
         public const string MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY = "modalDepthOffset";
+        public const string MODAL_CANVAS_OFFSET_ATTRIBUTE_KEY = "modalCanvasOffset";
         public const string OVERLAY_PREFAB_PATH_ATTRIBUTE_KEY = "overlayPath";
         #endregion
 
@@ -85,7 +86,7 @@ using System.Collections.Generic;
 
         protected GeneralInformation m_GeneralInformation;
         protected ActionNode[] m_GeneralActions;
-        protected  ViewNode[] m_Views;
+        protected ViewNode[] m_Views;
 	
 		//private
 	
@@ -191,7 +192,7 @@ using System.Collections.Generic;
         /// <returns>Parsed information.</returns>
         protected GeneralInformation ParseInfo(ref string error)
         {
-            GeneralInformation info = new GeneralInformation(FlowManager.DEFAULT_STARTING_VIEW, FlowManager.DEFAULT_MODAL_DEPTH_OFFSET);
+            GeneralInformation info = new GeneralInformation(FlowManager.DEFAULT_STARTING_VIEW, FlowManager.DEFAULT_MODAL_DEPTH_OFFSET, FlowManager.DEFAULT_MODAL_CANVAS_OFFSET);
             XElement infoElement = m_XML.Root.Element(INFO_ELEMENT_KEY);
             if (infoElement != null && infoElement.HasAttributes)
             {
@@ -216,6 +217,12 @@ using System.Collections.Generic;
                 if (curAttribute != null)
                 {
                     info.OverlayPrefabPath = curAttribute.Value;
+                }
+
+                curAttribute = infoElement.Attribute(MODAL_CANVAS_OFFSET_ATTRIBUTE_KEY);
+                if (curAttribute != null)
+                {
+                    info.ModalCanvasOffset = System.Convert.ToInt32(curAttribute.Value);
                 }
             }
             else
