@@ -83,6 +83,7 @@ namespace Starvoxel.FlowManagement
         public const string DEFAULT_STARTING_VIEW = "SPLASH";
         public const int DEFAULT_MODAL_DEPTH_OFFSET = -40;
         public const int DEFAULT_OVERLAY_DEPTH_OFFSET = 10;
+        public const int DEFAULT_MODAL_CANVAS_OFFSET = 40;
         public const string DEFAULT_OVERLAY_PATH = "Prefabs/DefaultOverlay";
 
         public const string COROUTINE_RUNNER_NAME = "FlowManagerCoroutineRunner";
@@ -273,6 +274,7 @@ namespace Starvoxel.FlowManagement
                 {
                     m_Overlay = GameObject.Instantiate<Overlay>(overlayPrefab);
                     GameObject.DontDestroyOnLoad(m_Overlay.gameObject);
+                    m_Overlay.Initialize(null, null);
                     m_Overlay.Hide(true);
                 }
             }
@@ -447,6 +449,7 @@ namespace Starvoxel.FlowManagement
         {
             string newSceneName = m_OpeningViewNode.SceneName;
             yield return SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
+
             m_OpeningView = GetViewForSceneName(newSceneName);
                         
             if (m_OpeningView != null)
@@ -455,6 +458,12 @@ namespace Starvoxel.FlowManagement
                 Vector3 pos = m_OpeningView.transform.position;
                 pos.z = m_CurrentViewStack.Count * m_GeneralInformation.ModalDepthOffset;
                 m_OpeningView.transform.position = pos;
+
+                Canvas[] openingViewCanvases = m_OpeningView.GetComponentsInChildren<Canvas>(true);
+                for (int canvasIndex = 0; canvasIndex < openingViewCanvases.Length; ++canvasIndex)
+                {
+                    openingViewCanvases[canvasIndex].sortingOrder += m_GeneralInformation.ModalCanvasOffset * m_CurrentViewStack.Count;
+                }
 
                 UpdateOverlayState(true);
 
@@ -533,6 +542,11 @@ namespace Starvoxel.FlowManagement
                     Vector3 pos = m_Overlay.transform.position;
                     pos.z = currentView.transform.position.z + DEFAULT_OVERLAY_DEPTH_OFFSET;
                     m_Overlay.transform.position = pos;
+                    
+                    if (m_Overlay.Canvas != null)
+                    {
+                        m_Overlay.Canvas.sortingOrder = (m_CurrentViewStack.Count * m_GeneralInformation.ModalCanvasOffset) - (m_GeneralInformation.ModalCanvasOffset / 2);
+                    }
                 }
                 // Else if the overlay is showing for what ever reason, hide it
                 else if (m_Overlay.State == Overlay.eState.SHOWING || m_Overlay.State == Overlay.eState.ANIMATING_IN)

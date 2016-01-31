@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <flow fileVersion="1.0.0">
     <!-- Flow specific information -->
-    <info modalDepthOffset="-50" startingView="MAIN_MENU" closeAllModals="false" />
+    <info modalDepthOffset="-50" startingView="MAIN_MENU" closeAllModals="false" modalCanvasOffset="50" />
     <!-- General actions shared by all views -->
     <generalActions>
         <action id="OPEN_MODAL" viewID="BASE_MODAL" />

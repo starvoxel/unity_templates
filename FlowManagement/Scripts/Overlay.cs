@@ -51,6 +51,8 @@ using System.Collections;
         protected System.Action m_OnHideComplete = null;
 
         protected eState m_CurrentState = eState.HIDDEN;
+
+        protected Canvas m_Canvas = null;
 	
 		//private
 	
@@ -58,6 +60,11 @@ using System.Collections;
         public eState State
         {
             get { return m_CurrentState; }
+        }
+
+        public Canvas Canvas
+        {
+            get { return m_Canvas; }
         }
 		#endregion
 
@@ -71,6 +78,8 @@ using System.Collections;
         #region Public Methods
         public virtual void Initialize(System.Action onShowComplete, System.Action onHideComplete)
         {
+            m_Canvas = GetComponentInChildren<Canvas>(true);
+
             m_OnShowComplete += onShowComplete;
             m_OnHideComplete += onHideComplete;
 
