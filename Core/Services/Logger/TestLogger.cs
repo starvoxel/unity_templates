@@ -16,6 +16,7 @@
 
 #region Includes
 #region System Includes
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using StackTrace = System.Diagnostics.StackTrace;
@@ -23,7 +24,7 @@ using StackFrame = System.Diagnostics.StackFrame;
 #endregion
 
 #region Other Includes
-
+using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 #endregion
 #endregion
 
@@ -33,23 +34,83 @@ using StackFrame = System.Diagnostics.StackFrame;
 	{
 		#region Fields & Properties
 		//const
+        private const string FILE_PATH = "/Logs/{0}.log";
+        private const int WRITE_INTERVAL = 10;
+
+        //struct
+        private struct sLogInfo
+        {
+            public string[] Categories;
+            public string Message;
+            public string Timestamp;
+            public string StackInfo;
+
+            public override string ToString()
+            {
+                return string.Format("{0} | {1} {2} {3}", Timestamp, Message, StackInfo, FormatCategories());
+            }
+
+            public string FormatCategories()
+            {
+                string categoryInfo = string.Empty;
+
+                if (Categories != null && Categories.Length > 0)
+                {
+                    categoryInfo = "{";
+
+                    for(int i = 0; i < Categories.Length; ++i)
+                    {
+                        if (i > 0)
+                        {
+                            categoryInfo += ", ";
+                        }
+
+                        categoryInfo += Categories[i];
+                    }
+
+                    categoryInfo += "}";
+                }
+
+                return categoryInfo;
+            }
+        }
 	
 		//public
 	
 		//protected
 	
 		//private
-	
+        private int m_FrameCount = 0;
+        private Queue<sLogInfo> m_QueuedLogs = new Queue<sLogInfo>();
+        private List<sLogInfo> m_AllLogs = new List<sLogInfo>();
+        private string m_FilePath = string.Empty;
+
 		//properties
 		#endregion
 	
 		#region Constructor Methods
+        public TestLogger()
+        {
+            //TODO jsmellie: Do somekind of initialization of log info queue that I can use to output to some file.  Maybe spawn a seporate thread or something
+            // so that it doesn't slow the game in any way.
+            m_FilePath = UnityEngine.Application.persistentDataPath + string.Format(FILE_PATH, System.DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss"));
+            UpdateCaller.LateUpdateAction += LateUpdate;
+        }
+
+        ~TestLogger()
+        {
+            UpdateCaller.LateUpdateAction -= LateUpdate;
+        }
 		#endregion
 
         #region Public Methods
         public void TestAllFunctions()
         {
             this.Log("Test normal log. {0}", true);
+            List<string> categories = new List<string>();
+            categories.Add(LoggerConstants.INPUT_CATEGORY);
+            categories.Add(LoggerConstants.TESTING_CATEGORY);
+            this.LogWithCategories(categories, "Test multiple categories. {0}", false);
             this.LogWithCategory(LoggerConstants.CORE_CATEGORY, "Test Core category log. {0}", true);
             this.LogWarning("Test warning log. {0}", true);
             this.LogError("Test error log. {0}", true);
@@ -61,11 +122,35 @@ using StackFrame = System.Diagnostics.StackFrame;
 
         public void LogWithCategory(string category, string msg, params object[] args)
         {
+            LogWithCategories(new List<string>(new string[] { category }), msg, args);
+        }
+
+        public void LogWithCategories(List<string> categories, string msg, params object[] args)
+        {
             StackTrace stack = new StackTrace(1, true);
 
-            string test = CreateInfoLine(stack) + FormatStackTrace(stack);
+            sLogInfo newLogInfo = new sLogInfo();
+            newLogInfo.Message = string.Format(msg, args);
+            newLogInfo.Timestamp = UnityEngine.Time.time.ToString();
+            newLogInfo.StackInfo = CreateInfoLine(stack);
+            newLogInfo.Categories = categories.ToArray();
+            string test = newLogInfo.Message + newLogInfo.StackInfo + newLogInfo.FormatCategories() + FormatStackTrace(stack);
 
-            UnityEngine.Debug.Log(test);
+            m_QueuedLogs.Enqueue(newLogInfo);
+
+            // Do a proper Debug log based off the categories passed
+            if (categories.Contains(LoggerConstants.ERROR_CATEGORY))
+            {
+                UnityEngine.Debug.LogError(test);
+            }
+            else if (categories.Contains(LoggerConstants.WARNING_CATEGORY))
+            {
+                UnityEngine.Debug.LogWarning(test);
+            }
+            else
+            {
+                UnityEngine.Debug.Log(test);
+            }
         }
 
         public void Log(string msg, params object[] args)
@@ -93,6 +178,48 @@ using StackFrame = System.Diagnostics.StackFrame;
 		#endregion
 
         #region Private Methods
+        private void EnqueueLog(sLogInfo log)
+        {
+            m_QueuedLogs.Enqueue(log);
+            m_AllLogs.Add(log);
+        }
+
+        private void LateUpdate()
+        {
+            m_FrameCount++;
+
+            if (m_FrameCount % WRITE_INTERVAL == 0)
+            {
+                WriteLogsToFile();
+            }
+        }
+
+        private void WriteLogsToFile()
+        {
+            if (m_QueuedLogs.Count > 0)
+            {
+                if (!File.Exists(m_FilePath))
+                {
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(m_FilePath));
+                }
+
+                UnityEngine.Debug.Log("Log Path: " + m_FilePath);
+
+                using (FileStream fileStream = new FileStream(m_FilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
+                {
+                    using (StreamWriter streamWriter = new StreamWriter(fileStream))
+                    {
+                        sLogInfo info;
+                        while (m_QueuedLogs.Count > 0)
+                        {
+                            info = m_QueuedLogs.Dequeue();
+                            streamWriter.WriteLine(info.ToString());
+                            streamWriter.WriteLine();
+                        }
+                    }
+                }
+            }
+        }
 
         private string CreateInfoLine(StackTrace stack)
         {
@@ -100,7 +227,7 @@ using StackFrame = System.Diagnostics.StackFrame;
             if (frameIndex >= 0)
             {
                 StackFrame frame = stack.GetFrame(GetIndexForFirstValidFrame(stack));
-                return string.Format("\n[ {0}:{1} @ {2} ] ", frame.GetMethod().DeclaringType.Name, frame.GetMethod().Name, frame.GetFileLineNumber());
+                return string.Format("\n[{0}:{1} @ {2}] ", frame.GetMethod().DeclaringType.Name, frame.GetMethod().Name, frame.GetFileLineNumber());
             }
             else
             {
@@ -111,7 +238,7 @@ using StackFrame = System.Diagnostics.StackFrame;
         private string FormatStackTrace(StackTrace stack)
         {
             string formattedStack = "\n\n--- STACK TRACE ---";
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
             int startingIndex = GetIndexForFirstValidFrame(stack);
 
             if (startingIndex >= 0)
@@ -147,6 +274,8 @@ using StackFrame = System.Diagnostics.StackFrame;
 
                     formattedStack += ") (at " + fileName.Substring(assetIndex) + ":" + frame.GetFileLineNumber() + ")";
                 }
+
+                formattedStack += "\n--- STACK TRACE END ---\n\n";
             }
 #endif
 
@@ -175,5 +304,4 @@ using StackFrame = System.Diagnostics.StackFrame;
         }
 		#endregion
     }
-	
 }

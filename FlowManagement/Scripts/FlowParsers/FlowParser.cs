@@ -46,10 +46,13 @@ using System.Collections.Generic;
         #region General Info
         public const string INFO_ELEMENT_KEY = "info";
         public const string STARTING_VIEW_ATTRIBUTE_KEY = "startingView";
-        public const string GENERAL_ACTION_ELEMENT_LEY = "generalActions";
+        public const string MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY = "modalDepthOffset";
+        public const string MODAL_CANVAS_OFFSET_ATTRIBUTE_KEY = "modalCanvasOffset";
+        public const string OVERLAY_PREFAB_PATH_ATTRIBUTE_KEY = "overlayPath";
         #endregion
 
         #region Actions
+        public const string GENERAL_ACTION_ELEMENT_LEY = "generalActions";
         public const string ACTION_ELEMENT_KEY = "action";
         public const string ACTION_ID_ATTRIBUTE_KEY = "id";
         public const string ACTION_VIEW_ID_ATTRIBUTE_KEY = "viewID";
@@ -62,6 +65,7 @@ using System.Collections.Generic;
         public const string VIEW_ELEMENT_KEY = "view";
         public const string VIEW_ID_ATTRIBUTE_KEY = "id";
         public const string VIEW_IS_MODAL_ATTRIBUTE_KEY = "isModal";
+        public const string VIEW_SHOW_OVERLAY_ATTRIBUTE_KEY = "showOverlay";
         public const string VIEW_SCENE_ATTRIBUTE_KEY = "scene";
         public const string VIEW_PARAM_ELEMENT_KEY = "parameter";
         public const string VIEW_PARAM_KEY_ATTRIBUTE_KEY = "key";
@@ -70,6 +74,8 @@ using System.Collections.Generic;
 
         #region Other
         public static readonly Version INVALID_VERSION = new Version("0.0.0");
+
+        public const string CLOSE_CURRENT_VIEW = "CLOSE_CURRENT_VIEW";
         #endregion
 
         //public
@@ -80,7 +86,7 @@ using System.Collections.Generic;
 
         protected GeneralInformation m_GeneralInformation;
         protected ActionNode[] m_GeneralActions;
-        protected  ViewNode[] m_Views;
+        protected ViewNode[] m_Views;
 	
 		//private
 	
@@ -186,18 +192,37 @@ using System.Collections.Generic;
         /// <returns>Parsed information.</returns>
         protected GeneralInformation ParseInfo(ref string error)
         {
-            GeneralInformation info = new GeneralInformation(FlowManager.DEFAULT_STARTING_VIEW);
+            GeneralInformation info = new GeneralInformation(FlowManager.DEFAULT_STARTING_VIEW, FlowManager.DEFAULT_MODAL_DEPTH_OFFSET, FlowManager.DEFAULT_MODAL_CANVAS_OFFSET);
             XElement infoElement = m_XML.Root.Element(INFO_ELEMENT_KEY);
             if (infoElement != null && infoElement.HasAttributes)
             {
-                if (infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY) != null)
+                XAttribute curAttribute = infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY);
+                if (curAttribute != null)
                 {
-                    info.StartingView = infoElement.Attribute(STARTING_VIEW_ATTRIBUTE_KEY).Value;
+                    info.StartingView = curAttribute.Value;
                 }
                 else
                 {
-                    error = INFO_ELEMENT_KEY + " does not contain the attribute " + STARTING_VIEW_ATTRIBUTE_KEY + ".  Invalid element.";
+                    error = string.Format("{0} does not contain the attribute {1}.  Invalid XML element.", INFO_ELEMENT_KEY, STARTING_VIEW_ATTRIBUTE_KEY);
                     return info;
+                }
+
+                curAttribute = infoElement.Attribute(MODAL_DEPTH_OFFSET_ATTRIBUTE_KEY);
+                if (curAttribute != null)
+                {
+                    info.ModalDepthOffset = System.Convert.ToInt32(curAttribute.Value);
+                }
+
+                curAttribute = infoElement.Attribute(OVERLAY_PREFAB_PATH_ATTRIBUTE_KEY);
+                if (curAttribute != null)
+                {
+                    info.OverlayPrefabPath = curAttribute.Value;
+                }
+
+                curAttribute = infoElement.Attribute(MODAL_CANVAS_OFFSET_ATTRIBUTE_KEY);
+                if (curAttribute != null)
+                {
+                    info.ModalCanvasOffset = System.Convert.ToInt32(curAttribute.Value);
                 }
             }
             else
@@ -281,7 +306,10 @@ using System.Collections.Generic;
             if (actionElement != null && actionElement.HasAttributes)
             {
                 action.ID = actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY).Value;
-                action.ViewID = actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY).Value;
+                if (actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY) != null)
+                {
+                    action.ViewID = actionElement.Attribute(ACTION_VIEW_ID_ATTRIBUTE_KEY).Value;
+                }
                 action.Parameters = ParseParameters(actionElement, ref error);                
             }
             else
@@ -377,10 +405,11 @@ using System.Collections.Generic;
                 XAttribute idAttribute = viewElement.Attribute(VIEW_ID_ATTRIBUTE_KEY);
                 XAttribute sceneNameAttribute = viewElement.Attribute(VIEW_SCENE_ATTRIBUTE_KEY);
                 XAttribute isModalAttribute = viewElement.Attribute(VIEW_IS_MODAL_ATTRIBUTE_KEY);
+                XAttribute showOverlayAttribute = viewElement.Attribute(VIEW_SHOW_OVERLAY_ATTRIBUTE_KEY);
 
                 List<ActionNode> actions = new List<ActionNode>();
 
-                IEnumerable<XElement> actionElements = viewElement.Elements(ACTION_PARAM_ELEMENT_KEY);
+                IEnumerable<XElement> actionElements = viewElement.Elements(ACTION_ELEMENT_KEY);
 
                 // Parse out the actions if there are any
                 if (actionElements != null)
@@ -418,6 +447,15 @@ using System.Collections.Generic;
                     else
                     {
                         viewNode.IsModal = false;
+                    }
+
+                    if (showOverlayAttribute != null)
+                    {
+                        viewNode.ShowOverlay = System.Convert.ToBoolean(showOverlayAttribute.Value);
+                    }
+                    else
+                    {
+                        viewNode.ShowOverlay = false;
                     }
 
                     viewNode.Actions = actions.ToArray();

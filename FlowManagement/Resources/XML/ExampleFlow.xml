@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <flow fileVersion="1.0.0">
     <!-- Flow specific information -->
-    <info modalDepthOffset="-50" startingView="SPLASH" closeAllModals="false" />
+    <info modalDepthOffset="-50" startingView="MAIN_MENU" closeAllModals="false" modalCanvasOffset="50" />
     <!-- General actions shared by all views -->
     <generalActions>
+        <action id="OPEN_MODAL" viewID="BASE_MODAL" />
         <action id="PAUSE" viewID="PAUSE">
             <parameter key="TEST" dataType="int" value="10" />
         </action>
@@ -13,7 +14,7 @@
         <action id="COMPLETE" viewID="MAIN_MENU" />
     </view>
     <!-- @BASE@ Base classes used throughout the flow -->
-    <view id="BASE_MODAL" isModal="true" showOverlay="true">
+    <view id="BASE_MODAL" isModal="true" showOverlay="true" scene="Modal">
         <action id="CLOSE" />
     </view>
     <view id="BASE_GAME_VIEW">
@@ -21,8 +22,9 @@
     </view>
     <!-- @MENUS@ Various menus used -->
     <view id="MAIN_MENU" scene="MainMenu">
-        <action id="GO_TO_SETTINGS" viewID="SETTINGS" />
-        <action id="PLAY" viewID="GAME_SCNE" />
+      <action id="GO_TO_SETTINGS" viewID="SETTINGS" />
+      <action id="PLAY" viewID="GAME_SCENE" />
+      <action id="GO_TO_SPLASH" viewID="SPLASH" />
     </view>
     <!-- @GAME SCENES@ All scenes related to game play -->
     <view id="GAME_SCENE" scene="GameScene" base="BASE_GAME_VIEW" state="XML/States/GameViews/GameScene" />

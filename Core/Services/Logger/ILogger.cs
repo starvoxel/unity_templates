@@ -26,14 +26,6 @@ using System.Collections;
 
  namespace Starvoxel.Core
 {
-    public struct sLogInfo
-    {
-        string Message;
-        string Category;
-        string Date;
-        string Timestamp;
-    }
-
 	public interface ILogger
 	{
 		#region Fields & Properties

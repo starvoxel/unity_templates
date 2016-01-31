@@ -38,6 +38,9 @@ using System.Collections;
 
         //private
         public string StartingView;
+        public int ModalDepthOffset;
+        public int ModalCanvasOffset;
+        public string OverlayPrefabPath;
 
         //properties
         /// <summary>
@@ -50,9 +53,12 @@ using System.Collections;
 		#endregion
 	
 		#region Constructor Methods
-        public GeneralInformation(string startingView)
+        public GeneralInformation(string startingView, int modalDepthOffset, int modalCanvasOffset)
         {
             StartingView = startingView;
+            ModalDepthOffset = modalDepthOffset;
+            ModalCanvasOffset = modalCanvasOffset;
+            OverlayPrefabPath = string.Empty;
         }
 		#endregion
 	
