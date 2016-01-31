@@ -41,7 +41,7 @@ using System.Collections.Generic;
 		//protected
 	
 		//private
-        static GameObject m_RunnerParent = null;
+        static GameObject m_RunnerParent = null
 	
 		//properties
 		#endregion
