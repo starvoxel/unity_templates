@@ -40,8 +40,8 @@ using System.Collections;
 		//protected
 	
 		//private
-        [SerializeField] private string m_TestXMLPath; // Used for testing to load a XML on Start
-        [SerializeField] private string m_ActionID; // Action ID of the action you want to run
+        [SerializeField] private string m_TestXMLPath = string.Empty; // Used for testing to load a XML on Start
+        [SerializeField] private string m_ActionID = string.Empty; // Action ID of the action you want to run
 	
 		//properties
 		#endregion
