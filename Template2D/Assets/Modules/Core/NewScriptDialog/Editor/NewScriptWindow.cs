@@ -14,7 +14,7 @@ public class NewScriptWindow : EditorWindow
     //classes
     class Styles
     {
-        public GUIContent m_WarningContent = new GUIContent(string.Empty, EditorGUIUtility.LoadRequired("Builtin Skins/Icons/console.warnicon.sml.png") as Texture2D);
+        public GUIContent m_WarningContent = new GUIContent(string.Empty);
         public GUIStyle m_PreviewBox = new GUIStyle("OL Box");
         public GUIStyle m_PreviewTitle = new GUIStyle("OL Title");
         public GUIStyle m_LoweredBox = new GUIStyle("TextField");
