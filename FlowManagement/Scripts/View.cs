@@ -33,6 +33,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 #endregion
+
+#region Other Includes
+using Starvoxel.Core;
+#endregion
 #endregion
 
 namespace Starvoxel.FlowManagement
@@ -81,6 +85,11 @@ namespace Starvoxel.FlowManagement
         protected virtual void Awake()
         {
             m_State = eViewState.CLOSED;
+
+            if (!ApplicationInitializer.IsInitialized)
+            {
+                ApplicationInitializer.Initialize();
+            }
         }
 		#endregion
 

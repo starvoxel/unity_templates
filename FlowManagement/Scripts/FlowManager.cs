@@ -14,6 +14,9 @@
  *
  * -------------------------- */
 
+#region Defines
+#define FLOW_MANAGEMENT
+#endregion
 #region Includes
 #region Unity Includes
 using UnityEngine;
@@ -142,6 +145,11 @@ namespace Starvoxel.FlowManagement
                 return m_Instance;  
             }
         }
+
+        public static bool IsInstanceNull
+        {
+            get { return m_Instance == null; }
+        }
 		#endregion
 	
 		#region Public Methods
@@ -186,24 +194,35 @@ namespace Starvoxel.FlowManagement
                         Debug.LogErrorFormat("Default overlay not found.  Please ensure a prefab with a Overlay script exists at {0}.", DEFAULT_OVERLAY_PATH);
                     }
 
-                    ViewNode startingView = new ViewNode();
-
-                    // Grab the starting view from the list of views.  If it's not found, through a error
-                    for (int viewIndex = 0; viewIndex < m_Views.Length; ++viewIndex)
+                    View loadedView = GameObject.FindObjectOfType<View>();
+                    if (loadedView != null)
                     {
-                        if (m_Views[viewIndex].ID == m_GeneralInformation.StartingView)
-                        {
-                            startingView = m_Views[viewIndex];
-                        }
-                    }
+                        m_OpeningView = loadedView;
+                        m_OpeningViewNode = GetViewNodeForView(m_OpeningView);
 
-                    if (startingView.IsInitialzed)
-                    {
-                        LoadView(startingView);
+                        m_CoroutineRunner.CreateCoroutine(InitializeOpenView());
                     }
                     else
                     {
-                        Debug.LogErrorFormat("Starting view ({0}) not found in view list.  Starting view must be a valid view.", m_GeneralInformation.StartingView);
+                        ViewNode startingView = new ViewNode();
+
+                        // Grab the starting view from the list of views.  If it's not found, through a error
+                        for (int viewIndex = 0; viewIndex < m_Views.Length; ++viewIndex)
+                        {
+                            if (m_Views[viewIndex].ID == m_GeneralInformation.StartingView)
+                            {
+                                startingView = m_Views[viewIndex];
+                            }
+                        }
+
+                        if (startingView.IsInitialzed)
+                        {
+                            LoadView(startingView);
+                        }
+                        else
+                        {
+                            Debug.LogErrorFormat("Starting view ({0}) not found in view list.  Starting view must be a valid view.", m_GeneralInformation.StartingView);
+                        }
                     }
 
                     PartialOnPostLaunch();
@@ -260,6 +279,14 @@ namespace Starvoxel.FlowManagement
 		#endregion
 
 		#region Private Methods
+        private IEnumerator InitializeOpenView()
+        {
+            PartialOnPreLoadNewScene();
+            yield return m_CoroutineRunner.CreateCoroutine(LoadingView());
+            PartialOnPreOpenView();
+            yield return m_CoroutineRunner.CreateCoroutine(OpenView());
+        }
+
         /// <summary>
         /// Attemps to load the overlay prefab at the provided path
         /// </summary>
@@ -454,26 +481,31 @@ namespace Starvoxel.FlowManagement
                         
             if (m_OpeningView != null)
             {
-                // Position the view based off how many views are open
-                Vector3 pos = m_OpeningView.transform.position;
-                pos.z = m_CurrentViewStack.Count * m_GeneralInformation.ModalDepthOffset;
-                m_OpeningView.transform.position = pos;
-
-                Canvas[] openingViewCanvases = m_OpeningView.GetComponentsInChildren<Canvas>(true);
-                for (int canvasIndex = 0; canvasIndex < openingViewCanvases.Length; ++canvasIndex)
-                {
-                    openingViewCanvases[canvasIndex].sortingOrder += m_GeneralInformation.ModalCanvasOffset * m_CurrentViewStack.Count;
-                }
-
-                UpdateOverlayState(true);
-
-                //Start loading the view
-                yield return m_CoroutineRunner.CreateCoroutine(m_OpeningView.ViewLoaded(m_CurrentParameters));
+                yield return m_CoroutineRunner.CreateCoroutine(LoadingView());
             }
             else
             {
                 Debug.LogErrorFormat("A view with the name {0} was not found.  Make sure that the view has the same name as the scene!", newSceneName);
             }
+        }
+
+        private IEnumerator LoadingView()
+        {
+            // Position the view based off how many views are open
+            Vector3 pos = m_OpeningView.transform.position;
+            pos.z = m_CurrentViewStack.Count * m_GeneralInformation.ModalDepthOffset;
+            m_OpeningView.transform.position = pos;
+
+            Canvas[] openingViewCanvases = m_OpeningView.GetComponentsInChildren<Canvas>(true);
+            for (int canvasIndex = 0; canvasIndex < openingViewCanvases.Length; ++canvasIndex)
+            {
+                openingViewCanvases[canvasIndex].sortingOrder += m_GeneralInformation.ModalCanvasOffset * m_CurrentViewStack.Count;
+            }
+
+            UpdateOverlayState(true);
+
+            //Start loading the view
+            yield return m_CoroutineRunner.CreateCoroutine(m_OpeningView.ViewLoaded(m_CurrentParameters));
         }
 
         /// <summary>
