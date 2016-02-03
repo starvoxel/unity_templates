@@ -1,14 +1,14 @@
 /* --------------------------
  *
- * TestLogger.cs
+ * TextFileLogger.cs
  *
- * Description: Logger used for the creating of the logger system.  Will be deleted once no longer needed.
+ * Description: Logger used to output logs to simple text file.  Also has a bool to allow simple Debug.Log output aswell
  *
  * Author: Jeremy Smellie
  *
  * Editors:
  *
- * 12/5/2015 - Starvoxel
+ * 2/2/2015 - Starvoxel
  *
  * All rights reserved.
  *
@@ -31,7 +31,7 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 
  namespace Starvoxel.Core
 {
-	public class TestLogger : ILogger
+	public class TextFileLogger : ILogger
 	{
 		#region Fields & Properties
 		//const
@@ -77,6 +77,7 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
         }
 	
 		//public
+        public bool IsLoggingToConsole = false;
 	
 		//protected
 	
@@ -91,40 +92,35 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 		#endregion
 	
 		#region Constructor Methods
-        public TestLogger()
+        public TextFileLogger() : this(false) { }
+
+        public TextFileLogger(bool isLoggingToConsole)
         {
-            //TODO jsmellie: Do somekind of initialization of log info queue that I can use to output to some file.  Maybe spawn a seporate thread or something
-            // so that it doesn't slow the game in any way.
+            //Conatenate the file path.  Always puts it in the persistentDataPath so sometimes it has weird paths but they won't be flushed.
             m_FilePath = UnityEngine.Application.persistentDataPath + string.Format(FILE_PATH, System.DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss"));
+
+            IsLoggingToConsole = isLoggingToConsole;
+
+            // Start up a thread to output the logs to a file so that if we have a ot of logs we don't clog up the main thread at all
             ThreadStart newThreadStart = new ThreadStart(WriteLogsToFile);
             m_OutputThread = new Thread(newThreadStart);
             m_OutputThread.Start();
-            int counter = 0;
-            while (!m_OutputThread.IsAlive && counter < 10000)
-            {
-                counter++;
-            }
-            Starvoxel.Utilities.CoroutineRunner.FetchCoroutineRunner().CreateCoroutine(this.LogEveryFrame());
-            //UpdateCaller.LateUpdateAction += LateUpdate;
-        }
-
-        ~TestLogger()
-        {
-            //UpdateCaller.LateUpdateAction -= LateUpdate;
+            while (!m_OutputThread.IsAlive) ;
         }
 		#endregion
 
         #region Public Methods
+        int m_TestCounter = 0;
         public void TestAllFunctions()
         {
-            this.Log("Test normal log. {0}", true);
+            this.Log("Test normal log. {0}", m_TestCounter++);
             List<string> categories = new List<string>();
             categories.Add(LoggerConstants.INPUT_CATEGORY);
             categories.Add(LoggerConstants.TESTING_CATEGORY);
-            this.LogWithCategories(categories, "Test multiple categories. {0}", false);
-            this.LogWithCategory(LoggerConstants.CORE_CATEGORY, "Test Core category log. {0}", true);
-            this.LogWarning("Test warning log. {0}", true);
-            this.LogError("Test error log. {0}", true);
+            this.LogWithCategories(categories, "Test multiple categories. {0}", m_TestCounter++);
+            this.LogWithCategory(LoggerConstants.CORE_CATEGORY, "Test Core category log. {0}", m_TestCounter++);
+            this.LogWarning("Test warning log. {0}", m_TestCounter++);
+            this.LogError("Test error log. {0}", m_TestCounter++);
 
             this.LogVariable("TEST_ID", 2);
             this.LogVariable("TEST_ID", 3);
@@ -149,18 +145,21 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 
             EnqueueLog(newLogInfo);
 
-            // Do a proper Debug log based off the categories passed
-            if (categories.Contains(LoggerConstants.ERROR_CATEGORY))
+            if (IsLoggingToConsole)
             {
-                UnityEngine.Debug.LogError(test);
-            }
-            else if (categories.Contains(LoggerConstants.WARNING_CATEGORY))
-            {
-                UnityEngine.Debug.LogWarning(test);
-            }
-            else
-            {
-                UnityEngine.Debug.Log(test);
+                // Do a proper Debug log based off the categories passed
+                if (categories.Contains(LoggerConstants.ERROR_CATEGORY))
+                {
+                    UnityEngine.Debug.LogError(test);
+                }
+                else if (categories.Contains(LoggerConstants.WARNING_CATEGORY))
+                {
+                    UnityEngine.Debug.LogWarning(test);
+                }
+                else
+                {
+                    UnityEngine.Debug.Log(test);
+                }
             }
         }
 
@@ -189,15 +188,6 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 		#endregion
 
         #region Private Methods
-        private IEnumerator LogEveryFrame()
-        {
-            for (int i = 0; i < 1000000; i++ )
-            {
-                TestAllFunctions();
-                yield return null;
-            }
-            }
-
         private void EnqueueLog(sLogInfo log)
         {
             m_AllLogs.Add(log);
@@ -205,27 +195,29 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 
         private void WriteLogsToFile()
         {
+            sLogInfo[] allLogs = null;
+
             while (true)
             {
+                allLogs = m_AllLogs.ToArray();
+
                 lock (this)
                 {
-                    if (m_AllLogs.Count > m_LogOutputIndex)
+                    if (allLogs.Length > m_LogOutputIndex)
                     {
                         if (!File.Exists(m_FilePath))
                         {
                             System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(m_FilePath));
                         }
 
-                        UnityEngine.Debug.Log("Log Path: " + m_FilePath);
-
                         using (FileStream fileStream = new FileStream(m_FilePath, FileMode.Append, FileAccess.Write, FileShare.Read))
                         {
                             using (StreamWriter streamWriter = new StreamWriter(fileStream))
                             {
                                 sLogInfo info;
-                                while (m_AllLogs.Count > m_LogOutputIndex)
+                                while (allLogs.Length > m_LogOutputIndex)
                                 {
-                                    info = m_AllLogs[m_LogOutputIndex];
+                                    info = allLogs[m_LogOutputIndex];
                                     streamWriter.WriteLine(info.ToString());
                                     streamWriter.WriteLine();
                                     m_LogOutputIndex++;
@@ -234,7 +226,6 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
                         }
                     }
                 }
-
                 Thread.Sleep(10000);
             }
         }
