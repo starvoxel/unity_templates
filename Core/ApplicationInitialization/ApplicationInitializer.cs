@@ -60,6 +60,7 @@ using Starvoxel.FlowManagement;
             FlowManager.Instance.LaunchWithFile(flowFilePath);
 #endif
             //TODO jsmellie:  Everything that needs to be init at the begining of the application should go here.
+            Services.InitializeLogger(new TextFileLogger(true));
 
             m_IsInitialized = true;
         }
