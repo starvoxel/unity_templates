@@ -115,7 +115,9 @@ namespace Starvoxel.FlowManagement
         private Queue<ActionQueueElement> m_ActionQueue = new Queue<ActionQueueElement>(); // Queue of all actions that are going to be processed
 
         private CoroutineRunner m_CoroutineRunner = null; // Script that we run the coroutines on seeing as FlowManager isn't  monobehaviour
+#pragma warning disable 0414 // Disabling the "not used anywhere" warning because this will be used later to canel the coroutine if something goes wrong
         private Coroutine m_LoadingRoutine = null; // Ref to the coroutine for the loading sequence.  Will be used to cancel the routine if we need to
+#pragma warning restore
 
         private Overlay m_Overlay; // OVerlay that goes behind modals
 
