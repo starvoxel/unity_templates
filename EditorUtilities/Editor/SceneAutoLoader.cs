@@ -122,15 +122,6 @@ namespace EditorUtilities
         }
         #endregion
 
-        #region Unity Methods
-        #endregion
-
-        #region Public Methods
-        #endregion
-
-        #region Protected Methods
-        #endregion
-
         #region Private Methods
 
         #region Constructors
@@ -190,7 +181,7 @@ namespace EditorUtilities
 
         #region Context Menu Methods
         //Basic function that opens a file panel to allow the user to pick a master scene
-        [MenuItem("Editor/Scene Autoload/Select Master Scene...", false, 50)]
+        [MenuItem("Tools/Scene Autoload/Select Master Scene...", false, 50)]
         private static void SelectMasterScene()
         {
             string masterScene = EditorUtility.OpenFilePanel("Select Master Scene", Application.dataPath, "unity");
@@ -208,23 +199,23 @@ namespace EditorUtilities
             }
         }
 
-        [MenuItem("Editor/Scene Autoload/Load Master On Play", true, 100)]
+        [MenuItem("Tools/Scene Autoload/Load Master On Play", true, 100)]
         private static bool ShowLoadMasterOnPlay()
         {
             return !LoadMasterOnPlay;
         }
-        [MenuItem("Editor/Scene Autoload/Load Master On Play", false, 100)]
+        [MenuItem("Tools/Scene Autoload/Load Master On Play", false, 100)]
         private static void EnableLoadMasterOnPlay()
         {
             LoadMasterOnPlay = true;
         }
 
-        [MenuItem("Editor/Scene Autoload/Don't Load Master On Play", true, 101)]
+        [MenuItem("Tools/Scene Autoload/Don't Load Master On Play", true, 101)]
         private static bool ShowDontLoadMasterOnPlay()
         {
             return LoadMasterOnPlay;
         }
-        [MenuItem("Editor/Scene Autoload/Don't Load Master On Play", false, 101)]
+        [MenuItem("Tools/Scene Autoload/Don't Load Master On Play", false, 101)]
         private static void DisableLoadMasterOnPlay()
         {
             LoadMasterOnPlay = false;
