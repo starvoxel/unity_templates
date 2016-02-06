@@ -34,14 +34,14 @@ using Starvoxel.FlowManagement;
 	{
 		#region Fields & Properties
 		//const
-        private const string DEFAULT_FLOW_PATH = "XML/Flow";
         private const string INNITIALIZATION_SCENE_NAME = "ApplicationInitializer";
 	
 		//public
 	
 		//protected
-	
-		//private
+
+        //private
+        [SerializeField] private string m_FlowPath = "XML/Flow";
         private static bool m_IsInitialized = false;
 	
 		//properties
@@ -54,13 +54,13 @@ using Starvoxel.FlowManagement;
 		#region Unity Methods
         private void Awake()
         {
+            Services.InitializeLogger(new TextFileLogger(true));
+
 #if !FLOW_MANAGEMENT
-            string flowFilePath = DEFAULT_FLOW_PATH;
+            string flowFilePath = m_FlowPath;
             FetchFlowXMLPath(ref flowFilePath);
             FlowManager.Instance.LaunchWithFile(flowFilePath);
 #endif
-            //TODO jsmellie:  Everything that needs to be init at the begining of the application should go here.
-            Services.InitializeLogger(new TextFileLogger(true));
 
             m_IsInitialized = true;
         }

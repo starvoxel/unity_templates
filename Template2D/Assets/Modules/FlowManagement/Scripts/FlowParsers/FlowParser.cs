@@ -117,7 +117,6 @@ using Starvoxel.Core;
 
                 m_XML = doc;
                 Version fileVersion = ParseVersion();
-                Log("File Version: {0}", fileVersion);
 
                 if (fileVersion == INVALID_VERSION)
                 {
@@ -252,7 +251,6 @@ using Starvoxel.Core;
                 {
                     foreach (XElement actionElement in actionElements)
                     {
-                        Log(actionElement.Attribute(ACTION_ID_ATTRIBUTE_KEY).ToString());
                         ActionNode action = ParseAction(actionElement, ref error);
 
                         if (action.IsInitialized)
@@ -373,6 +371,7 @@ using Starvoxel.Core;
                                     //While converting, something went wrong
                                     catch (Exception err)
                                     {
+                                        Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Error, err.GetType().ToString() + " : " + err.Message);
                                         parameters.Add(key, value);
                                     }
                                 }
@@ -392,10 +391,10 @@ using Starvoxel.Core;
 
         /// <summary>
         /// Parses the views information from the specified element
-        /// </summary>
+        /// </summaryprotected
         /// <param name="viewElement"></param>
         /// <returns></returns>
-        protected ViewNode ParseView(XElement viewElement, ref string error)
+        ViewNode ParseView(XElement viewElement, ref string error)
         {
             ViewNode viewNode = new ViewNode();
 

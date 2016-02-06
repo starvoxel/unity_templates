@@ -1,14 +1,14 @@
 /* --------------------------
  *
- * ActionTrigger.cs
+ * StateContext.cs
  *
- * Description: Fires an action that is specified in m_ActionID
+ * Description: Base context used to track the current state and to switch states.
  *
  * Author: Jeremy Smellie
  *
  * Editors:
  *
- * 1/31/2016 - DefaultCompany
+ * 2/6/2016 - Starvoxel
  *
  * All rights reserved.
  *
@@ -24,13 +24,13 @@ using System.Collections;
 #endregion
 
 #region Other Includes
-using Starvoxel.Core;
+
 #endregion
 #endregion
 
- namespace Starvoxel.FlowManagement
+ namespace Starvoxel.Core
 {
-	public class ActionTrigger : CustomMono
+	public class StateContext : CustomMono
 	{
 		#region Fields & Properties
 		//const
@@ -38,19 +38,16 @@ using Starvoxel.Core;
 		//public
 	
 		//protected
-        [SerializeField] protected string m_ActionID;
 	
 		//private
 	
 		//properties
 		#endregion
 	
+		#region Unity Methods
+		#endregion
+	
 		#region Public Methods
-        [ContextMenu("Fire Flow Event")]
-        public virtual void FireFlowEvent()
-        {
-            EventMessenger.Instance.Raise<FlowEvent>(new FlowEvent(m_ActionID));
-        }
 		#endregion
 	
 		#region Protected Methods

@@ -41,7 +41,6 @@ using Starvoxel.Core;
 	
 		//private
         [SerializeField] private string m_TestXMLPath = string.Empty; // Used for testing to load a XML on Start
-        [SerializeField] private string m_ActionID = string.Empty; // Action ID of the action you want to run
 	
 		//properties
 		#endregion
@@ -55,22 +54,8 @@ using Starvoxel.Core;
             }
         }
 		#endregion
-	
-		#region Public Methods
-		#endregion
-	
-		#region Protected Methods
-		#endregion
-	
-		#region Private Methods
-        #endregion
 
         #region Context Methods
-        [ContextMenu("Run Action")] private void ContextRunAction()
-        {
-            Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Log, "Running Action: " + m_ActionID);
-            FlowManager.Instance.TriggerAction(m_ActionID);
-        }
         #endregion
 	}
 	

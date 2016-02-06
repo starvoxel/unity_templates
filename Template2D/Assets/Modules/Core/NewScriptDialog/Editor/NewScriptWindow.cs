@@ -107,7 +107,6 @@ public class NewScriptWindow : EditorWindow
     private Vector2 m_PreviewScroll;
     private Vector2 m_OptionsScroll;
     private bool m_ClearKeyboardControl = false;
-    private bool m_IsShowingNamespaceFoldout = false;
     private bool m_IsUsingHeader = true;
 
     private bool m_UsingDescription = false;

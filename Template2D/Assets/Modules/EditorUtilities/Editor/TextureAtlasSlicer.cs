@@ -44,7 +44,7 @@ namespace Starvoxel.EditorUtilities
 
         public TextureAtlasSlicer()
         {
-            title = "Texture Atlas Slicer";
+            titleContent = new GUIContent("Texture Atlas Slicer");
         }
 
 
