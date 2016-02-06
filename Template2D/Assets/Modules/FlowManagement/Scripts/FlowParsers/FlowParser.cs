@@ -28,7 +28,7 @@ using System.Collections.Generic;
 #endregion
 
 #region Other Includes
-
+using Starvoxel.Core;
 #endregion
 #endregion
 
@@ -121,16 +121,16 @@ using System.Collections.Generic;
 
                 if (fileVersion == INVALID_VERSION)
                 {
-                    Debug.LogErrorFormat("FLow XML at path {0}'s version is invalid.  Either you haven't specified it or something is wrong!", xmlPath);
+                    Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Error, "FLow XML at path {0}'s version is invalid.  Either you haven't specified it or something is wrong!", xmlPath);
                     return;
                 }
                 else if (fileVersion < currentVersion)
                 {
-                    Debug.LogWarningFormat("Flow XML at path {0}'s version is smaller then the currently supported version.  Right now there's no different parsing for older versions but eventually we'll put backwards compatibility.", xmlPath);
+                    Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Warning, "Flow XML at path {0}'s version is smaller then the currently supported version.  Right now there's no different parsing for older versions but eventually we'll put backwards compatibility.", xmlPath);
                 }
                 else if (fileVersion > currentVersion)
                 {
-                    Debug.LogErrorFormat("FLow XML at path {0}'s version is bigger then the currently supported version.  Either this game is out of date for this file or something is really wrong.", xmlPath);
+                    Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Error, "FLow XML at path {0}'s version is bigger then the currently supported version.  Either this game is out of date for this file or something is really wrong.", xmlPath);
                     return;
                 }
 
@@ -154,7 +154,7 @@ using System.Collections.Generic;
             }
             else
             {
-                Debug.LogErrorFormat("No XML file found at {0}.", xmlPath);
+                Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Error, "No XML file found at {0}.", xmlPath);
             }
 		}
 		#endregion
@@ -481,10 +481,7 @@ using System.Collections.Generic;
         #region Private Methods
         private void Log(string msg, params object[] args)
         {
-            if (IsLogging)
-            {
-                Debug.LogFormat(msg, args);
-            }
+            Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Log, msg, args);
         }
 		#endregion
 	}

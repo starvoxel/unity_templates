@@ -28,7 +28,7 @@ using System.Collections;
 #endregion
 #endregion
 
- namespace Starvoxel
+namespace Starvoxel.EditorUtilities
 {
     public abstract class ObjectInspector
 	{

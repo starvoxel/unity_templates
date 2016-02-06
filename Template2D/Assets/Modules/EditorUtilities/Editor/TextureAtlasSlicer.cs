@@ -4,8 +4,9 @@ using System.Linq;
 using System.Xml;
 using UnityEditor;
 using UnityEngine;
+using Starvoxel.Core;
 
-namespace EditorUtilities
+namespace Starvoxel.EditorUtilities
 {
     public class TextureAtlasSlicer : EditorWindow
     {
@@ -286,7 +287,7 @@ namespace EditorUtilities
                 }
                 catch (Exception exception)
                 {
-                    Debug.LogException(exception);
+                    Services.Logger.LogWithCategory(LoggerConstants.EDITOR_UTILITY_CATEGORY, LogType.Exception, exception.GetType().Name + ": " + exception.Message);
                     EditorUtility.DisplayDialog("Error", "There was an exception while trying to reimport the image." +
                                                          "\nPlease check the console log for details.", "OK");
                 }

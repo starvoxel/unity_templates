@@ -24,7 +24,7 @@ using System.Collections;
 #endregion
 
 #region Other Includes
-
+using Starvoxel.Core;
 #endregion
 #endregion
 
@@ -68,7 +68,7 @@ using System.Collections;
         #region Context Methods
         [ContextMenu("Run Action")] private void ContextRunAction()
         {
-            Debug.Log("Running Action: " + m_ActionID);
+            Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Log, "Running Action: " + m_ActionID);
             FlowManager.Instance.TriggerAction(m_ActionID);
         }
         #endregion

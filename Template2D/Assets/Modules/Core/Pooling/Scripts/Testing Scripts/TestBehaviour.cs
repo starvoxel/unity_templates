@@ -24,7 +24,7 @@ using System.Collections;
 #endregion
 #endregion
 
-namespace Utility
+namespace Starvoxel.Core
 {
     public class TestBehaviour : MonoBehaviour
     {
@@ -44,35 +44,37 @@ namespace Utility
         [ContextMenu("Test")]
         void Awake()
         {
+            Logger logger = Services.Logger;
+
             //This is just some test stuff
             Pool<TestObject> testPool = new Pool<TestObject>(new TestObject("Original"));
 
             TestObject firstInstance = testPool.NextInstance();
             firstInstance.Name = "1st Clone";
 
-            Debug.Log(testPool.ToString());
+            logger.Log(testPool.ToString());
 
             TestObject secondInstance = testPool.NextInstance();
             secondInstance.Name = "2nd Clone";
 
-            Debug.Log(testPool.ToString());
+            logger.Log(testPool.ToString());
 
             TestObject thirdInstance = testPool.NextInstance();
             thirdInstance.Name = "3rd Clone";
 
-            Debug.Log(testPool.ToString());
+            logger.Log(testPool.ToString());
 
             firstInstance.Deactivate();
 
-            Debug.Log(testPool.ToString());
+            logger.Log(testPool.ToString());
 
             TestObject fourthInstance = testPool.NextInstance();
 
-            Debug.Log(testPool.ToString());
+            logger.Log(testPool.ToString());
 
             testPool.Deactivate(fourthInstance);
 
-            Debug.Log(testPool.ToString());
+            logger.Log(testPool.ToString());
         }
         #endregion
 

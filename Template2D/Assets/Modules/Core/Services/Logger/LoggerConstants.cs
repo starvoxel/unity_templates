@@ -35,6 +35,7 @@ using System.Collections;
         public const string FLOW_CATEGORY = "FLOW";
         public const string POOLING_CATEGORY = "POOLING";
         public const string UTILITY_CATEGORY = "UTILITY";
+        public const string EDITOR_UTILITY_CATEGORY = "EDITOR_UTILITY";
         public const string TELEMETERY_CATEGORY = "TELEMETRY";
 
         // Game related

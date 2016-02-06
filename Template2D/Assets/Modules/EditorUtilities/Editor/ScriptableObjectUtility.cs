@@ -30,7 +30,7 @@ using System.IO;
 #endregion
 #endregion
 
- namespace Starvoxel
+namespace Starvoxel.EditorUtilities
 {
 	public static class ScriptableObjectUtility
 	{	
