@@ -47,8 +47,20 @@ using System.Collections;
 		#region Unity Methods
         protected void Awake()
         {
-            Services.InitializeLogger(new TestLogger());
-            Services.Logger.TestAllFunctions();
+            Services.InitializeLogger(new TextFileLogger(true));
+            Logger logger = Services.Logger;
+            
+            //Testing the category stuff
+            logger.ClearActiveCategories();
+            logger.AddCategories(LoggerConstants.CORE_CATEGORY, LoggerConstants.GAME_CATEGORY, LoggerConstants.INPUT_CATEGORY);
+            logger.LogWithCategory(LoggerConstants.CORE_CATEGORY, LogType.Log, "Core Category test");
+            logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Log, "Flow Category test");
+            logger.LogWithCategory(LoggerConstants.GAME_CATEGORY, LogType.Log, "Game Category test");
+            logger.LogWithCategory(LoggerConstants.INPUT_CATEGORY, LogType.Log, " Input Category test");
+            System.Collections.Generic.List<string> categories = new System.Collections.Generic.List<string>();
+            categories.Add(LoggerConstants.INPUT_CATEGORY);
+            categories.Add(LoggerConstants.FLOW_CATEGORY);
+            logger.LogWithCategories(categories, LogType.Log, "Input & Flow Category test");
         }
 		#endregion
 	

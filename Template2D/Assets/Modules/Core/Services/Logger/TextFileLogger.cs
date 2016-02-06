@@ -26,67 +26,31 @@ using StackFrame = System.Diagnostics.StackFrame;
 
 #region Other Includes
 using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
+using LogType = UnityEngine.LogType;
 #endregion
 #endregion
 
  namespace Starvoxel.Core
 {
-	public class TextFileLogger : ILogger
+	public class TextFileLogger : Logger
 	{
 		#region Fields & Properties
 		//const
-        private const string FILE_PATH = "/Logs/{0}.log";
-        private const int WRITE_INTERVAL = 10;
+        private const int WRITE_INTERVAL = 2;
+        private const string FILE_NAME_FORMAT = "HH-mm_ss";
+        private const string FILE_PATH = LoggerConstants.BASE_FOLDER_STRUCTUR + "{0}/{1}/{2}/{3}.log";
 
         //struct
-        private struct sLogInfo
-        {
-            public string[] Categories;
-            public string Message;
-            public string Timestamp;
-            public string StackInfo;
-
-            public override string ToString()
-            {
-                return string.Format("{0} | {1} {2} {3}", Timestamp, Message, StackInfo, FormatCategories());
-            }
-
-            public string FormatCategories()
-            {
-                string categoryInfo = string.Empty;
-
-                if (Categories != null && Categories.Length > 0)
-                {
-                    categoryInfo = "{";
-
-                    for(int i = 0; i < Categories.Length; ++i)
-                    {
-                        if (i > 0)
-                        {
-                            categoryInfo += ", ";
-                        }
-
-                        categoryInfo += Categories[i];
-                    }
-
-                    categoryInfo += "}";
-                }
-
-                return categoryInfo;
-            }
-        }
 	
 		//public
-        public bool IsLoggingToConsole = false;
 	
 		//protected
-	
-		//private
-        private int m_LogOutputIndex = 0;
-        private List<sLogInfo> m_AllLogs = new List<sLogInfo>();
-        private string m_FilePath = string.Empty;
+        protected int m_LogOutputIndex = 0; // Index of the next log that needs to be written to the log file
+        protected string m_FilePath = string.Empty;
 
         private Thread m_OutputThread;
+
+        //private
 
 		//properties
 		#endregion
@@ -94,12 +58,11 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 		#region Constructor Methods
         public TextFileLogger() : this(false) { }
 
-        public TextFileLogger(bool isLoggingToConsole)
+        public TextFileLogger(bool isLoggingToConsole) : base(isLoggingToConsole)
         {
             //Conatenate the file path.  Always puts it in the persistentDataPath so sometimes it has weird paths but they won't be flushed.
-            m_FilePath = UnityEngine.Application.persistentDataPath + string.Format(FILE_PATH, System.DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss"));
-
-            IsLoggingToConsole = isLoggingToConsole;
+            System.DateTime now = System.DateTime.Now;
+            m_FilePath = UnityEngine.Application.persistentDataPath + string.Format(FILE_PATH, now.Year.ToString("0000"), now.Month.ToString("00"), now.Day.ToString("00"), now.ToString(FILE_NAME_FORMAT));
 
             // Start up a thread to output the logs to a file so that if we have a ot of logs we don't clog up the main thread at all
             ThreadStart newThreadStart = new ThreadStart(WriteLogsToFile);
@@ -110,89 +73,12 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
 		#endregion
 
         #region Public Methods
-        int m_TestCounter = 0;
-        public void TestAllFunctions()
-        {
-            this.Log("Test normal log. {0}", m_TestCounter++);
-            List<string> categories = new List<string>();
-            categories.Add(LoggerConstants.INPUT_CATEGORY);
-            categories.Add(LoggerConstants.TESTING_CATEGORY);
-            this.LogWithCategories(categories, "Test multiple categories. {0}", m_TestCounter++);
-            this.LogWithCategory(LoggerConstants.CORE_CATEGORY, "Test Core category log. {0}", m_TestCounter++);
-            this.LogWarning("Test warning log. {0}", m_TestCounter++);
-            this.LogError("Test error log. {0}", m_TestCounter++);
-
-            this.LogVariable("TEST_ID", 2);
-            this.LogVariable("TEST_ID", 3);
-            this.LogVariable("TEST_ID", 1);
-        }
-
-        public void LogWithCategory(string category, string msg, params object[] args)
-        {
-            LogWithCategories(new List<string>(new string[] { category }), msg, args);
-        }
-
-        public void LogWithCategories(List<string> categories, string msg, params object[] args)
-        {
-            StackTrace stack = new StackTrace(1, true);
-
-            sLogInfo newLogInfo = new sLogInfo();
-            newLogInfo.Message = string.Format(msg, args);
-            newLogInfo.Timestamp = UnityEngine.Time.time.ToString();
-            newLogInfo.StackInfo = CreateInfoLine(stack);
-            newLogInfo.Categories = categories.ToArray();
-            string test = newLogInfo.Message + newLogInfo.StackInfo + newLogInfo.FormatCategories() + FormatStackTrace(stack);
-
-            EnqueueLog(newLogInfo);
-
-            if (IsLoggingToConsole)
-            {
-                // Do a proper Debug log based off the categories passed
-                if (categories.Contains(LoggerConstants.ERROR_CATEGORY))
-                {
-                    UnityEngine.Debug.LogError(test);
-                }
-                else if (categories.Contains(LoggerConstants.WARNING_CATEGORY))
-                {
-                    UnityEngine.Debug.LogWarning(test);
-                }
-                else
-                {
-                    UnityEngine.Debug.Log(test);
-                }
-            }
-        }
-
-        public void Log(string msg, params object[] args)
-        {
-            LogWithCategory(LoggerConstants.GetDefaultCategory(), msg, args);
-        }
-
-        public void LogWarning(string msg, params object[] args)
-        {
-            LogWithCategory(LoggerConstants.WARNING_CATEGORY, msg, args);
-        }
-
-        public void LogError(string msg, params object[] args)
-        {
-            LogWithCategory(LoggerConstants.ERROR_CATEGORY, msg, args);
-        }
-
-        public void LogVariable(string id, object variable)
-        {
-            // This won't be done for a good long time but I definitely want it to happen!
-        }
 		#endregion
 	
 		#region Protected Methods
 		#endregion
 
         #region Private Methods
-        private void EnqueueLog(sLogInfo log)
-        {
-            m_AllLogs.Add(log);
-        }
-
         private void WriteLogsToFile()
         {
             sLogInfo[] allLogs = null;
@@ -226,89 +112,7 @@ using UpdateCaller = Starvoxel.Utilities.UpdateCaller;
                         }
                     }
                 }
-                Thread.Sleep(10000);
-            }
-        }
-
-        private string CreateInfoLine(StackTrace stack)
-        {
-            int frameIndex = GetIndexForFirstValidFrame(stack);
-            if (frameIndex >= 0)
-            {
-                StackFrame frame = stack.GetFrame(GetIndexForFirstValidFrame(stack));
-                return string.Format("\n[{0}:{1} @ {2}] ", frame.GetMethod().DeclaringType.Name, frame.GetMethod().Name, frame.GetFileLineNumber());
-            }
-            else
-            {
-                return string.Empty;
-            }
-        }
-
-        private string FormatStackTrace(StackTrace stack)
-        {
-            string formattedStack = "\n\n--- STACK TRACE ---";
-#if !UNITY_EDITOR
-            int startingIndex = GetIndexForFirstValidFrame(stack);
-
-            if (startingIndex >= 0)
-            {
-                StackFrame[] frames = stack.GetFrames();
-                StackFrame frame;
-
-                for (int frameIndex = startingIndex; frameIndex < frames.Length; ++frameIndex)
-                {
-                    frame = frames[frameIndex];
-                    System.Reflection.MethodBase method = frame.GetMethod();
-                    formattedStack += "\n" + method.DeclaringType.FullName + ":" + method.Name + "(";
-                    System.Reflection.ParameterInfo[] parameters = method.GetParameters();
-                    if (parameters != null)
-                    {
-                        System.Reflection.ParameterInfo parameter;
-
-                        for (int paramIndex = 0; paramIndex < parameters.Length; ++paramIndex)
-                        {
-                            parameter = parameters[paramIndex];
-
-                            if (paramIndex != 0)
-                            {
-                                formattedStack += ", ";
-                            }
-
-                            formattedStack += parameter.ParameterType.Name;
-                        }
-                    }
-
-                    string fileName = frame.GetFileName();
-                    int assetIndex = fileName.LastIndexOf("Assets");
-
-                    formattedStack += ") (at " + fileName.Substring(assetIndex) + ":" + frame.GetFileLineNumber() + ")";
-                }
-
-                formattedStack += "\n--- STACK TRACE END ---\n\n";
-            }
-#endif
-
-            return formattedStack;
-        }
-
-        private int GetIndexForFirstValidFrame(StackTrace stack)
-        {
-            int counter = -1;
-            StackFrame frame;
-
-            do
-            {
-                counter += 1;
-                frame = stack.GetFrame(counter);
-            } while (counter < stack.GetFrames().Length && frame.GetMethod().DeclaringType == this.GetType());
-
-            if (counter >= stack.GetFrames().Length)
-            {
-                return -1;
-            }
-            else
-            {
-                return counter;
+                Thread.Sleep(WRITE_INTERVAL * 1000);
             }
         }
 		#endregion
