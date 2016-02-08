@@ -7,167 +7,203 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Starvoxel
+namespace T4Generator
 {
-    using System.Text;
     using System;
-    using System.Collections.Generic;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
-    
-    #line 1 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "12.0.0.0")]
-    public partial class LoggerFlagsGenerator : LoggerFlagsGeneratorBase
+    public partial class StateMachineGenerator : StateMachineGeneratorBase
     {
-#line hidden
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            
-            #line 6 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-
-
-            
-            #line default
-            #line hidden
-            this.Write(@"/* --------------------------
+            this.Write("\r\n/* --------------------------\r\n *\r\n * ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(@".cs
  *
- * LoggerFlags.cs
- *
- * Description: Generated class for flags used in the Logger class.
- *
- * Starvoxel
- *
- * All rights reserved.
- *
- * WARNING: THIS IS A GENERATED CLASS.  ALL MANUAL CHANGES IN HERE WILL BE OVERWRITTEN WHEN RE-GENERATED.
- * TO ADD FLAGS TO THIS FILE, PLEASE CREATE A PROPER .lfi FILE WITH THE FLAG NAME THAT YOU WOULD LIKE.
+ * Description: This is a auto-generated state machine.
  *
  * -------------------------- */
 
 #region Includes
 #region System Includes
-using System;
 using System.Collections;
-using System.Collections.Generic;
 #endregion
 
 #region Other Includes
-
+using Starvoxel.Core;
 #endregion
 #endregion
 
-
-namespace Starvoxel
+namespace Starvoxel.Test
 {
-    public partial class eLoggerFlags
-    {
-");
-            
-            #line 40 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-	if (FlagNames != null && FlagNames.Length > 0) 
-    {
-            
-            #line default
-            #line hidden
-            
-            #line 42 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-		for (int i = 0; i < FlagNames.Length; ++i)
-		{
-            
-            #line default
-            #line hidden
-            this.Write("        public static readonly eLoggerFlags ");
-            
-            #line 44 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FlagNames[i]));
-            
-            #line default
-            #line hidden
-            this.Write(" = new eLoggerFlags(1 << ");
-            
-            #line 44 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StartingValue + i));
-            
-            #line default
-            #line hidden
-            this.Write(");\r\n");
-            
-            #line 45 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-		}
-            
-            #line default
-            #line hidden
-            this.Write("\r\n        public static readonly eLoggerFlags[] CUSTOM_FLAGS = new eLoggerFlags[]" +
-                    " { ");
-            
-            #line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-for (int i = 0; i < FlagNames.Length; ++i) { if (i != 0){
-            
-            #line default
-            #line hidden
-            this.Write(", ");
-            
-            #line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-}
-            
-            #line default
-            #line hidden
-            
-            #line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FlagNames[i]));
-            
-            #line default
-            #line hidden
-            
-            #line 47 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-}
-            
-            #line default
-            #line hidden
-            this.Write(@"};
-		
-        static partial void GetPartialEnumValues(ref eLoggerFlags[] flags)
-        {
-            List<eLoggerFlags> flagList = new List<eLoggerFlags>(flags);
+	public class ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(" \r\n\t{\r\n\t\t#region Fields & Properties\r\n\t\t//const\r\n\r\n\t\t// classes\r\n\t\tpublic abstrac" +
+                    "t class ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write("State : BaseState \r\n\t\t{\r\n\t\t\tpublic struct sTransitionData\r\n\t\t\t{\r\n\t\t\t\tpublic reado" +
+                    "nly ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(".Transitions m_TransitionType;\r\n\t\t\t\tpublic readonly TransitionValidity m_Transiti" +
+                    "onValidity;\r\n\t\t\t\tpublic readonly ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(".States m_StateID;\r\n\r\n\t\t\t\tpublic sTransitionData(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(".Transitions transitionType, TransitionValidity transitionValidity, ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(".States stateID)\r\n\t\t\t\t{\r\n\t\t\t\t\tm_TransitionType = transitionType;\r\n\t\t\t\t\tm_Transiti" +
+                    "onValidity = transitionValidity;\r\n\t\t\t\t\tm_StateID = stateID;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\r\n\t\t\tp" +
+                    "ublic abstract ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(".States StateID\r\n\t\t\t{\r\n\t\t\t\tget;\r\n\t\t\t}\r\n\r\n\t\t\tprotected abstract bool IsValidTransi" +
+                    "tion(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(".Transitions transitionType);\r\n\t\t}\r\n\r\n\t\t// enums\r\n\t\tpublic enum States\r\n\t\t{\r\n");
+ 
+				for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+                {
 
-            flagList.AddRange(CUSTOM_FLAGS);
+            this.Write("\t\t\t");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_")));
+            this.Write(" = ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(stateIndex.ToString()));
+            this.Write(",\r\n");
 
-            flags = flagList.ToArray();
-        }
-");
-            
-            #line 57 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-  }
-	else
-	{
-            
-            #line default
-            #line hidden
-            this.Write("        SOMETHING WENT WRONG!\r\n        */\r\n");
-            
-            #line 62 "C:\CodeProjects\Starvoxel\Template\Template2D\Tools\T4Generator\T4Generator\LoggerFlagsGenerator.tt"
-  }
-            
-            #line default
-            #line hidden
-            this.Write("    }\r\n}");
+                }
+
+            this.Write("\t\t}\r\n\t\t\r\n\t\tpublic enum Transitions\r\n\t\t{\r\n");
+ 
+				for(int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
+                {
+
+            this.Write("\t\t\t");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_TransitionTypes[transitionIndex].Replace(" ", "_")));
+            this.Write(" = ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(transitionIndex.ToString()));
+            this.Write(",\r\n");
+
+                }
+
+            this.Write("\t\t}\r\n\t\t//protected\r\n\t\tprotected ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write("State m_CurrentState;\r\n\t\t\r\n\t\t//private\r\n\r\n\t\t//properties\r\n\t\tpublic ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write("State CurrentState\r\n\t\t{\r\n\t\t\tget { return m_CurrentState; }\r\n\t\t}\r\n\t\t#endregion\r\n\r\n" +
+                    "\t\t#region Constructor Methods\r\n\t\tpublic ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write("() { }\r\n\t\t#endregion\r\n\r\n\t\t#region Public Methods\r\n\t\t#endregion\r\n\r\n\t\t#region Prote" +
+                    "cted Methods\r\n\t\t#endregion\r\n\r\n\t\t#region Private Methods\r\n\t\t#endregion\r\n\t}\r\n}");
             return this.GenerationEnvironment.ToString();
         }
+
+private string _m_ClassNameField;
+
+/// <summary>
+/// Access the m_ClassName parameter of the template.
+/// </summary>
+private string m_ClassName
+{
+    get
+    {
+        return this._m_ClassNameField;
     }
-    
-    #line default
-    #line hidden
+}
+
+private string[] _m_StateNamesField;
+
+/// <summary>
+/// Access the m_StateNames parameter of the template.
+/// </summary>
+private string[] m_StateNames
+{
+    get
+    {
+        return this._m_StateNamesField;
+    }
+}
+
+private string[] _m_TransitionTypesField;
+
+/// <summary>
+/// Access the m_TransitionTypes parameter of the template.
+/// </summary>
+private string[] m_TransitionTypes
+{
+    get
+    {
+        return this._m_TransitionTypesField;
+    }
+}
+
+
+/// <summary>
+/// Initialize the template
+/// </summary>
+public virtual void Initialize()
+{
+    if ((this.Errors.HasErrors == false))
+    {
+bool m_ClassNameValueAcquired = false;
+if (this.Session.ContainsKey("m_ClassName"))
+{
+    this._m_ClassNameField = ((string)(this.Session["m_ClassName"]));
+    m_ClassNameValueAcquired = true;
+}
+if ((m_ClassNameValueAcquired == false))
+{
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_ClassName");
+    if ((data != null))
+    {
+        this._m_ClassNameField = ((string)(data));
+    }
+}
+bool m_StateNamesValueAcquired = false;
+if (this.Session.ContainsKey("m_StateNames"))
+{
+    this._m_StateNamesField = ((string[])(this.Session["m_StateNames"]));
+    m_StateNamesValueAcquired = true;
+}
+if ((m_StateNamesValueAcquired == false))
+{
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StateNames");
+    if ((data != null))
+    {
+        this._m_StateNamesField = ((string[])(data));
+    }
+}
+bool m_TransitionTypesValueAcquired = false;
+if (this.Session.ContainsKey("m_TransitionTypes"))
+{
+    this._m_TransitionTypesField = ((string[])(this.Session["m_TransitionTypes"]));
+    m_TransitionTypesValueAcquired = true;
+}
+if ((m_TransitionTypesValueAcquired == false))
+{
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_TransitionTypes");
+    if ((data != null))
+    {
+        this._m_TransitionTypesField = ((string[])(data));
+    }
+}
+
+
+    }
+}
+
+
+    }
     #region Base class
     /// <summary>
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "12.0.0.0")]
-    public class LoggerFlagsGeneratorBase
+    public class StateMachineGeneratorBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

@@ -1,0 +1,105 @@
+﻿<#@ template language="C#" linePragmas="false" #>
+<#@ parameter name="m_ClassName" type="System.String"#>
+<#@ parameter name="m_StateNames" type="System.String[]"#>
+<#@ parameter name="m_TransitionTypes" type="System.String[]"#>
+
+/* --------------------------
+ *
+ * <#= m_ClassName #>.cs
+ *
+ * Description: This is a auto-generated state machine.
+ *
+ * -------------------------- */
+
+#region Includes
+#region System Includes
+using System.Collections;
+#endregion
+
+#region Other Includes
+using Starvoxel.Core;
+#endregion
+#endregion
+
+namespace Starvoxel.Test
+{
+	public class <#= m_ClassName #> 
+	{
+		#region Fields & Properties
+		//const
+
+		// classes
+		public abstract class <#= m_ClassName #>State : BaseState 
+		{
+			public struct sTransitionData
+			{
+				public readonly <#= m_ClassName #>.Transitions m_TransitionType;
+				public readonly TransitionValidity m_TransitionValidity;
+				public readonly <#= m_ClassName #>.States m_StateID;
+
+				public sTransitionData(<#= m_ClassName #>.Transitions transitionType, TransitionValidity transitionValidity, <#= m_ClassName #>.States stateID)
+				{
+					m_TransitionType = transitionType;
+					m_TransitionValidity = transitionValidity;
+					m_StateID = stateID;
+				}
+			}
+
+			public abstract <#= m_ClassName #>.States StateID
+			{
+				get;
+			}
+
+			protected abstract bool IsValidTransition(<#= m_ClassName #>.Transitions transitionType);
+		}
+
+		// enums
+		public enum States
+		{
+<# 
+				for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+                {
+#>
+			<#= m_StateNames[stateIndex].Replace(" ", "_") #> = <#= stateIndex.ToString() #>,
+<#
+                }
+#>
+		}
+		
+		public enum Transitions
+		{
+<# 
+				for(int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
+                {
+#>
+			<#= m_TransitionTypes[transitionIndex].Replace(" ", "_") #> = <#= transitionIndex.ToString() #>,
+<#
+                }
+#>
+		}
+		//protected
+		protected <#= m_ClassName #>State m_CurrentState;
+		
+		//private
+
+		//properties
+		public <#= m_ClassName #>State CurrentState
+		{
+			get { return m_CurrentState; }
+		}
+		#endregion
+
+		#region Constructor Methods
+		public <#= m_ClassName #>() { }
+		#endregion
+
+		#region Public Methods
+		#endregion
+
+		#region Protected Methods
+		#endregion
+
+		#region Private Methods
+		#endregion
+	}
+}
