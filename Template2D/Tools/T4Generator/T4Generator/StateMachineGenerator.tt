@@ -1,8 +1,9 @@
 ﻿<#@ template language="C#" linePragmas="false" #>
+<#@ parameter name="m_Namespace" type="System.String"#>
 <#@ parameter name="m_ClassName" type="System.String"#>
 <#@ parameter name="m_StateNames" type="System.String[]"#>
+<#@ parameter name="m_StartingStateIndex" type="System.Int32"#> 
 <#@ parameter name="m_TransitionTypes" type="System.String[]"#>
-
 /* --------------------------
  *
  * <#= m_ClassName #>.cs
@@ -14,6 +15,7 @@
 #region Includes
 #region System Includes
 using System.Collections;
+using System.Collections.Generic;
 #endregion
 
 #region Other Includes
@@ -21,79 +23,178 @@ using Starvoxel.Core;
 #endregion
 #endregion
 
-namespace Starvoxel.Test
+namespace <#= m_Namespace #>
 {
-	public class <#= m_ClassName #> 
+	public sealed partial class <#= m_ClassName #> 
 	{
-		#region Fields & Properties
-		//const
-
-		// classes
+		#region Classes
 		public abstract class <#= m_ClassName #>State : BaseState 
 		{
+			#region Structs
+            /// <summary>
+            /// Data used to determine if a transition is valid and what state it would transition to
+            /// </summary>
 			public struct sTransitionData
 			{
-				public readonly <#= m_ClassName #>.Transitions m_TransitionType;
-				public readonly TransitionValidity m_TransitionValidity;
-				public readonly <#= m_ClassName #>.States m_StateID;
+				public readonly eTransitionValidity TransitionValidity;
+				public readonly <#= m_ClassName #>.eStates StateID;
 
-				public sTransitionData(<#= m_ClassName #>.Transitions transitionType, TransitionValidity transitionValidity, <#= m_ClassName #>.States stateID)
+				public sTransitionData(eTransitionValidity transitionValidity, <#= m_ClassName #>.eStates stateID)
 				{
-					m_TransitionType = transitionType;
-					m_TransitionValidity = transitionValidity;
-					m_StateID = stateID;
+					TransitionValidity = transitionValidity;
+					StateID = stateID;
 				}
 			}
+			#endregion
 
-			public abstract <#= m_ClassName #>.States StateID
+			#region Fields & Properties
+			protected readonly <#= m_ClassName #> m_Context = null; // Link to the context that owns tis instance.
+			protected readonly Dictionary<<#= m_ClassName #>.eTransitions, sTransitionData> m_Transitions = null; // Map of all the transitions and to which states those transitions lead to
+			
+            /// <summary>
+            /// State enum associated with this class.
+            /// </summary>
+			public abstract <#= m_ClassName #>.eStates StateID
 			{
 				get;
 			}
+			#endregion
 
-			protected abstract bool IsValidTransition(<#= m_ClassName #>.Transitions transitionType);
+			#region Constructors
+			public <#= m_ClassName #>State(<#= m_ClassName #> context)
+			{
+				m_Context = context;
+			}
+			#endregion
+
+			#region Public Methods
+            /// <summary>
+            /// Checks if the provided transition type is a valid transition for this state.
+            /// </summary>
+            /// <param name="transitionType">Transition type</param>
+            /// <returns></returns>
+			public bool IsValidTransition(<#= m_ClassName #>.eTransitions transitionType)
+			{
+				 return m_Transitions != null && m_Transitions.ContainsKey(transitionType) && m_Transitions[transitionType].TransitionValidity == eTransitionValidity.Valid;
+			}
+			#endregion
 		}
 
-		// enums
-		public enum States
+		#region ---------- PLACEHOLDER STATES ----------
+<#
+		// Completely placeholder.  We are just putting these here so that we can test stuff.  Eventually this will all be off and built in it's own T4
+		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+        {
+			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
+
+			if (stateIndex > 0)
+            {
+#>
+		
+<#
+            }
+#>
+		public class <#= stateName #> : <#= m_ClassName #>State
+		{
+			public <#= m_ClassName #>.eStates StateID
+			{
+				get { return <#= m_ClassName #>.eStates.<#= m_StateNames[stateIndex].Replace(" ", "_").ToUpper() #>; }
+			}
+
+			public bool IsValidTransition(<#= m_ClassName #>.eTransitions transitionType)
+			{
+				return false;
+			}
+
+			public <#= stateName #>(<#= m_ClassName #> context) : base(context) { }
+		}
+<#
+        }
+#>
+		#endregion
+		#endregion
+
+		#region Enums
+		/// <summary>
+        /// All states.  Also used as the index in the state array
+        /// </summary>
+		public enum eStates
 		{
 <# 
-				for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
-                {
+			// Iterate over all the states and create the enum
+			for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+            {
 #>
-			<#= m_StateNames[stateIndex].Replace(" ", "_") #> = <#= stateIndex.ToString() #>,
+			<#= m_StateNames[stateIndex].Replace(" ", "_").ToUpper() #> = <#= stateIndex.ToString() #>,
 <#
-                }
+            }
 #>
 		}
 		
-		public enum Transitions
+        /// <summary>
+        /// All possible transition types
+        /// </summary>
+		public enum eTransitions
 		{
 <# 
-				for(int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
-                {
+			// Iterate over all the transition types and create the enum
+			for(int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
+            {
 #>
-			<#= m_TransitionTypes[transitionIndex].Replace(" ", "_") #> = <#= transitionIndex.ToString() #>,
+			<#= m_TransitionTypes[transitionIndex].Replace(" ", "_".ToUpper()) #> = <#= transitionIndex.ToString() #>,
 <#
                 }
 #>
 		}
+		#endregion
+
+		#region Fields & Properties
+		//const
+
+		//public
+
 		//protected
-		protected <#= m_ClassName #>State m_CurrentState;
-		
+		protected <#= m_ClassName #>State[] m_States; // Instances of all the states
+		protected int m_CurrentStateIndex = <#= m_StartingStateIndex #>; // Index of the currently active state
 		//private
 
 		//properties
 		public <#= m_ClassName #>State CurrentState
 		{
-			get { return m_CurrentState; }
+			get { return m_States[m_CurrentStateIndex]; }
 		}
 		#endregion
 
 		#region Constructor Methods
-		public <#= m_ClassName #>() { }
+		public <#= m_ClassName #>()
+		{
+			m_States = new <#= m_ClassName #>State[<#= m_StateNames.Length.ToString() #>];
+			
+			// I know this looks hardcoded, but because this is a generated file this will be auto-updated when re-generated.
+<#
+		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+        {
+			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
+#>
+			m_States[<#= stateIndex.ToString() #>] = new <#= stateName #>(this);
+<#
+        }
+#>
+		}
 		#endregion
 
 		#region Public Methods
+        /// <summary>
+        /// Called to process a transition and potentially transition to a new state
+        /// </summary>
+        /// <param name="transitionType">Transiton type to try and transition with</param>
+		public void ProcessTransition(<#= m_ClassName #>.eTransitions transitionType)
+		{
+			if (CurrentState.IsValidTransition(transitionType))
+			{
+				//TODO jsmellie: Fetch the state enum associated with the transition type
+			}
+		}
 		#endregion
 
 		#region Protected Methods

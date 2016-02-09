@@ -46,7 +46,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="BaseState.cs" />
     <Compile Include="StateMachineGenerator.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

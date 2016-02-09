@@ -29,10 +29,14 @@ namespace Starvoxel.Core
     public abstract class BaseState
     {
         #region Fields & Properties
-        protected enum TransitionValidity
+        protected enum eTransitionValidity
         {
             Valid, // Valid transition, this state uses this transition in some way
             Ignore, // We don't use this transition type at all, so we're ignoring it0 
+        }
+
+        private void Test()
+        {
         }
         #endregion
 

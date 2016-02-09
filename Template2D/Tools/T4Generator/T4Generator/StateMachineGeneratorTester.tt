@@ -8,10 +8,12 @@
 		"Beta",
 		"Gamma"
     };
+	_m_StartingStateIndexField = 0;
 	_m_TransitionTypesField = new string[]
     {
 		"Next",
 		"Previous"
     };
+	_m_NamespaceField = "Starvoxel.Core";
 #>
 <#@ include file="$(ProjectDir)StateMachineGenerator.tt"#>
