@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace T4Generator
+namespace T4Generator.StateMachine.ContextGeneration
 {
     using System;
     
@@ -15,7 +15,7 @@ namespace T4Generator
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "12.0.0.0")]
-    public partial class StateMachineGenerator : StateMachineGeneratorBase
+    public partial class ContextGenerator : ContextGeneratorBase
     {
         /// <summary>
         /// Create the template output
@@ -66,8 +66,8 @@ namespace ");
                     "teID = stateID;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\t#endregion\r\n\r\n\t\t\t#region Fields & Properties\r\n\t" +
                     "\t\tprotected readonly ");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(" m_Context = null; // Link to the context that owns tis instance.\r\n\t\t\tprotected r" +
-                    "eadonly Dictionary<");
+            this.Write(" m_Context = null; // Link to the context that owns tis instance.\r\n\t\t\tprotected D" +
+                    "ictionary<");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
             this.Write(@".eTransitions, sTransitionData> m_Transitions = null; // Map of all the transitions and to which states those transitions lead to
 			
@@ -84,6 +84,8 @@ namespace ");
             this.Write(@" context)
 			{
 				m_Context = context;
+
+				PopulateTransitionDictionary();
 			}
 			#endregion
 
@@ -100,40 +102,56 @@ namespace ");
 				 return m_Transitions != null && m_Transitions.ContainsKey(transitionType) && m_Transitions[transitionType].TransitionValidity == eTransitionValidity.Valid;
 			}
 			#endregion
+			
+			#region Protected Methods
+			protected abstract void PopulateTransitionDictionary();
+			#endregion
 		}
 
 		#region ---------- PLACEHOLDER STATES ----------
 ");
 
+		bool hasNotPutSpace = true;
+
 		// Completely placeholder.  We are just putting these here so that we can test stuff.  Eventually this will all be off and built in it's own T4
 		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
         {
+			if (stateIndex == 0)
+            {
+				continue;
+            }
+
 			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
 
-			if (stateIndex > 0)
+			if (!hasNotPutSpace)
             {
 
             this.Write("\t\t\r\n");
 
             }
+			else
+            {
+				hasNotPutSpace = false;
+            }
+
+			string baseStateName = m_ClassName + "State";
 
             this.Write("\t\tpublic class ");
             this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
             this.Write(" : ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write("State\r\n\t\t{\r\n\t\t\tpublic ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(baseStateName));
+            this.Write("\r\n\t\t{\r\n\t\t\tpublic ");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
             this.Write(".eStates StateID\r\n\t\t\t{\r\n\t\t\t\tget { return ");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
             this.Write(".eStates.");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_").ToUpper()));
-            this.Write("; }\r\n\t\t\t}\r\n\r\n\t\t\tpublic bool IsValidTransition(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eTransitions transitionType)\r\n\t\t\t{\r\n\t\t\t\treturn false;\r\n\t\t\t}\r\n\r\n\t\t\tpublic ");
+            this.Write("; }\r\n\t\t\t}\r\n\r\n\t\t\tpublic ");
             this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
             this.Write("(");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(" context) : base(context) { }\r\n\t\t}\r\n");
+            this.Write(" context) : base(context) { }\r\n\r\n\t\t\tprotected override void PopulateTransitionDic" +
+                    "tionary() { }\r\n\t\t}\r\n");
 
         }
 
@@ -161,7 +179,7 @@ namespace ");
             {
 
             this.Write("\t\t\t");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_TransitionTypes[transitionIndex].Replace(" ", "_".ToUpper())));
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_TransitionTypes[transitionIndex].Replace(" ", "_").ToUpper()));
             this.Write(" = ");
             this.Write(this.ToStringHelper.ToStringWithCulture(transitionIndex.ToString()));
             this.Write(",\r\n");
@@ -174,8 +192,8 @@ namespace ");
             this.Write("State[] m_States; // Instances of all the states\r\n\t\tprotected int m_CurrentStateI" +
                     "ndex = ");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_StartingStateIndex));
-            this.Write("; // Index of the currently active state\r\n\t\t//private\r\n\r\n\t\t//properties\r\n\t\tpublic" +
-                    " ");
+            this.Write("; // Index of the currently active state.  The default value is set on generation" +
+                    ".\r\n\t\t//private\r\n\r\n\t\t//properties\r\n\t\tpublic ");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
             this.Write("State CurrentState\r\n\t\t{\r\n\t\t\tget { return m_States[m_CurrentStateIndex]; }\r\n\t\t}\r\n\t" +
                     "\t#endregion\r\n\r\n\t\t#region Constructor Methods\r\n\t\tpublic ");
@@ -383,7 +401,7 @@ if ((m_TransitionTypesValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "12.0.0.0")]
-    public class StateMachineGeneratorBase
+    public class ContextGeneratorBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

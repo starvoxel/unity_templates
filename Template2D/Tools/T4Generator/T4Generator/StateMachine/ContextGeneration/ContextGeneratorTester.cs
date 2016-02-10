@@ -1,7 +1,7 @@
 ﻿ 
 /* --------------------------
  *
- * StateMachine.cs
+ * TestMachine.cs
  *
  * Description: This is a auto-generated state machine.
  *
@@ -20,10 +20,10 @@ using Starvoxel.Core;
 
 namespace Starvoxel.Core
 {
-	public sealed partial class StateMachine 
+	public sealed partial class TestMachine 
 	{
 		#region Classes
-		public abstract class StateMachineState : BaseState 
+		public abstract class TestMachineState : BaseState 
 		{
 			#region Structs
             /// <summary>
@@ -32,9 +32,9 @@ namespace Starvoxel.Core
 			public struct sTransitionData
 			{
 				public readonly eTransitionValidity TransitionValidity;
-				public readonly StateMachine.eStates StateID;
+				public readonly TestMachine.eStates StateID;
 
-				public sTransitionData(eTransitionValidity transitionValidity, StateMachine.eStates stateID)
+				public sTransitionData(eTransitionValidity transitionValidity, TestMachine.eStates stateID)
 				{
 					TransitionValidity = transitionValidity;
 					StateID = stateID;
@@ -43,22 +43,24 @@ namespace Starvoxel.Core
 			#endregion
 
 			#region Fields & Properties
-			protected readonly StateMachine m_Context = null; // Link to the context that owns tis instance.
-			protected readonly Dictionary<StateMachine.eTransitions, sTransitionData> m_Transitions = null; // Map of all the transitions and to which states those transitions lead to
+			protected readonly TestMachine m_Context = null; // Link to the context that owns tis instance.
+			protected Dictionary<TestMachine.eTransitions, sTransitionData> m_Transitions = null; // Map of all the transitions and to which states those transitions lead to
 			
             /// <summary>
             /// State enum associated with this class.
             /// </summary>
-			public abstract StateMachine.eStates StateID
+			public abstract TestMachine.eStates StateID
 			{
 				get;
 			}
 			#endregion
 
 			#region Constructors
-			public StateMachineState(StateMachine context)
+			public TestMachineState(TestMachine context)
 			{
 				m_Context = context;
+
+				PopulateTransitionDictionary();
 			}
 			#endregion
 
@@ -68,57 +70,40 @@ namespace Starvoxel.Core
             /// </summary>
             /// <param name="transitionType">Transition type</param>
             /// <returns></returns>
-			public bool IsValidTransition(StateMachine.eTransitions transitionType)
+			public bool IsValidTransition(TestMachine.eTransitions transitionType)
 			{
 				 return m_Transitions != null && m_Transitions.ContainsKey(transitionType) && m_Transitions[transitionType].TransitionValidity == eTransitionValidity.Valid;
 			}
 			#endregion
+			
+			#region Protected Methods
+			protected abstract void PopulateTransitionDictionary();
+			#endregion
 		}
 
 		#region ---------- PLACEHOLDER STATES ----------
-		public class AlphaState : StateMachineState
+		public class BetaState : TestMachineState
 		{
-			public StateMachine.eStates StateID
+			public TestMachine.eStates StateID
 			{
-				get { return StateMachine.eStates.ALPHA; }
+				get { return TestMachine.eStates.BETA; }
 			}
 
-			public bool IsValidTransition(StateMachine.eTransitions transitionType)
-			{
-				return false;
-			}
+			public BetaState(TestMachine context) : base(context) { }
 
-			public AlphaState(StateMachine context) : base(context) { }
+			protected override void PopulateTransitionDictionary() { }
 		}
 		
-		public class BetaState : StateMachineState
+		public class GammaState : TestMachineState
 		{
-			public StateMachine.eStates StateID
+			public TestMachine.eStates StateID
 			{
-				get { return StateMachine.eStates.BETA; }
+				get { return TestMachine.eStates.GAMMA; }
 			}
 
-			public bool IsValidTransition(StateMachine.eTransitions transitionType)
-			{
-				return false;
-			}
+			public GammaState(TestMachine context) : base(context) { }
 
-			public BetaState(StateMachine context) : base(context) { }
-		}
-		
-		public class GammaState : StateMachineState
-		{
-			public StateMachine.eStates StateID
-			{
-				get { return StateMachine.eStates.GAMMA; }
-			}
-
-			public bool IsValidTransition(StateMachine.eTransitions transitionType)
-			{
-				return false;
-			}
-
-			public GammaState(StateMachine context) : base(context) { }
+			protected override void PopulateTransitionDictionary() { }
 		}
 		#endregion
 		#endregion
@@ -139,8 +124,8 @@ namespace Starvoxel.Core
         /// </summary>
 		public enum eTransitions
 		{
-			Next = 0,
-			Previous = 1,
+			NEXT = 0,
+			PREVIOUS = 1,
 		}
 		#endregion
 
@@ -150,21 +135,21 @@ namespace Starvoxel.Core
 		//public
 
 		//protected
-		protected StateMachineState[] m_States; // Instances of all the states
+		protected TestMachineState[] m_States; // Instances of all the states
 		protected int m_CurrentStateIndex = 0; // Index of the currently active state
 		//private
 
 		//properties
-		public StateMachineState CurrentState
+		public TestMachineState CurrentState
 		{
 			get { return m_States[m_CurrentStateIndex]; }
 		}
 		#endregion
 
 		#region Constructor Methods
-		public StateMachine()
+		public TestMachine()
 		{
-			m_States = new StateMachineState[3];
+			m_States = new TestMachineState[3];
 			
 			// I know this looks hardcoded, but because this is a generated file this will be auto-updated when re-generated.
 			m_States[0] = new AlphaState(this);
@@ -178,7 +163,7 @@ namespace Starvoxel.Core
         /// Called to process a transition and potentially transition to a new state
         /// </summary>
         /// <param name="transitionType">Transiton type to try and transition with</param>
-		public void ProcessTransition(StateMachine.eTransitions transitionType)
+		public void ProcessTransition(TestMachine.eTransitions transitionType)
 		{
 			if (CurrentState.IsValidTransition(transitionType))
 			{

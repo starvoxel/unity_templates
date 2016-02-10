@@ -1,7 +1,8 @@
 ﻿<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ output extension=".cs" #>
 <#
-	_m_ClassNameField = "StateMachine";
+	_m_NamespaceField = "Starvoxel.Core";
+	_m_ClassNameField = "TestMachine";
 	_m_StateNamesField = new string[]
     {
 		"Alpha",
@@ -14,6 +15,5 @@
 		"Next",
 		"Previous"
     };
-	_m_NamespaceField = "Starvoxel.Core";
 #>
-<#@ include file="$(ProjectDir)StateMachineGenerator.tt"#>
+<#@ include file="$(ProjectDir)StateMachine/ContextGeneration/ContextGenerator.tt"#>

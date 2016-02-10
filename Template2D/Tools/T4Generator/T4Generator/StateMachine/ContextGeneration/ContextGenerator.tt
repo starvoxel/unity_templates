@@ -49,7 +49,7 @@ namespace <#= m_Namespace #>
 
 			#region Fields & Properties
 			protected readonly <#= m_ClassName #> m_Context = null; // Link to the context that owns tis instance.
-			protected readonly Dictionary<<#= m_ClassName #>.eTransitions, sTransitionData> m_Transitions = null; // Map of all the transitions and to which states those transitions lead to
+			protected Dictionary<<#= m_ClassName #>.eTransitions, sTransitionData> m_Transitions = null; // Map of all the transitions and to which states those transitions lead to
 			
             /// <summary>
             /// State enum associated with this class.
@@ -64,6 +64,8 @@ namespace <#= m_Namespace #>
 			public <#= m_ClassName #>State(<#= m_ClassName #> context)
 			{
 				m_Context = context;
+
+				PopulateTransitionDictionary();
 			}
 			#endregion
 
@@ -78,35 +80,49 @@ namespace <#= m_Namespace #>
 				 return m_Transitions != null && m_Transitions.ContainsKey(transitionType) && m_Transitions[transitionType].TransitionValidity == eTransitionValidity.Valid;
 			}
 			#endregion
+			
+			#region Protected Methods
+			protected abstract void PopulateTransitionDictionary();
+			#endregion
 		}
 
 		#region ---------- PLACEHOLDER STATES ----------
 <#
+		bool hasNotPutSpace = true;
+
 		// Completely placeholder.  We are just putting these here so that we can test stuff.  Eventually this will all be off and built in it's own T4
 		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
         {
+			if (stateIndex == 0)
+            {
+				continue;
+            }
+
 			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
 
-			if (stateIndex > 0)
+			if (!hasNotPutSpace)
             {
 #>
 		
 <#
             }
+			else
+            {
+				hasNotPutSpace = false;
+            }
+
+			string baseStateName = m_ClassName + "State";
 #>
-		public class <#= stateName #> : <#= m_ClassName #>State
+		public class <#= stateName #> : <#= baseStateName #>
 		{
 			public <#= m_ClassName #>.eStates StateID
 			{
 				get { return <#= m_ClassName #>.eStates.<#= m_StateNames[stateIndex].Replace(" ", "_").ToUpper() #>; }
 			}
 
-			public bool IsValidTransition(<#= m_ClassName #>.eTransitions transitionType)
-			{
-				return false;
-			}
-
 			public <#= stateName #>(<#= m_ClassName #> context) : base(context) { }
+
+			protected override void PopulateTransitionDictionary() { }
 		}
 <#
         }
@@ -141,7 +157,7 @@ namespace <#= m_Namespace #>
 			for(int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
             {
 #>
-			<#= m_TransitionTypes[transitionIndex].Replace(" ", "_".ToUpper()) #> = <#= transitionIndex.ToString() #>,
+			<#= m_TransitionTypes[transitionIndex].Replace(" ", "_").ToUpper() #> = <#= transitionIndex.ToString() #>,
 <#
                 }
 #>
@@ -155,7 +171,7 @@ namespace <#= m_Namespace #>
 
 		//protected
 		protected <#= m_ClassName #>State[] m_States; // Instances of all the states
-		protected int m_CurrentStateIndex = <#= m_StartingStateIndex #>; // Index of the currently active state
+		protected int m_CurrentStateIndex = <#= m_StartingStateIndex #>; // Index of the currently active state.  The default value is set on generation.
 		//private
 
 		//properties

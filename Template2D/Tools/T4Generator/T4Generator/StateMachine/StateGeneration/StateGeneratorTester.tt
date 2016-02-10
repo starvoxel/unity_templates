@@ -1,0 +1,21 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+<#
+	_m_NamespaceField = "Starvoxel.Core";
+	_m_ContextNameField = "TestMachine";
+	_m_StateNameField = "Alpha";
+	_m_TransitionTypesField = new string[]
+    {
+		"Next",
+		"Previous"
+    };
+	_m_ValidTransitionTypesField = new string[]
+    {
+		"Next",
+    };
+	_m_ValidStateNamesField = new string[]
+    {
+		"Beta",
+    };
+#>
+<#@ include file="$(ProjectDir)StateMachine/StateGeneration/StateGenerator.tt"#>

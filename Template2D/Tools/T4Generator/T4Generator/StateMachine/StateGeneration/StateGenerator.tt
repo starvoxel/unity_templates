@@ -1,0 +1,102 @@
+﻿<#@ template language="C#" linePragmas="false" #>
+<#@ parameter name="m_Namespace" type="System.String"#>
+<#@ parameter name="m_ContextName" type="System.String"#>
+<#@ parameter name="m_StateName" type="System.String"#>
+<#@ parameter name="m_TransitionTypes" type="System.String[]" #>
+<#@ parameter name="m_ValidTransitionTypes" type="System.String[]"#>
+<#@ parameter name="m_ValidStateNames" type="System.String[]"#>
+<#@ import namespace="System.Collections.Generic" #>
+<#
+	string stateName = m_StateName + "State";
+	string baseStateName = m_ContextName + "State";
+	string stateEnum = m_ContextName + ".eStates";
+	string transitionEnum = m_ContextName + ".eTransitions";
+#>
+/* --------------------------
+ *
+ * <#= m_StateName #>.cs
+ *
+ * Description: One of the states used in the <#= m_ContextName #> state machine.
+ * WARNING: THIS CLASS IS GENERATED.  CHANGES COULD BE LOST.
+ *
+ * -------------------------- */
+#region Includes
+#region System Includes
+using System.Collections;
+using System.Collections.Generic;
+#endregion
+
+#region Other Includes
+using Starvoxel.Core;
+#endregion
+#endregion
+
+namespace <#= m_Namespace #>
+{
+	public partial class <#= m_ContextName #>
+	{
+		public sealed partial class <#= stateName #> : <#= baseStateName #>
+		{
+			public <#= stateEnum #> StateID
+			{
+				get { return <#= stateEnum #>.<#= m_StateName.Replace(" ", "_").ToUpper() #>; }
+			}
+
+			public <#= stateName #>(<#= m_ContextName #> context) : base(context) { }
+
+			protected override void PopulateTransitionDictionary()
+			{
+				m_Transitions = new Dictionary<<#= transitionEnum #>, sTransitionData>();
+
+				sTransitionData transitionData;
+
+				// Valid Transitions
+<#
+			List<string> transitionTypes = new List<string>(m_TransitionTypes);
+
+			for (int i = 0; i < m_ValidTransitionTypes.Length; ++i)
+            {
+				transitionTypes.Remove(m_ValidTransitionTypes[i]);
+
+				string stateEnumName = m_ValidStateNames[i].Replace(" ", "_").ToUpper();
+				string transitionEnumValue = m_ValidTransitionTypes[i].Replace(" ", "_").ToUpper();
+
+				if (i > 0)
+                {
+#>
+
+<#
+                }
+#>
+				transitionData = new sTransitionData(eTransitionValidity.Valid, <#= stateEnum #>.<#= stateEnumName #>);
+				m_Transitions.Add(<#= transitionEnum #>.<#= transitionEnumValue #>, transitionData);
+<#
+            }
+
+			if (transitionTypes.Count > 0)
+            {
+#>
+
+				//Ignored Transitions
+<#
+				for(int i = 0; i < transitionTypes.Count; ++i)
+                {
+					string transitionEnumValue = transitionTypes[i].Replace(" ", "_").ToUpper();
+
+					if (i > 0)
+					{
+#>
+
+<#
+					}
+#>
+				transitionData = new sTransitionData(eTransitionValidity.Ignore, (<#= stateEnum #>)0);
+				m_Transitions.Add(<#= transitionEnum #>.<#= transitionEnumValue #>, transitionData);
+<#
+                }
+            }
+#>
+			}
+		}
+	}
+}
