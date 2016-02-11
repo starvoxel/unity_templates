@@ -33,29 +33,50 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="StateMachineGenerator.tt">
+    <None Include="StateMachine\ContextGeneration\ContextGenerator.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>StateMachineGenerator.cs</LastGenOutput>
+      <LastGenOutput>ContextGenerator.cs</LastGenOutput>
+      <Parameters>&lt;%3fxml version="1.0" encoding="utf-16"%3f&gt;
+&lt;ArrayOfParameterStorage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" /&gt;</Parameters>
+      <CustomToolNamespace>Starvoxel.Core</CustomToolNamespace>
     </None>
-    <None Include="StateMachineGeneratorTester.tt">
+    <None Include="StateMachine\ContextGeneration\ContextGeneratorTester.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>StateMachineGeneratorTester.cs</LastGenOutput>
+      <LastGenOutput>ContextGeneratorTester.cs</LastGenOutput>
+    </None>
+    <None Include="StateMachine\StateGeneration\StateGenerator.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <CustomToolNamespace>Starvoxel.Core</CustomToolNamespace>
+    </None>
+    <None Include="StateMachine\StateGeneration\StateGeneratorTester.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>StateGeneratorTester.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseState.cs" />
-    <Compile Include="StateMachineGenerator.cs">
+    <Compile Include="StateMachine\BaseState.cs" />
+    <Compile Include="StateMachine\ContextGeneration\ContextGenerator.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>StateMachineGenerator.tt</DependentUpon>
+      <DependentUpon>ContextGenerator.tt</DependentUpon>
     </Compile>
-    <Compile Include="StateMachineGeneratorTester.cs">
+    <Compile Include="StateMachine\ContextGeneration\ContextGeneratorTester.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>StateMachineGeneratorTester.tt</DependentUpon>
+      <DependentUpon>ContextGeneratorTester.tt</DependentUpon>
+    </Compile>
+    <Compile Include="StateMachine\StateGeneration\StateGenerator.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StateGenerator.tt</DependentUpon>
+    </Compile>
+    <Compile Include="StateMachine\StateGeneration\StateGeneratorTester.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StateGeneratorTester.tt</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

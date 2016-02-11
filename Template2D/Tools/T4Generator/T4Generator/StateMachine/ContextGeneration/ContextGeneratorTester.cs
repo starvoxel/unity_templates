@@ -29,7 +29,7 @@ namespace Starvoxel.Core
             /// <summary>
             /// Data used to determine if a transition is valid and what state it would transition to
             /// </summary>
-			public struct sTransitionData
+			protected struct sTransitionData
 			{
 				public readonly eTransitionValidity TransitionValidity;
 				public readonly TestMachine.eStates StateID;
@@ -84,7 +84,7 @@ namespace Starvoxel.Core
 		#region ---------- PLACEHOLDER STATES ----------
 		public class BetaState : TestMachineState
 		{
-			public TestMachine.eStates StateID
+			public override TestMachine.eStates StateID
 			{
 				get { return TestMachine.eStates.BETA; }
 			}
@@ -96,7 +96,7 @@ namespace Starvoxel.Core
 		
 		public class GammaState : TestMachineState
 		{
-			public TestMachine.eStates StateID
+			public override TestMachine.eStates StateID
 			{
 				get { return TestMachine.eStates.GAMMA; }
 			}
@@ -136,7 +136,7 @@ namespace Starvoxel.Core
 
 		//protected
 		protected TestMachineState[] m_States; // Instances of all the states
-		protected int m_CurrentStateIndex = 0; // Index of the currently active state
+		protected int m_CurrentStateIndex = 0; // Index of the currently active state.  The default value is set on generation.
 		//private
 
 		//properties

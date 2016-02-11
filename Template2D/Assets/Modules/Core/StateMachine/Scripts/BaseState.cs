@@ -24,14 +24,22 @@ using System.Collections;
 #endregion
 #endregion
 
- namespace Starvoxel.Core
+namespace Starvoxel.Core
 {
-	public abstract class BaseState
-	{	
-		#region Public Methods
+    public abstract class BaseState
+    {
+        #region Fields & Properties
+        protected enum eTransitionValidity
+        {
+            Valid, // Valid transition, this state uses this transition in some way
+            Ignore, // We don't use this transition type at all, so we're ignoring it
+        }
+        #endregion
+
+        #region Public Methods
         public virtual void Start() { }
         public virtual void Update() { }
         public virtual void End() { }
-		#endregion
-	}	
+        #endregion
+    }
 }

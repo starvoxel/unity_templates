@@ -10,7 +10,7 @@
 namespace Starvoxel.Core
 {
     using System;
-    
+
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -111,80 +111,75 @@ namespace ");
 		#region ---------- PLACEHOLDER STATES ----------
 ");
 
-		bool hasNotPutSpace = true;
+            bool hasNotPutSpace = true;
 
-		// Completely placeholder.  We are just putting these here so that we can test stuff.  Eventually this will all be off and built in it's own T4
-		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
-        {
-			if (stateIndex == 0)
+            // Completely placeholder.  We are just putting these here so that we can test stuff.  Eventually this will all be off and built in it's own T4
+            for (int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
             {
-				continue;
+                string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
+
+                if (!hasNotPutSpace)
+                {
+
+                    this.Write("\t\t\r\n");
+
+                }
+                else
+                {
+                    hasNotPutSpace = false;
+                }
+
+                string baseStateName = m_ClassName + "State";
+
+                this.Write("\t\tpublic class ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
+                this.Write(" : ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(baseStateName));
+                this.Write("\r\n\t\t{\r\n\t\t\tpublic override ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+                this.Write(".eStates StateID\r\n\t\t\t{\r\n\t\t\t\tget { return ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+                this.Write(".eStates.");
+                this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_").ToUpper()));
+                this.Write("; }\r\n\t\t\t}\r\n\r\n\t\t\tpublic ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
+                this.Write("(");
+                this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+                this.Write(" context) : base(context) { }\r\n\r\n\t\t\tprotected override void PopulateTransitionDic" +
+                        "tionary() { }\r\n\t\t}\r\n");
+
             }
-
-			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
-
-			if (!hasNotPutSpace)
-            {
-
-            this.Write("\t\t\r\n");
-
-            }
-			else
-            {
-				hasNotPutSpace = false;
-            }
-
-			string baseStateName = m_ClassName + "State";
-
-            this.Write("\t\tpublic class ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
-            this.Write(" : ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(baseStateName));
-            this.Write("\r\n\t\t{\r\n\t\t\tpublic override ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eStates StateID\r\n\t\t\t{\r\n\t\t\t\tget { return ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eStates.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_").ToUpper()));
-            this.Write("; }\r\n\t\t\t}\r\n\r\n\t\t\tpublic ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
-            this.Write("(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(" context) : base(context) { }\r\n\r\n\t\t\tprotected override void PopulateTransitionDic" +
-                    "tionary() { }\r\n\t\t}\r\n");
-
-        }
 
             this.Write("\t\t#endregion\r\n\t\t#endregion\r\n\r\n\t\t#region Enums\r\n\t\t/// <summary>\r\n        /// All s" +
                     "tates.  Also used as the index in the state array\r\n        /// </summary>\r\n\t\tpub" +
                     "lic enum eStates\r\n\t\t{\r\n");
- 
-			// Iterate over all the states and create the enum
-			for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+
+            // Iterate over all the states and create the enum
+            for (int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
             {
 
-            this.Write("\t\t\t");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_").ToUpper()));
-            this.Write(" = ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateIndex.ToString()));
-            this.Write(",\r\n");
+                this.Write("\t\t\t");
+                this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_").ToUpper()));
+                this.Write(" = ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(stateIndex.ToString()));
+                this.Write(",\r\n");
 
             }
 
             this.Write("\t\t}\r\n\t\t\r\n        /// <summary>\r\n        /// All possible transition types\r\n      " +
                     "  /// </summary>\r\n\t\tpublic enum eTransitions\r\n\t\t{\r\n");
- 
-			// Iterate over all the transition types and create the enum
-			for(int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
+
+            // Iterate over all the transition types and create the enum
+            for (int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
             {
 
-            this.Write("\t\t\t");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_TransitionTypes[transitionIndex].Replace(" ", "_").ToUpper()));
-            this.Write(" = ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(transitionIndex.ToString()));
-            this.Write(",\r\n");
+                this.Write("\t\t\t");
+                this.Write(this.ToStringHelper.ToStringWithCulture(m_TransitionTypes[transitionIndex].Replace(" ", "_").ToUpper()));
+                this.Write(" = ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(transitionIndex.ToString()));
+                this.Write(",\r\n");
 
-                }
+            }
 
             this.Write("\t\t}\r\n\t\t#endregion\r\n\r\n\t\t#region Fields & Properties\r\n\t\t//const\r\n\r\n\t\t//public\r\n\r\n\t\t" +
                     "//protected\r\n\t\tprotected ");
@@ -205,17 +200,17 @@ namespace ");
             this.Write("];\r\n\t\t\t\r\n\t\t\t// I know this looks hardcoded, but because this is a generated file " +
                     "this will be auto-updated when re-generated.\r\n");
 
-		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
-        {
-			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
+            for (int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+            {
+                string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
 
-            this.Write("\t\t\tm_States[");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateIndex.ToString()));
-            this.Write("] = new ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
-            this.Write("(this);\r\n");
+                this.Write("\t\t\tm_States[");
+                this.Write(this.ToStringHelper.ToStringWithCulture(stateIndex.ToString()));
+                this.Write("] = new ");
+                this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
+                this.Write("(this);\r\n");
 
-        }
+            }
 
             this.Write(@"		}
 		#endregion
@@ -246,153 +241,153 @@ namespace ");
             return this.GenerationEnvironment.ToString();
         }
 
-private string _m_NamespaceField;
+        private string _m_NamespaceField;
 
-/// <summary>
-/// Access the m_Namespace parameter of the template.
-/// </summary>
-private string m_Namespace
-{
-    get
-    {
-        return this._m_NamespaceField;
-    }
-}
+        /// <summary>
+        /// Access the m_Namespace parameter of the template.
+        /// </summary>
+        private string m_Namespace
+        {
+            get
+            {
+                return this._m_NamespaceField;
+            }
+        }
 
-private string _m_ClassNameField;
+        private string _m_ClassNameField;
 
-/// <summary>
-/// Access the m_ClassName parameter of the template.
-/// </summary>
-private string m_ClassName
-{
-    get
-    {
-        return this._m_ClassNameField;
-    }
-}
+        /// <summary>
+        /// Access the m_ClassName parameter of the template.
+        /// </summary>
+        private string m_ClassName
+        {
+            get
+            {
+                return this._m_ClassNameField;
+            }
+        }
 
-private string[] _m_StateNamesField;
+        private string[] _m_StateNamesField;
 
-/// <summary>
-/// Access the m_StateNames parameter of the template.
-/// </summary>
-private string[] m_StateNames
-{
-    get
-    {
-        return this._m_StateNamesField;
-    }
-}
+        /// <summary>
+        /// Access the m_StateNames parameter of the template.
+        /// </summary>
+        private string[] m_StateNames
+        {
+            get
+            {
+                return this._m_StateNamesField;
+            }
+        }
 
-private int _m_StartingStateIndexField;
+        private int _m_StartingStateIndexField;
 
-/// <summary>
-/// Access the m_StartingStateIndex parameter of the template.
-/// </summary>
-private int m_StartingStateIndex
-{
-    get
-    {
-        return this._m_StartingStateIndexField;
-    }
-}
+        /// <summary>
+        /// Access the m_StartingStateIndex parameter of the template.
+        /// </summary>
+        private int m_StartingStateIndex
+        {
+            get
+            {
+                return this._m_StartingStateIndexField;
+            }
+        }
 
-private string[] _m_TransitionTypesField;
+        private string[] _m_TransitionTypesField;
 
-/// <summary>
-/// Access the m_TransitionTypes parameter of the template.
-/// </summary>
-private string[] m_TransitionTypes
-{
-    get
-    {
-        return this._m_TransitionTypesField;
-    }
-}
-
-
-/// <summary>
-/// Initialize the template
-/// </summary>
-public virtual void Initialize()
-{
-    if ((this.Errors.HasErrors == false))
-    {
-bool m_NamespaceValueAcquired = false;
-if (this.Session.ContainsKey("m_Namespace"))
-{
-    this._m_NamespaceField = ((string)(this.Session["m_Namespace"]));
-    m_NamespaceValueAcquired = true;
-}
-if ((m_NamespaceValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_Namespace");
-    if ((data != null))
-    {
-        this._m_NamespaceField = ((string)(data));
-    }
-}
-bool m_ClassNameValueAcquired = false;
-if (this.Session.ContainsKey("m_ClassName"))
-{
-    this._m_ClassNameField = ((string)(this.Session["m_ClassName"]));
-    m_ClassNameValueAcquired = true;
-}
-if ((m_ClassNameValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_ClassName");
-    if ((data != null))
-    {
-        this._m_ClassNameField = ((string)(data));
-    }
-}
-bool m_StateNamesValueAcquired = false;
-if (this.Session.ContainsKey("m_StateNames"))
-{
-    this._m_StateNamesField = ((string[])(this.Session["m_StateNames"]));
-    m_StateNamesValueAcquired = true;
-}
-if ((m_StateNamesValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StateNames");
-    if ((data != null))
-    {
-        this._m_StateNamesField = ((string[])(data));
-    }
-}
-bool m_StartingStateIndexValueAcquired = false;
-if (this.Session.ContainsKey("m_StartingStateIndex"))
-{
-    this._m_StartingStateIndexField = ((int)(this.Session["m_StartingStateIndex"]));
-    m_StartingStateIndexValueAcquired = true;
-}
-if ((m_StartingStateIndexValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StartingStateIndex");
-    if ((data != null))
-    {
-        this._m_StartingStateIndexField = ((int)(data));
-    }
-}
-bool m_TransitionTypesValueAcquired = false;
-if (this.Session.ContainsKey("m_TransitionTypes"))
-{
-    this._m_TransitionTypesField = ((string[])(this.Session["m_TransitionTypes"]));
-    m_TransitionTypesValueAcquired = true;
-}
-if ((m_TransitionTypesValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_TransitionTypes");
-    if ((data != null))
-    {
-        this._m_TransitionTypesField = ((string[])(data));
-    }
-}
+        /// <summary>
+        /// Access the m_TransitionTypes parameter of the template.
+        /// </summary>
+        private string[] m_TransitionTypes
+        {
+            get
+            {
+                return this._m_TransitionTypesField;
+            }
+        }
 
 
-    }
-}
+        /// <summary>
+        /// Initialize the template
+        /// </summary>
+        public virtual void Initialize()
+        {
+            if ((this.Errors.HasErrors == false))
+            {
+                bool m_NamespaceValueAcquired = false;
+                if (this.Session.ContainsKey("m_Namespace"))
+                {
+                    this._m_NamespaceField = ((string)(this.Session["m_Namespace"]));
+                    m_NamespaceValueAcquired = true;
+                }
+                if ((m_NamespaceValueAcquired == false))
+                {
+                    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_Namespace");
+                    if ((data != null))
+                    {
+                        this._m_NamespaceField = ((string)(data));
+                    }
+                }
+                bool m_ClassNameValueAcquired = false;
+                if (this.Session.ContainsKey("m_ClassName"))
+                {
+                    this._m_ClassNameField = ((string)(this.Session["m_ClassName"]));
+                    m_ClassNameValueAcquired = true;
+                }
+                if ((m_ClassNameValueAcquired == false))
+                {
+                    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_ClassName");
+                    if ((data != null))
+                    {
+                        this._m_ClassNameField = ((string)(data));
+                    }
+                }
+                bool m_StateNamesValueAcquired = false;
+                if (this.Session.ContainsKey("m_StateNames"))
+                {
+                    this._m_StateNamesField = ((string[])(this.Session["m_StateNames"]));
+                    m_StateNamesValueAcquired = true;
+                }
+                if ((m_StateNamesValueAcquired == false))
+                {
+                    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StateNames");
+                    if ((data != null))
+                    {
+                        this._m_StateNamesField = ((string[])(data));
+                    }
+                }
+                bool m_StartingStateIndexValueAcquired = false;
+                if (this.Session.ContainsKey("m_StartingStateIndex"))
+                {
+                    this._m_StartingStateIndexField = ((int)(this.Session["m_StartingStateIndex"]));
+                    m_StartingStateIndexValueAcquired = true;
+                }
+                if ((m_StartingStateIndexValueAcquired == false))
+                {
+                    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StartingStateIndex");
+                    if ((data != null))
+                    {
+                        this._m_StartingStateIndexField = ((int)(data));
+                    }
+                }
+                bool m_TransitionTypesValueAcquired = false;
+                if (this.Session.ContainsKey("m_TransitionTypes"))
+                {
+                    this._m_TransitionTypesField = ((string[])(this.Session["m_TransitionTypes"]));
+                    m_TransitionTypesValueAcquired = true;
+                }
+                if ((m_TransitionTypesValueAcquired == false))
+                {
+                    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_TransitionTypes");
+                    if ((data != null))
+                    {
+                        this._m_TransitionTypesField = ((string[])(data));
+                    }
+                }
+
+
+            }
+        }
 
 
     }
@@ -495,7 +490,7 @@ if ((m_TransitionTypesValueAcquired == false))
             }
             // If we're starting off, or if the previous text ended with a newline,
             // we have to append the current indent first.
-            if (((this.GenerationEnvironment.Length == 0) 
+            if (((this.GenerationEnvironment.Length == 0)
                         || this.endsWithNewline))
             {
                 this.GenerationEnvironment.Append(this.currentIndentField);
@@ -613,7 +608,7 @@ if ((m_TransitionTypesValueAcquired == false))
         /// </summary>
         public class ToStringInstanceHelper
         {
-            private System.IFormatProvider formatProviderField  = global::System.Globalization.CultureInfo.InvariantCulture;
+            private System.IFormatProvider formatProviderField = global::System.Globalization.CultureInfo.InvariantCulture;
             /// <summary>
             /// Gets or sets format provider to be used by ToStringWithCulture method.
             /// </summary>
@@ -621,13 +616,13 @@ if ((m_TransitionTypesValueAcquired == false))
             {
                 get
                 {
-                    return this.formatProviderField ;
+                    return this.formatProviderField;
                 }
                 set
                 {
                     if ((value != null))
                     {
-                        this.formatProviderField  = value;
+                        this.formatProviderField = value;
                     }
                 }
             }

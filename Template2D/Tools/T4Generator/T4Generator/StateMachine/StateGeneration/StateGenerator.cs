@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace T4Generator.StateMachine.StateGeneration
+namespace Starvoxel.Core
 {
     using System.Collections.Generic;
     using System;

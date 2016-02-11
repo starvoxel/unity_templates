@@ -1,0 +1,1 @@
+{"ContextName":"TestContext","TransitionTypes":["Seen","Heard","Next"],"StateInfo":["{\"Name\":\"Idle\",\"ValidTypes\":[\"Seen\",\"Heard\",\"Next\"]}","{\"Name\":\"Patrol\",\"ValidTypes\":[\"Seen\",\"Heard\",\"Next\"]}","{\"Name\":\"Chase\",\"ValidTypes\":[\"Next\"]}","{\"Name\":\"Fire\",\"ValidTypes\":[\"Next\"]}"]}

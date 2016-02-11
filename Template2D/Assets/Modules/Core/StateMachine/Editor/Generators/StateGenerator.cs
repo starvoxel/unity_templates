@@ -7,30 +7,36 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Starvoxel.Core
+namespace starvoxel.Core
 {
+    using System.Collections.Generic;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "12.0.0.0")]
-    public partial class ContextGenerator : ContextGeneratorBase
+    public partial class StateGenerator : StateGeneratorBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(" \r\n");
+
+	string stateName = m_StateName + "State";
+	string baseStateName = m_ContextName + "State";
+	string stateEnum = m_ContextName + ".eStates";
+	string transitionEnum = m_ContextName + ".eTransitions";
+
             this.Write("/* --------------------------\r\n *\r\n * ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(@".cs
- *
- * Description: This is a auto-generated state machine.
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateName));
+            this.Write(".cs\r\n *\r\n * Description: One of the states used in the ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ContextName));
+            this.Write(@" state machine.
+ * WARNING: THIS CLASS IS GENERATED.  CHANGES COULD BE LOST.
  *
  * -------------------------- */
-
 #region Includes
 #region System Includes
 using System.Collections;
@@ -44,205 +50,84 @@ using Starvoxel.Core;
 
 namespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(m_Namespace));
-            this.Write("\r\n{\r\n\tpublic sealed partial class ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(" \r\n\t{\r\n\t\t#region Classes\r\n\t\tpublic abstract class ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(@"State : BaseState 
-		{
-			#region Structs
-            /// <summary>
-            /// Data used to determine if a transition is valid and what state it would transition to
-            /// </summary>
-			protected struct sTransitionData
-			{
-				public readonly eTransitionValidity TransitionValidity;
-				public readonly ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eStates StateID;\r\n\r\n\t\t\t\tpublic sTransitionData(eTransitionValidity transitionVal" +
-                    "idity, ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eStates stateID)\r\n\t\t\t\t{\r\n\t\t\t\t\tTransitionValidity = transitionValidity;\r\n\t\t\t\t\tSta" +
-                    "teID = stateID;\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t\t#endregion\r\n\r\n\t\t\t#region Fields & Properties\r\n\t" +
-                    "\t\tprotected readonly ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(" m_Context = null; // Link to the context that owns tis instance.\r\n\t\t\tprotected D" +
-                    "ictionary<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(@".eTransitions, sTransitionData> m_Transitions = null; // Map of all the transitions and to which states those transitions lead to
-			
-            /// <summary>
-            /// State enum associated with this class.
-            /// </summary>
-			public abstract ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eStates StateID\r\n\t\t\t{\r\n\t\t\t\tget;\r\n\t\t\t}\r\n\t\t\t#endregion\r\n\r\n\t\t\t#region Constructors\r" +
-                    "\n\t\t\tpublic ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write("State(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(@" context)
-			{
-				m_Context = context;
-
-				PopulateTransitionDictionary();
-			}
-			#endregion
-
-			#region Public Methods
-            /// <summary>
-            /// Checks if the provided transition type is a valid transition for this state.
-            /// </summary>
-            /// <param name=""transitionType"">Transition type</param>
-            /// <returns></returns>
-			public bool IsValidTransition(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(@".eTransitions transitionType)
-			{
-				 return m_Transitions != null && m_Transitions.ContainsKey(transitionType) && m_Transitions[transitionType].TransitionValidity == eTransitionValidity.Valid;
-			}
-			#endregion
-			
-			#region Protected Methods
-			protected abstract void PopulateTransitionDictionary();
-			#endregion
-		}
-
-		#region ---------- PLACEHOLDER STATES ----------
-");
-
-		bool hasNotPutSpace = true;
-
-		// Completely placeholder.  We are just putting these here so that we can test stuff.  Eventually this will all be off and built in it's own T4
-		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
-        {
-			if (stateIndex == 0)
-            {
-				continue;
-            }
-
-			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
-
-			if (!hasNotPutSpace)
-            {
-
-            this.Write("\t\t\r\n");
-
-            }
-			else
-            {
-				hasNotPutSpace = false;
-            }
-
-			string baseStateName = m_ClassName + "State";
-
-            this.Write("\t\tpublic class ");
+            this.Write("\r\n{\r\n\tpublic partial class ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ContextName));
+            this.Write("\r\n\t{\r\n\t\tpublic sealed partial class ");
             this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
             this.Write(" : ");
             this.Write(this.ToStringHelper.ToStringWithCulture(baseStateName));
-            this.Write("\r\n\t\t{\r\n\t\t\tpublic override ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eStates StateID\r\n\t\t\t{\r\n\t\t\t\tget { return ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(".eStates.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_").ToUpper()));
+            this.Write("\r\n\t\t{\r\n\t\t\tpublic ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(stateEnum));
+            this.Write(" StateID\r\n\t\t\t{\r\n\t\t\t\tget { return ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(stateEnum));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateName.Replace(" ", "_").ToUpper()));
             this.Write("; }\r\n\t\t\t}\r\n\r\n\t\t\tpublic ");
             this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
             this.Write("(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(m_ContextName));
             this.Write(" context) : base(context) { }\r\n\r\n\t\t\tprotected override void PopulateTransitionDic" +
-                    "tionary() { }\r\n\t\t}\r\n");
+                    "tionary()\r\n\t\t\t{\r\n\t\t\t\tm_Transitions = new Dictionary<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(transitionEnum));
+            this.Write(", sTransitionData>();\r\n\r\n\t\t\t\tsTransitionData transitionData;\r\n\r\n\t\t\t\t// Valid Tran" +
+                    "sitions\r\n");
 
-        }
+			List<string> transitionTypes = new List<string>(m_TransitionTypes);
 
-            this.Write("\t\t#endregion\r\n\t\t#endregion\r\n\r\n\t\t#region Enums\r\n\t\t/// <summary>\r\n        /// All s" +
-                    "tates.  Also used as the index in the state array\r\n        /// </summary>\r\n\t\tpub" +
-                    "lic enum eStates\r\n\t\t{\r\n");
- 
-			// Iterate over all the states and create the enum
-			for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
+			for (int i = 0; i < m_ValidTransitionTypes.Length; ++i)
             {
+				transitionTypes.Remove(m_ValidTransitionTypes[i]);
 
-            this.Write("\t\t\t");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames[stateIndex].Replace(" ", "_").ToUpper()));
-            this.Write(" = ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateIndex.ToString()));
-            this.Write(",\r\n");
+				string stateEnumName = m_ValidStateNames[i].Replace(" ", "_").ToUpper();
+				string transitionEnumValue = m_ValidTransitionTypes[i].Replace(" ", "_").ToUpper();
 
-            }
+				if (i > 0)
+                {
 
-            this.Write("\t\t}\r\n\t\t\r\n        /// <summary>\r\n        /// All possible transition types\r\n      " +
-                    "  /// </summary>\r\n\t\tpublic enum eTransitions\r\n\t\t{\r\n");
- 
-			// Iterate over all the transition types and create the enum
-			for(int transitionIndex = 0; transitionIndex < m_TransitionTypes.Length; ++transitionIndex)
-            {
-
-            this.Write("\t\t\t");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_TransitionTypes[transitionIndex].Replace(" ", "_").ToUpper()));
-            this.Write(" = ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(transitionIndex.ToString()));
-            this.Write(",\r\n");
+            this.Write("\r\n");
 
                 }
 
-            this.Write("\t\t}\r\n\t\t#endregion\r\n\r\n\t\t#region Fields & Properties\r\n\t\t//const\r\n\r\n\t\t//public\r\n\r\n\t\t" +
-                    "//protected\r\n\t\tprotected ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write("State[] m_States; // Instances of all the states\r\n\t\tprotected int m_CurrentStateI" +
-                    "ndex = ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_StartingStateIndex));
-            this.Write("; // Index of the currently active state.  The default value is set on generation" +
-                    ".\r\n\t\t//private\r\n\r\n\t\t//properties\r\n\t\tpublic ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write("State CurrentState\r\n\t\t{\r\n\t\t\tget { return m_States[m_CurrentStateIndex]; }\r\n\t\t}\r\n\t" +
-                    "\t#endregion\r\n\r\n\t\t#region Constructor Methods\r\n\t\tpublic ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write("()\r\n\t\t{\r\n\t\t\tm_States = new ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write("State[");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_StateNames.Length.ToString()));
-            this.Write("];\r\n\t\t\t\r\n\t\t\t// I know this looks hardcoded, but because this is a generated file " +
-                    "this will be auto-updated when re-generated.\r\n");
+            this.Write("\t\t\t\ttransitionData = new sTransitionData(eTransitionValidity.Valid, ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(stateEnum));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(stateEnumName));
+            this.Write(");\r\n\t\t\t\tm_Transitions.Add(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(transitionEnum));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(transitionEnumValue));
+            this.Write(", transitionData);\r\n");
 
-		for(int stateIndex = 0; stateIndex < m_StateNames.Length; ++stateIndex)
-        {
-			string stateName = m_StateNames[stateIndex].Replace(" ", "") + "State";
+            }
 
-            this.Write("\t\t\tm_States[");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateIndex.ToString()));
-            this.Write("] = new ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(stateName));
-            this.Write("(this);\r\n");
+			if (transitionTypes.Count > 0)
+            {
 
-        }
+            this.Write("\r\n\t\t\t\t//Ignored Transitions\r\n");
 
-            this.Write(@"		}
-		#endregion
+				for(int i = 0; i < transitionTypes.Count; ++i)
+                {
+					string transitionEnumValue = transitionTypes[i].Replace(" ", "_").ToUpper();
 
-		#region Public Methods
-        /// <summary>
-        /// Called to process a transition and potentially transition to a new state
-        /// </summary>
-        /// <param name=""transitionType"">Transiton type to try and transition with</param>
-		public void ProcessTransition(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(m_ClassName));
-            this.Write(@".eTransitions transitionType)
-		{
-			if (CurrentState.IsValidTransition(transitionType))
-			{
-				//TODO jsmellie: Fetch the state enum associated with the transition type
-			}
-		}
-		#endregion
+					if (i > 0)
+					{
 
-		#region Protected Methods
-		#endregion
+            this.Write("\r\n");
 
-		#region Private Methods
-		#endregion
-	}
-}");
+					}
+
+            this.Write("\t\t\t\ttransitionData = new sTransitionData(eTransitionValidity.Ignore, (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(stateEnum));
+            this.Write(")0);\r\n\t\t\t\tm_Transitions.Add(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(transitionEnum));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(transitionEnumValue));
+            this.Write(", transitionData);\r\n");
+
+                }
+            }
+
+            this.Write("\t\t\t}\r\n\t\t}\r\n\t}\r\n}");
             return this.GenerationEnvironment.ToString();
         }
 
@@ -259,42 +144,29 @@ private string m_Namespace
     }
 }
 
-private string _m_ClassNameField;
+private string _m_ContextNameField;
 
 /// <summary>
-/// Access the m_ClassName parameter of the template.
+/// Access the m_ContextName parameter of the template.
 /// </summary>
-private string m_ClassName
+private string m_ContextName
 {
     get
     {
-        return this._m_ClassNameField;
+        return this._m_ContextNameField;
     }
 }
 
-private string[] _m_StateNamesField;
+private string _m_StateNameField;
 
 /// <summary>
-/// Access the m_StateNames parameter of the template.
+/// Access the m_StateName parameter of the template.
 /// </summary>
-private string[] m_StateNames
+private string m_StateName
 {
     get
     {
-        return this._m_StateNamesField;
-    }
-}
-
-private int _m_StartingStateIndexField;
-
-/// <summary>
-/// Access the m_StartingStateIndex parameter of the template.
-/// </summary>
-private int m_StartingStateIndex
-{
-    get
-    {
-        return this._m_StartingStateIndexField;
+        return this._m_StateNameField;
     }
 }
 
@@ -308,6 +180,32 @@ private string[] m_TransitionTypes
     get
     {
         return this._m_TransitionTypesField;
+    }
+}
+
+private string[] _m_ValidTransitionTypesField;
+
+/// <summary>
+/// Access the m_ValidTransitionTypes parameter of the template.
+/// </summary>
+private string[] m_ValidTransitionTypes
+{
+    get
+    {
+        return this._m_ValidTransitionTypesField;
+    }
+}
+
+private string[] _m_ValidStateNamesField;
+
+/// <summary>
+/// Access the m_ValidStateNames parameter of the template.
+/// </summary>
+private string[] m_ValidStateNames
+{
+    get
+    {
+        return this._m_ValidStateNamesField;
     }
 }
 
@@ -333,46 +231,32 @@ if ((m_NamespaceValueAcquired == false))
         this._m_NamespaceField = ((string)(data));
     }
 }
-bool m_ClassNameValueAcquired = false;
-if (this.Session.ContainsKey("m_ClassName"))
+bool m_ContextNameValueAcquired = false;
+if (this.Session.ContainsKey("m_ContextName"))
 {
-    this._m_ClassNameField = ((string)(this.Session["m_ClassName"]));
-    m_ClassNameValueAcquired = true;
+    this._m_ContextNameField = ((string)(this.Session["m_ContextName"]));
+    m_ContextNameValueAcquired = true;
 }
-if ((m_ClassNameValueAcquired == false))
+if ((m_ContextNameValueAcquired == false))
 {
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_ClassName");
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_ContextName");
     if ((data != null))
     {
-        this._m_ClassNameField = ((string)(data));
+        this._m_ContextNameField = ((string)(data));
     }
 }
-bool m_StateNamesValueAcquired = false;
-if (this.Session.ContainsKey("m_StateNames"))
+bool m_StateNameValueAcquired = false;
+if (this.Session.ContainsKey("m_StateName"))
 {
-    this._m_StateNamesField = ((string[])(this.Session["m_StateNames"]));
-    m_StateNamesValueAcquired = true;
+    this._m_StateNameField = ((string)(this.Session["m_StateName"]));
+    m_StateNameValueAcquired = true;
 }
-if ((m_StateNamesValueAcquired == false))
+if ((m_StateNameValueAcquired == false))
 {
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StateNames");
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StateName");
     if ((data != null))
     {
-        this._m_StateNamesField = ((string[])(data));
-    }
-}
-bool m_StartingStateIndexValueAcquired = false;
-if (this.Session.ContainsKey("m_StartingStateIndex"))
-{
-    this._m_StartingStateIndexField = ((int)(this.Session["m_StartingStateIndex"]));
-    m_StartingStateIndexValueAcquired = true;
-}
-if ((m_StartingStateIndexValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_StartingStateIndex");
-    if ((data != null))
-    {
-        this._m_StartingStateIndexField = ((int)(data));
+        this._m_StateNameField = ((string)(data));
     }
 }
 bool m_TransitionTypesValueAcquired = false;
@@ -389,6 +273,34 @@ if ((m_TransitionTypesValueAcquired == false))
         this._m_TransitionTypesField = ((string[])(data));
     }
 }
+bool m_ValidTransitionTypesValueAcquired = false;
+if (this.Session.ContainsKey("m_ValidTransitionTypes"))
+{
+    this._m_ValidTransitionTypesField = ((string[])(this.Session["m_ValidTransitionTypes"]));
+    m_ValidTransitionTypesValueAcquired = true;
+}
+if ((m_ValidTransitionTypesValueAcquired == false))
+{
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_ValidTransitionTypes");
+    if ((data != null))
+    {
+        this._m_ValidTransitionTypesField = ((string[])(data));
+    }
+}
+bool m_ValidStateNamesValueAcquired = false;
+if (this.Session.ContainsKey("m_ValidStateNames"))
+{
+    this._m_ValidStateNamesField = ((string[])(this.Session["m_ValidStateNames"]));
+    m_ValidStateNamesValueAcquired = true;
+}
+if ((m_ValidStateNamesValueAcquired == false))
+{
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("m_ValidStateNames");
+    if ((data != null))
+    {
+        this._m_ValidStateNamesField = ((string[])(data));
+    }
+}
 
 
     }
@@ -401,7 +313,7 @@ if ((m_TransitionTypesValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "12.0.0.0")]
-    public class ContextGeneratorBase
+    public class StateGeneratorBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

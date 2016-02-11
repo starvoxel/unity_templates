@@ -34,7 +34,7 @@ namespace <#= m_Namespace #>
             /// <summary>
             /// Data used to determine if a transition is valid and what state it would transition to
             /// </summary>
-			public struct sTransitionData
+			protected struct sTransitionData
 			{
 				public readonly eTransitionValidity TransitionValidity;
 				public readonly <#= m_ClassName #>.eStates StateID;
@@ -115,7 +115,7 @@ namespace <#= m_Namespace #>
 #>
 		public class <#= stateName #> : <#= baseStateName #>
 		{
-			public <#= m_ClassName #>.eStates StateID
+			public override <#= m_ClassName #>.eStates StateID
 			{
 				get { return <#= m_ClassName #>.eStates.<#= m_StateNames[stateIndex].Replace(" ", "_").ToUpper() #>; }
 			}
