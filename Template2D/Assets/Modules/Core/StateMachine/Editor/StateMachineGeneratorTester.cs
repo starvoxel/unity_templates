@@ -78,8 +78,8 @@ using System.Collections.Generic;
 		//protected
 	
 		//private
-        private string m_Path = string.Empty;
         private string m_ContextName = string.Empty;
+        private bool m_TransitionTypesFoldout;
         private string[] m_TransitionTypes = null;
         private StateMachineGeneratorInterface.sStateInfo[] m_StateInfo;
 	
@@ -100,12 +100,17 @@ using System.Collections.Generic;
 
         private void GenerationTest()
         {
-            StateMachineGeneratorInterface.GenerateStateMachine(PATH, CONTEXT_NAME, TRANSITION_NAMES, STATE_INFO);
+            string outputPath = EditorUtility.SaveFolderPanel(title: "Save Location",
+                defaultName: "StateMachine",
+                folder: "/Assets/");
+
+            StateMachineGeneratorInterface.GenerateStateMachine(outputPath, CONTEXT_NAME, TRANSITION_NAMES, STATE_INFO);
         }
 
         private void OnGUI()
         {
             m_ContextName = EditorGUILayout.TextField("Context Name", m_ContextName);
+            m_TransitionTypes = OnStringArrayGUI("Transition Types", m_TransitionTypes, ref m_TransitionTypesFoldout);
 
             EditorGUILayout.Space();
 
@@ -201,26 +206,101 @@ using System.Collections.Generic;
             }
         }
 		#endregion
-
-        private int[] OnIntArrayGUI(int[] array)
+        private string[] OnStringArrayGUI(string name, string[] array, ref bool isShowing)
         {
+            return OnStringArrayGUI(new GUIContent(name), array, ref isShowing);
+        }
+
+
+        private string[] OnStringArrayGUI(GUIContent content, string[] array, ref bool isShowing)
+        {
+            isShowing = EditorGUILayout.Foldout(isShowing, content);
+
+            if (array == null)
+            {
+                array = new string[0];
+            }
+
+            List<string> list = new List<string>(array);
+
+            if (isShowing)
+            {
+                EditorGUI.indentLevel += 1;
+
+                int count = EditorGUILayout.IntField("Size", list.Count);
+
+                while (count > list.Count)
+                {
+                    if (list.Count != 0)
+                    {
+                        list.Add(list[list.Count - 1]);
+                    }
+                    else
+                    {
+                        list.Add(string.Empty);
+                    }
+                }
+
+                while (count < list.Count)
+                {
+                    list.RemoveAt(list.Count - 1);
+                }
+
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    list[i] = EditorGUILayout.TextField("Element " + i.ToString(), list[i]);
+                }
+                EditorGUI.indentLevel -= 1;
+            }
+
+            return list.ToArray();
+        }
+
+        private int[] OnIntArrayGUI(string name, int[] array)
+        {
+            return OnIntArrayGUI(new GUIContent(name), array);
+        }
+
+        private bool foldout = false;
+        private int[] OnIntArrayGUI(GUIContent content, int[] array)
+        {
+            foldout = EditorGUILayout.Foldout(foldout, content);
+
+            if (array == null)
+            {
+                array = new int[0];
+            }
+
             List<int> list = new List<int>(array);
 
-            int count = EditorGUILayout.IntField("Element Size", list.Count);
-
-            while (count > list.Count)
+            if (foldout)
             {
-                list.Add(list[list.Count - 1]);
-            }
+                EditorGUI.indentLevel += 1;
 
-            while (count < list.Count)
-            {
-                list.RemoveAt(list.Count - 1);
-            }
+                int count = EditorGUILayout.IntField("Size", list.Count);
 
-            for (int i = 0; i < list.Count; ++i )
-            {
-                list[i] = EditorGUILayout.IntField("Element " + i.ToString(), list[i]);
+                while (count > list.Count)
+                {
+                    if (list.Count != 0)
+                    {
+                        list.Add(list[list.Count - 1]);
+                    }
+                    else
+                    {
+                        list.Add(0);
+                    }
+                }
+
+                while (count < list.Count)
+                {
+                    list.RemoveAt(list.Count - 1);
+                }
+
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    list[i] = EditorGUILayout.IntField("Element " + i.ToString(), list[i]);
+                }
+                EditorGUI.indentLevel -= 1;
             }
 
             return list.ToArray();

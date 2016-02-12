@@ -124,68 +124,76 @@ namespace Starvoxel.Core
         #region Public Methods
         public static void GenerateStateMachine(string path, string contextName, string[] transitionTypes, sStateInfo[] states)
         {
-            List<string> stateNames = new List<string>();
-            List<sStateInfo> validStates = new List<sStateInfo>(states);
-
-            List<int> invalidStateIndices = new List<int>();
-
-            for (int i = 0; i < states.Length; ++i)
+            if (!string.IsNullOrEmpty(path))
             {
-                if (!string.IsNullOrEmpty(states[i].Name) && !stateNames.Contains(states[i].Name))
+                if (path[path.Length - 1] != System.IO.Path.PathSeparator)
                 {
-                    stateNames.Add(states[i].Name);
+                    path += System.IO.Path.DirectorySeparatorChar;
                 }
-                else
-                {
-                    invalidStateIndices.Add(i);
-                }
-            }
 
-            if (invalidStateIndices.Count > 0)
-            {
-                for (int invalidIndex = 0; invalidIndex < invalidStateIndices.Count; invalidIndex++)
-                {
-                    validStates.Remove(states[invalidIndex]);
-                }
-            }
+                List<string> stateNames = new List<string>();
+                List<sStateInfo> validStates = new List<sStateInfo>(states);
 
-            List<string> transitionNames = new List<string>();
+                List<int> invalidStateIndices = new List<int>();
 
-            for(int validIndex = 0; validIndex < validStates.Count; ++validIndex)
-            {
-                for(int transitionIndex = 0; transitionIndex < validStates[validIndex].ValidTypes.Length; ++transitionIndex)
+                for (int i = 0; i < states.Length; ++i)
                 {
-                    if (!string.IsNullOrEmpty(validStates[validIndex].ValidTypes[transitionIndex]) && !transitionNames.Contains(validStates[validIndex].ValidTypes[transitionIndex]))
+                    if (!string.IsNullOrEmpty(states[i].Name) && !stateNames.Contains(states[i].Name))
                     {
-                        transitionNames.Add(validStates[validIndex].ValidTypes[transitionIndex]);
+                        stateNames.Add(states[i].Name);
+                    }
+                    else
+                    {
+                        invalidStateIndices.Add(i);
                     }
                 }
+
+                if (invalidStateIndices.Count > 0)
+                {
+                    for (int invalidIndex = 0; invalidIndex < invalidStateIndices.Count; invalidIndex++)
+                    {
+                        validStates.Remove(states[invalidIndex]);
+                    }
+                }
+
+                List<string> transitionNames = new List<string>();
+
+                for (int validIndex = 0; validIndex < validStates.Count; ++validIndex)
+                {
+                    for (int transitionIndex = 0; transitionIndex < validStates[validIndex].ValidTypes.Length; ++transitionIndex)
+                    {
+                        if (!string.IsNullOrEmpty(validStates[validIndex].ValidTypes[transitionIndex]) && !transitionNames.Contains(validStates[validIndex].ValidTypes[transitionIndex]))
+                        {
+                            transitionNames.Add(validStates[validIndex].ValidTypes[transitionIndex]);
+                        }
+                    }
+                }
+
+                string ns = string.Format("{0}.{1}", CodifyString(PlayerSettings.companyName), CodifyString(PlayerSettings.productName));
+
+                ContextGenerator contextGenerator = new ContextGenerator();
+
+                contextGenerator.Session = new Dictionary<string, object>();
+
+                contextGenerator.Session["m_Namespace"] = ns;
+                contextGenerator.Session["m_ClassName"] = contextName;
+                contextGenerator.Session["m_StateNames"] = stateNames.ToArray();
+                contextGenerator.Session["m_StartingStateIndex"] = 0;
+                contextGenerator.Session["m_TransitionTypes"] = transitionTypes;
+
+                contextGenerator.Initialize();
+
+                string test = contextGenerator.TransformText();
+
+                if (!System.IO.Directory.Exists(path))
+                {
+                    System.IO.Directory.CreateDirectory(path);
+                }
+
+                System.IO.File.WriteAllText(path + contextName + FILE_EXTENSION, test);
+
+                AssetDatabase.Refresh();
             }
-
-            string ns = string.Format("{0}.{1}", CodifyString(PlayerSettings.companyName), CodifyString(PlayerSettings.productName));
-
-            ContextGenerator contextGenerator = new ContextGenerator();
-
-            contextGenerator.Session = new Dictionary<string, object>();
-
-            contextGenerator.Session["m_Namespace"] = ns;
-            contextGenerator.Session["m_ClassName"] = contextName;
-            contextGenerator.Session["m_StateNames"] = stateNames.ToArray();
-            contextGenerator.Session["m_StartingStateIndex"] = 0;
-            contextGenerator.Session["m_TransitionTypes"] = transitionTypes;
-
-            contextGenerator.Initialize();
-
-            string test = contextGenerator.TransformText();
-
-            if (!System.IO.Directory.Exists(path))
-            {
-                System.IO.Directory.CreateDirectory(path);
-            }
-
-            System.IO.File.WriteAllText(path + contextName + FILE_EXTENSION, test);
-
-            AssetDatabase.Refresh();
         }
         #endregion
 
