@@ -35,22 +35,156 @@ namespace Starvoxel.Core
     public static class StateMachineGeneratorInterface
     {
         #region Structs
-        public struct sStateInfo
+        public class sStateInfo
         {
-            public string Name;
-            public string[] ValidTypes;
+            public class sTransitionInfo
+            {
+                public string TransitionName;
+                public string StateName;
 
-            public sStateInfo(string name, string[] validTypes)
+                public sTransitionInfo(string transitionName, string stateName)
+                {
+                    TransitionName = transitionName;
+                    StateName = stateName;
+                }
+
+                public sTransitionInfo()
+                {
+                    TransitionName = string.Empty;
+                    StateName = string.Empty;
+                }
+
+                public string Save()
+                {
+                    Dictionary<string, object> saveData = new Dictionary<string, object>();
+                    saveData.Add("TransitionName", TransitionName);
+                    saveData.Add("StateName", StateName);
+
+                    return MiniJSON.Json.Serialize(saveData);
+                }
+
+                public void OnGUI()
+                {
+                    TransitionName = EditorGUILayout.TextField("Transition Name", TransitionName);
+                    StateName = EditorGUILayout.TextField("State Name", StateName);
+                }
+
+                public static sTransitionInfo Load(object data)
+                {
+                    if (data is string)
+                    {
+                        return Load(data as string);
+                    }
+                    else if (data is Dictionary<string, object>)
+                    {
+                        return Load(data as Dictionary<string, object>);
+                    }
+                    else
+                    {
+                        return new sTransitionInfo();
+                    }
+                }
+
+                public static sTransitionInfo Load(string json)
+                {
+                    return Load(MiniJSON.Json.Deserialize(json) as Dictionary<string, object>);
+                }
+
+                public static sTransitionInfo Load(Dictionary<string, object> data)
+                {
+                    sTransitionInfo info = new sTransitionInfo();
+
+                    if (data != null)
+                    {
+                        if (data.ContainsKey("TransitionName"))
+                        {
+                            info.TransitionName = data["TransitionName"] as string;
+                        }
+
+                        if (data.ContainsKey("StateName"))
+                        {
+                            info.StateName = data["StateName"] as string;
+                        }
+                    }
+
+                    return info;
+                }
+            }
+
+            public string Name;
+            public sTransitionInfo[] ValidTransitions;
+
+            public sStateInfo()
+            {
+                Name = string.Empty;
+                ValidTransitions = null;
+                foldout = false;
+            }
+
+            public sStateInfo(string name, sTransitionInfo[] validTransitions)
             {
                 Name = name;
-                ValidTypes = validTypes;
+                ValidTransitions = validTransitions;
+                foldout = false;
+            }
+
+            private bool foldout;
+            public void OnGUI()
+            {
+                Name = EditorGUILayout.TextField("Name", Name);
+                foldout = EditorGUILayout.Foldout(foldout, "Valid Transitions");
+
+                if (ValidTransitions == null)
+                {
+                    ValidTransitions = new sTransitionInfo[0];
+                }
+
+                List<sTransitionInfo> list = new List<sTransitionInfo>(ValidTransitions);
+
+                if (foldout)
+                {
+                    EditorGUI.indentLevel += 1;
+
+                    int count = EditorGUILayout.IntField("Size", list.Count);
+
+                    while (count > list.Count)
+                    {
+                        if (list.Count != 0)
+                        {
+                            sTransitionInfo lastElement = list[list.Count - 1];
+                            list.Add(new sTransitionInfo(lastElement.TransitionName, lastElement.StateName));
+                        }
+                        else
+                        {
+                            list.Add(new sTransitionInfo());
+                        }
+                    }
+
+                    while (count < list.Count)
+                    {
+                        list.RemoveAt(list.Count - 1);
+                    }
+
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        list[i].OnGUI();
+                    }
+                    EditorGUI.indentLevel -= 1;
+                }
+
+                ValidTransitions = list.ToArray();
             }
 
             public string Save()
             {
                 Dictionary<string, object> saveData = new Dictionary<string, object>();
                 saveData.Add("Name", Name);
-                saveData.Add("ValidTypes", ValidTypes);
+                string[] savedTransitions = new string[ValidTransitions.Length];
+                for (int i = 0; i < ValidTransitions.Length; ++i)
+                {
+                    savedTransitions[i] = ValidTransitions[i].Save();
+                }
+                saveData.Add("ValidTypes", savedTransitions);
                 return MiniJSON.Json.Serialize(saveData);
             }
 
@@ -83,15 +217,15 @@ namespace Starvoxel.Core
 
                     if (data.ContainsKey("ValidTypes"))
                     {
-                        List<object> validTypes = data["ValidTypes"] as List<object>;
+                        List<object> validTransitions = data["ValidTypes"] as List<object>;
 
-                        if (validTypes != null)
+                        if (validTransitions != null)
                         {
-                            info.ValidTypes = new string[validTypes.Count];
+                            info.ValidTransitions = new sTransitionInfo[validTransitions.Count];
 
-                            for (int i = 0; i < validTypes.Count; ++i)
+                            for (int i = 0; i < validTransitions.Count; ++i)
                             {
-                                info.ValidTypes[i] = validTypes[i] as string;
+                                info.ValidTransitions[i] = sTransitionInfo.Load(validTransitions[i]);
                             }
                         }
                     }
@@ -122,7 +256,7 @@ namespace Starvoxel.Core
         #endregion
 
         #region Public Methods
-        public static void GenerateStateMachine(string path, string contextName, string[] transitionTypes, sStateInfo[] states)
+        public static void GenerateStateMachine(string path, string contextName, sStateInfo[] states)
         {
             if (!string.IsNullOrEmpty(path))
             {
@@ -160,11 +294,11 @@ namespace Starvoxel.Core
 
                 for (int validIndex = 0; validIndex < validStates.Count; ++validIndex)
                 {
-                    for (int transitionIndex = 0; transitionIndex < validStates[validIndex].ValidTypes.Length; ++transitionIndex)
+                    for (int transitionIndex = 0; transitionIndex < validStates[validIndex].ValidTransitions.Length; ++transitionIndex)
                     {
-                        if (!string.IsNullOrEmpty(validStates[validIndex].ValidTypes[transitionIndex]) && !transitionNames.Contains(validStates[validIndex].ValidTypes[transitionIndex]))
+                        if (!string.IsNullOrEmpty(validStates[validIndex].ValidTransitions[transitionIndex].TransitionName) && !transitionNames.Contains(validStates[validIndex].ValidTransitions[transitionIndex].TransitionName))
                         {
-                            transitionNames.Add(validStates[validIndex].ValidTypes[transitionIndex]);
+                            transitionNames.Add(validStates[validIndex].ValidTransitions[transitionIndex].TransitionName);
                         }
                     }
                 }
@@ -179,7 +313,7 @@ namespace Starvoxel.Core
                 contextGenerator.Session["m_ClassName"] = contextName;
                 contextGenerator.Session["m_StateNames"] = stateNames.ToArray();
                 contextGenerator.Session["m_StartingStateIndex"] = 0;
-                contextGenerator.Session["m_TransitionTypes"] = transitionTypes;
+                contextGenerator.Session["m_TransitionTypes"] = transitionNames;
 
                 contextGenerator.Initialize();
 

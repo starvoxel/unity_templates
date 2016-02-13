@@ -51,25 +51,25 @@ using System.Collections.Generic;
 
         private static readonly StateMachineGeneratorInterface.sStateInfo[] STATE_INFO = new StateMachineGeneratorInterface.sStateInfo[]
         {
-            new StateMachineGeneratorInterface.sStateInfo("Idle", new string[]
+            new StateMachineGeneratorInterface.sStateInfo("Idle", new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo[]
                 {
-                    TRANSITION_NAMES[0],
-                    TRANSITION_NAMES[1],
-                    TRANSITION_NAMES[2],
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[0],"Patrol"),
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[1],"Chase"),
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[2],"Fire")
                 }),
-            new StateMachineGeneratorInterface.sStateInfo("Patrol", new string[]
+            new StateMachineGeneratorInterface.sStateInfo("Patrol", new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo[]
                 {
-                    TRANSITION_NAMES[0],
-                    TRANSITION_NAMES[1],
-                    TRANSITION_NAMES[2],
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[0], "Chase"),
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[1], "Chase"),
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[2], "Fire")
                 }),
-            new StateMachineGeneratorInterface.sStateInfo("Chase", new string[]
+            new StateMachineGeneratorInterface.sStateInfo("Chase", new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo[]
                 {
-                    TRANSITION_NAMES[2]
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[2], "Patrol")
                 }),
-            new StateMachineGeneratorInterface.sStateInfo("Fire", new string[]
+            new StateMachineGeneratorInterface.sStateInfo("Fire", new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo[]
                 {
-                    TRANSITION_NAMES[2]
+                    new StateMachineGeneratorInterface.sStateInfo.sTransitionInfo(TRANSITION_NAMES[2], "Idle")
                 }),
         };
 
@@ -80,7 +80,6 @@ using System.Collections.Generic;
 		//private
         private string m_ContextName = string.Empty;
         private bool m_TransitionTypesFoldout;
-        private string[] m_TransitionTypes = null;
         private StateMachineGeneratorInterface.sStateInfo[] m_StateInfo;
 	
 		//properties
@@ -104,13 +103,46 @@ using System.Collections.Generic;
                 defaultName: "StateMachine",
                 folder: "/Assets/");
 
-            StateMachineGeneratorInterface.GenerateStateMachine(outputPath, CONTEXT_NAME, TRANSITION_NAMES, STATE_INFO);
+            StateMachineGeneratorInterface.GenerateStateMachine(outputPath, CONTEXT_NAME, STATE_INFO);
         }
 
         private void OnGUI()
         {
             m_ContextName = EditorGUILayout.TextField("Context Name", m_ContextName);
-            m_TransitionTypes = OnStringArrayGUI("Transition Types", m_TransitionTypes, ref m_TransitionTypesFoldout);
+
+            m_TransitionTypesFoldout = EditorGUILayout.Foldout(m_TransitionTypesFoldout, "State Info");
+
+            if (m_StateInfo == null)
+            {
+                m_StateInfo = new StateMachineGeneratorInterface.sStateInfo[0];
+            }
+
+            List<StateMachineGeneratorInterface.sStateInfo> stateInfoList = new List<StateMachineGeneratorInterface.sStateInfo>(m_StateInfo);
+
+            if (m_TransitionTypesFoldout)
+            {
+                EditorGUI.indentLevel += 1;
+
+                int count = EditorGUILayout.IntField("Size", stateInfoList.Count);
+
+                while (count > stateInfoList.Count)
+                {
+                    stateInfoList.Add(new StateMachineGeneratorInterface.sStateInfo());
+                }
+
+                while (count < stateInfoList.Count)
+                {
+                    stateInfoList.RemoveAt(stateInfoList.Count - 1);
+                }
+
+                for (int i = 0; i < stateInfoList.Count; ++i)
+                {
+                    stateInfoList[i].OnGUI();
+                }
+                EditorGUI.indentLevel -= 1;
+            }
+
+            m_StateInfo = stateInfoList.ToArray();
 
             EditorGUILayout.Space();
 
@@ -139,7 +171,6 @@ using System.Collections.Generic;
             {
                 Dictionary<string, object> saveData = new Dictionary<string, object>();
                 saveData.Add(CONTEXT_NAME_KEY, CONTEXT_NAME);
-                saveData.Add(TRANSITION_TYPES_KEY, TRANSITION_NAMES);
                 List<string> stateValueData = new List<string>();
                 if (STATE_INFO != null)
                 {
@@ -171,21 +202,6 @@ using System.Collections.Generic;
                     if (data.ContainsKey(CONTEXT_NAME_KEY))
                     {
                         m_ContextName = data[CONTEXT_NAME_KEY] as string;
-                    }
-
-                    if (data.ContainsKey(TRANSITION_TYPES_KEY))
-                    {
-                        List<object> transitionTypes = data[TRANSITION_TYPES_KEY] as List<object>;
-
-                        if (transitionTypes != null)
-                        {
-                            m_TransitionTypes = new string[transitionTypes.Count];
-
-                            for(int i = 0; i < transitionTypes.Count; ++i)
-                            {
-                                m_TransitionTypes[i] = transitionTypes[i] as string;
-                            }
-                        }
                     }
 
                     if (data.ContainsKey(STATE_INFO_KEY))
