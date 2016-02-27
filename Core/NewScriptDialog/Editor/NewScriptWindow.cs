@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 using Object = UnityEngine.Object;
+using Starvoxel.Core;
 
 public class NewScriptWindow : EditorWindow
 {
@@ -106,7 +107,6 @@ public class NewScriptWindow : EditorWindow
     private Vector2 m_PreviewScroll;
     private Vector2 m_OptionsScroll;
     private bool m_ClearKeyboardControl = false;
-    private bool m_IsShowingNamespaceFoldout = false;
     private bool m_IsUsingHeader = true;
 
     private bool m_UsingDescription = false;
@@ -462,7 +462,7 @@ public class NewScriptWindow : EditorWindow
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("Malformed function line: \"" + functionLineWhole + "\"\n  at " + functionDataFilePath + ":" + lineNr + "\n" + e);
+                    Services.Logger.LogWithCategory(LoggerConstants.CORE_CATEGORY, LogType.Log, "Malformed function line: \"" + functionLineWhole + "\"\n  at " + functionDataFilePath + ":" + lineNr + "\n" + e);
                 }
                 lineNr++;
             }
@@ -1316,7 +1316,7 @@ public class NewScriptWindow : EditorWindow
 
         if (folderIndex >= folders.Length)
         {
-            Debug.LogError("Couldn't find proper directory namespace name...");
+            Services.Logger.LogWithCategory(LoggerConstants.EDITOR_UTILITY_CATEGORY, LogType.Error, "Couldn't find proper directory namespace name...");
         }
         else
         {

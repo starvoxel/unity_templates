@@ -21,7 +21,7 @@ using System.Collections;
 #endregion
 #endregion
 
-namespace Utility
+namespace Starvoxel.Core
 {
     public class TestObject : IPoolable
     {

@@ -25,9 +25,9 @@ using System;
 #endregion
 #endregion
 
-namespace Utility
+namespace Starvoxel.Core
 {
-	public abstract class Poolable : MonoBehaviour, IPoolable
+	public abstract class Poolable : CustomMono, IPoolable
 	{
 		#region Fields & Properties
 		//const

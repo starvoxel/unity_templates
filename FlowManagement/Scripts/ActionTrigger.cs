@@ -24,7 +24,7 @@ using System.Collections;
 #endregion
 
 #region Other Includes
-
+using Starvoxel.Core;
 #endregion
 #endregion
 
@@ -45,13 +45,11 @@ using System.Collections;
 		//properties
 		#endregion
 	
-		#region Unity Methods
-		#endregion
-	
 		#region Public Methods
-        public virtual void TriggerAction()
+        [ContextMenu("Fire Flow Event")]
+        public virtual void FireFlowEvent()
         {
-            FlowManager.Instance.TriggerAction(m_ActionID);
+            EventMessenger.Instance.Raise<FlowEvent>(new FlowEvent(m_ActionID));
         }
 		#endregion
 	

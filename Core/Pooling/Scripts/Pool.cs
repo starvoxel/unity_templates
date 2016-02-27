@@ -26,7 +26,7 @@ using System.Collections.Generic;
 #endregion
 #endregion
 
-namespace Utility
+namespace Starvoxel.Core
 {
     public class Pool<T> where T : IPoolable
     {
@@ -107,11 +107,11 @@ namespace Utility
 
                 if (index >= m_Pool.Count)
                 {
-                    Debug.LogError("Object at invalid index trying to be deactivated.\nIndex: " + index);
+                    Services.Logger.LogError("Object at invalid index trying to be deactivated.\nIndex: " + index);
                 }
                 else if (index > m_ActiveIndex)
                 {
-                    Debug.LogWarning("Trying to de-activate an object that is already in-active.");
+                    Services.Logger.LogWarning("Trying to de-activate an object that is already in-active.");
                 }
                 else
                 {

@@ -30,15 +30,12 @@ using System.Collections;
 	public static partial class LoggerConstants
     {
         #region Categories
-        // Base
-        public const string WARNING_CATEGORY = "WARNING";
-        public const string ERROR_CATEGORY = "ERROR";
-
         // Module related
         public const string CORE_CATEGORY = "CORE";
         public const string FLOW_CATEGORY = "FLOW";
         public const string POOLING_CATEGORY = "POOLING";
         public const string UTILITY_CATEGORY = "UTILITY";
+        public const string EDITOR_UTILITY_CATEGORY = "EDITOR_UTILITY";
         public const string TELEMETERY_CATEGORY = "TELEMETRY";
 
         // Game related
@@ -59,7 +56,7 @@ using System.Collections;
         #endregion
 
         #region IO
-        public static readonly string LOGGER_OUTPUT_PATH = "Logs";
+        public const string BASE_FOLDER_STRUCTUR = "/Logs/";
         #endregion
     }
 	

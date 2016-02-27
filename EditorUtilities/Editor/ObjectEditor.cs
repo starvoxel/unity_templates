@@ -32,7 +32,7 @@ using System.Reflection;
 #endregion
 #endregion
 
-namespace Starvoxel
+namespace Starvoxel.EditorUtilities
 {
     [CustomEditor(typeof(DefaultAsset))]
     public class ObjectEditor : Editor

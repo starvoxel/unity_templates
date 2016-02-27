@@ -17,6 +17,7 @@
 #region Defines
 #define FLOW_MANAGEMENT
 #endregion
+
 #region Includes
 #region Unity Includes
 using UnityEngine;
@@ -33,6 +34,7 @@ using System.Xml.Linq;
 
 #region Other Includes
 using Starvoxel.Utilities;
+using Starvoxel.Core;
 #endregion
 #endregion
 
@@ -142,7 +144,6 @@ namespace Starvoxel.FlowManagement
                 if (m_Instance == null)
                 {
                     m_Instance = new FlowManager();
-                    m_Instance.Initialize();
                 }
                 return m_Instance;  
             }
@@ -153,20 +154,26 @@ namespace Starvoxel.FlowManagement
             get { return m_Instance == null; }
         }
 		#endregion
-	
-		#region Public Methods
-        /// <summary>
-        /// Initializes non-file specific functionality
-        /// </summary>
-        public void Initialize()
+
+        #region Constructor Methods
+        public FlowManager()
         {
             if (m_CoroutineRunner == null)
             {
                 m_CoroutineRunner = CoroutineRunner.FetchCoroutineRunner();
                 m_CoroutineRunner.name = COROUTINE_RUNNER_NAME;
             }
+
+            EventMessenger.Instance.AddListener<FlowEvent>(OnFlowEventFired);
         }
 
+        ~FlowManager()
+        {
+            EventMessenger.Instance.RemoveListener<FlowEvent>(OnFlowEventFired);
+        }
+        #endregion
+
+        #region Public Methods
         /// <summary>
         /// Launch the flow of the game.  It will load and parse the XML at the provided path.
         /// </summary>
@@ -193,7 +200,7 @@ namespace Starvoxel.FlowManagement
 
                     if (m_Overlay == null)
                     {
-                        Debug.LogErrorFormat("Default overlay not found.  Please ensure a prefab with a Overlay script exists at {0}.", DEFAULT_OVERLAY_PATH);
+                        Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Error, "Default overlay not found.  Please ensure a prefab with a Overlay script exists at {0}.", DEFAULT_OVERLAY_PATH);
                     }
 
                     View loadedView = GameObject.FindObjectOfType<View>();
@@ -223,7 +230,7 @@ namespace Starvoxel.FlowManagement
                         }
                         else
                         {
-                            Debug.LogErrorFormat("Starting view ({0}) not found in view list.  Starting view must be a valid view.", m_GeneralInformation.StartingView);
+                            Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Error, "Starting view ({0}) not found in view list.  Starting view must be a valid view.", m_GeneralInformation.StartingView);
                         }
                     }
 
@@ -231,12 +238,14 @@ namespace Starvoxel.FlowManagement
                 }
             }
         }
+		#endregion
 
+		#region Private Methods
         /// <summary>
-        /// Trigger a flow action based on provided ID.  This action can change views, load additive views on top of the current scene.  Eventually they will interact with the state machines of views aswell
+        /// Fired when a flow event is fired.
         /// </summary>
-        /// <param name="actionID">ID for the action</param>
-        public void TriggerAction(string actionID, Dictionary<string, object> parameters = null)
+        /// <param name="ev">Flow event</param>
+        private void OnFlowEventFired(FlowEvent ev)
         {
             ActionNode action = new ActionNode();
 
@@ -247,15 +256,15 @@ namespace Starvoxel.FlowManagement
 
                 if (focusedNode.IsInitialzed)
                 {
-                    action = focusedNode.GetActionByID(actionID);
+                    action = focusedNode.GetActionByID(ev.ActionID);
                 }
 
                 // If we still don't have action, try the general actions
                 if (!action.IsInitialized && m_GeneralActions != null && m_GeneralActions.Length > 0)
                 {
-                    for(int actionIndex = 0; actionIndex < m_GeneralActions.Length; ++actionIndex)
+                    for (int actionIndex = 0; actionIndex < m_GeneralActions.Length; ++actionIndex)
                     {
-                        if (m_GeneralActions[actionIndex].ID == actionID)
+                        if (m_GeneralActions[actionIndex].ID == ev.ActionID)
                         {
                             action = m_GeneralActions[actionIndex];
                             break;
@@ -268,7 +277,7 @@ namespace Starvoxel.FlowManagement
             {
                 ActionQueueElement newElement = new ActionQueueElement();
                 newElement.Action = action;
-                newElement.Parameters = parameters;
+                newElement.Parameters = ev.Parameters;
 
                 m_ActionQueue.Enqueue(newElement);
 
@@ -278,9 +287,7 @@ namespace Starvoxel.FlowManagement
                 }
             }
         }
-		#endregion
 
-		#region Private Methods
         private IEnumerator InitializeOpenView()
         {
             PartialOnPreLoadNewScene();
@@ -487,7 +494,7 @@ namespace Starvoxel.FlowManagement
             }
             else
             {
-                Debug.LogErrorFormat("A view with the name {0} was not found.  Make sure that the view has the same name as the scene!", newSceneName);
+                Services.Logger.LogWithCategory(LoggerConstants.FLOW_CATEGORY, LogType.Error, "A view with the name {0} was not found.  Make sure that the view has the same name as the scene!", newSceneName);
             }
         }
 

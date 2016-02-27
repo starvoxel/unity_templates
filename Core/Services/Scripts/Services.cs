@@ -34,17 +34,17 @@ using System.Collections;
 		//public
 
         //private
-        private static ILogger m_Logger;
+        private static Logger m_Logger;
 	
 		//properties
-        public static ILogger Logger
+        public static Logger Logger
         {
             get { return m_Logger; }
         }
 		#endregion
 	
 		#region Public Methods
-        public static void InitializeLogger(ILogger logger)
+        public static void InitializeLogger(Logger logger)
         {
             if (m_Logger == null)
             {

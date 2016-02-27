@@ -21,7 +21,7 @@ using System;
 #endregion
 #endregion
 
-namespace Utility
+namespace Starvoxel.Core
 {
     public interface IPoolable
     {
