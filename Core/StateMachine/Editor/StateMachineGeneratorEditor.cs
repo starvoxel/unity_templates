@@ -40,7 +40,6 @@ using System.Collections.Generic;
         private const string TRANSITION_TYPES_KEY = "TransitionTypes";
         private const string STATE_INFO_KEY = "StateInfo";
 
-        private static readonly string PATH = Application.dataPath + "/TestFolder/";
         private const string CONTEXT_NAME = "TestContext";
         private static readonly string[] TRANSITION_NAMES = new string[]
         {
@@ -221,11 +220,11 @@ using System.Collections.Generic;
                 }
             }
         }
-		#endregion
         private string[] OnStringArrayGUI(string name, string[] array, ref bool isShowing)
         {
             return OnStringArrayGUI(new GUIContent(name), array, ref isShowing);
         }
+        #endregion
 
 
         private string[] OnStringArrayGUI(GUIContent content, string[] array, ref bool isShowing)
