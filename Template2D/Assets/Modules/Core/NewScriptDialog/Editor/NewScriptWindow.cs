@@ -74,8 +74,10 @@ public class NewScriptWindow : EditorWindow
     //const
     private const int BUTTON_WIDTH = 120;
     private const int LABEL_WIDTH = 120;
-    private const string TEMPLATE_PATH = "Modules/Core/NewScriptDialog/OtherResources/ScriptTemplates";
-    private const string HEADER_PATH = "Modules/Core/NewScriptDialog/OtherResources/HeaderTemplates";
+    private const string MODULE_TEMPLATE_PATH = "Modules/Core/NewScriptDialog/OtherResources/ScriptTemplates";
+    private const string MODULE_HEADER_PATH = "Modules/Core/NewScriptDialog/OtherResources/HeaderTemplates";
+    private const string PROJECT_TEMPLATE_PATH = "OtherResources/NewScriptDialog/ScriptTemplates";
+    private const string PROJECT_HEADER_PATH = "OtherResources/NewScriptDialog/HeaderTemplates";
     private const string RESOURCES_TEMPLATE_PATH = "Resources/CustomScriptTemplates";
     private const string CUSTOM_EDITOR_NAME = "Editor";
 
@@ -260,14 +262,14 @@ public class NewScriptWindow : EditorWindow
         return Path.Combine(EditorApplication.applicationContentsPath, RESOURCES_TEMPLATE_PATH);
     }
 
-    private string GetAbsoluteCustomTemplatePath()
+    private string GetAbsoluteModuleTemplatePath()
     {
-        return Application.dataPath + "/" + TEMPLATE_PATH;
+        return Application.dataPath + "/" + MODULE_TEMPLATE_PATH;
     }
 
-    private string GetAbsoluteHeaderPath()
+    private string GetAbsoluteModuleHeaderPath()
     {
-        return Application.dataPath + "/" + HEADER_PATH;
+        return Application.dataPath + "/" + MODULE_HEADER_PATH;
     }
 
     private string TargetPath()
@@ -399,7 +401,7 @@ public class NewScriptWindow : EditorWindow
         }
 
         // Try to find function file first in custom templates folder and then in built-in
-        string functionDataFilePath = Path.Combine(GetAbsoluteCustomTemplatePath(), m_BaseClass + ".functions.txt");
+        string functionDataFilePath = Path.Combine(GetAbsoluteModuleTemplatePath(), m_BaseClass + ".functions.txt");
         if (!File.Exists(functionDataFilePath))
             functionDataFilePath = Path.Combine(GetAbsoluteBuiltinTemplatePath(), m_BaseClass + ".functions.txt");
 
@@ -480,7 +482,7 @@ public class NewScriptWindow : EditorWindow
 
     private string GetTemplate(string nameWithoutExtension)
     {
-        string path = Path.Combine(GetAbsoluteCustomTemplatePath(), nameWithoutExtension + "." + extension + ".txt");
+        string path = Path.Combine(GetAbsoluteModuleTemplatePath(), nameWithoutExtension + "." + extension + ".txt");
         if (File.Exists(path))
             return File.ReadAllText(path);
 
@@ -503,8 +505,8 @@ public class NewScriptWindow : EditorWindow
         List<string> templates = new List<string>();
 
         // Get all file names of custom templates
-        if (Directory.Exists(GetAbsoluteCustomTemplatePath()))
-            templates.AddRange(Directory.GetFiles(GetAbsoluteCustomTemplatePath()));
+        if (Directory.Exists(GetAbsoluteModuleTemplatePath()))
+            templates.AddRange(Directory.GetFiles(GetAbsoluteModuleTemplatePath()));
 
         // Get all file names of built-in templates
         if (Directory.Exists(GetAbsoluteBuiltinTemplatePath()))
@@ -615,7 +617,7 @@ public class NewScriptWindow : EditorWindow
     {
         if (m_HeaderNames.Length > 0)
         {
-            string path = Path.Combine(GetAbsoluteHeaderPath(), GetHeaderName() + ".txt");
+            string path = Path.Combine(GetAbsoluteModuleHeaderPath(), GetHeaderName() + ".txt");
             if (File.Exists(path))
             {
                 string file = File.ReadAllText(path);
@@ -633,9 +635,9 @@ public class NewScriptWindow : EditorWindow
         List<string> headers = new List<string>();
 
         // Get all file names of custom templates
-        if (Directory.Exists(GetAbsoluteHeaderPath()))
+        if (Directory.Exists(GetAbsoluteModuleHeaderPath()))
         {
-            headers.AddRange(Directory.GetFiles(GetAbsoluteHeaderPath()));
+            headers.AddRange(Directory.GetFiles(GetAbsoluteModuleHeaderPath()));
         }
 
         for (int i = 0; i < headers.Count; ++i)
