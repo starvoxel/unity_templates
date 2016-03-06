@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
+using Starvoxel.Core;
 
 namespace UnityEditor
 {
@@ -112,10 +113,10 @@ namespace UnityEditor
 				
 				if (!hasFunctions)
 				{
-					if (m_ScriptPrescription.m_Lang == Language.Boo && !m_Text.Contains ("def"))
+					/*if (m_ScriptPrescription.m_Lang == Language.Boo && !m_Text.Contains ("def"))
 						// Replace $Functions keyword with "pass" if no functions in Boo
 						m_Text = m_Text.Replace (match.Value, m_Indentation + "pass");
-					else
+					else*/
 						// Otherwise just remove $Functions keyword plus newline
 						m_Text = m_Text.Replace (match.Value + "\n", string.Empty);
 				}
@@ -242,7 +243,7 @@ namespace UnityEditor
 				
 				break;
 				
-			case Language.Boo:
+			/*case Language.Boo:
 				// Comment
 				WriteComment (function.comment);
 				
@@ -263,7 +264,7 @@ namespace UnityEditor
 				m_Writer.WriteLine (m_Indentation + functionContentString);
 				IndentLevel--;
 				
-				break;
+				break;*/
 			}
 		}
 	}

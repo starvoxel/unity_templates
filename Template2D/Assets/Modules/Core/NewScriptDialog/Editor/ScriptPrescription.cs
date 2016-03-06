@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
+using Starvoxel.Core;
 
 namespace UnityEditor
 {
@@ -18,7 +19,7 @@ namespace UnityEditor
 		public Dictionary<string, string> m_StringReplacements = new Dictionary<string, string> ();
 	}
 	
-	internal enum Language
+	/*internal enum Language
 	{
 		JavaScript = 0,
 		CSharp = 1,
@@ -57,5 +58,5 @@ namespace UnityEditor
 			this.name = name;
 			this.type = type;
 		}
-	}
+	}*/
 }

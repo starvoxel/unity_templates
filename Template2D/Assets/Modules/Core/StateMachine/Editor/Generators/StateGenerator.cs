@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace starvoxel.Core
+namespace Starvoxel.Core
 {
     using System.Collections.Generic;
     using System;

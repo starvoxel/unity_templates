@@ -136,8 +136,6 @@ public class NewScriptWindow : EditorWindow
                     return "cs";
                 case Language.JavaScript:
                     return "js";
-                case Language.Boo:
-                    return "boo";
                 default:
                     throw new ArgumentOutOfRangeException();
             }
