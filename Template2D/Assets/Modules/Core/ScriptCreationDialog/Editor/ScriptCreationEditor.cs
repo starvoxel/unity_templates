@@ -1,7 +1,16 @@
+#region Inludes
+
+#region Unity Includes
 using UnityEngine;
 using UnityEditor;
+#endregion
+
+#region System Includes
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+#endregion
+#endregion
 
 namespace Starvoxel.Core
 {
@@ -10,6 +19,7 @@ namespace Starvoxel.Core
         #region Fields & Properties
         //const
         private const string EDITOR_TEMPLATE_TAG = "Editor";
+        private const string ASSET_FOLER_STRING = "Assets/";
 
         private const float BUTTON_WIDTH = 120;
         private const float LABEL_WIDTH = 120;
@@ -33,7 +43,8 @@ namespace Starvoxel.Core
         //protected
 
         //private
-        private ScriptData m_Data;
+        private ScriptData m_Data = new ScriptData();
+        private string m_Path = string.Empty;
 
         // GUI variables
         private Vector2 m_PreviewScroll = Vector2.zero;
@@ -65,6 +76,24 @@ namespace Starvoxel.Core
             minSize = new Vector2(550, 400);
         }
 
+        private void OnEnable()
+        {
+            UpdateHeaderNamesAndHeader();
+            UpdateTemplateNamesAndTemplate();
+
+            if (Selection.activeObject != null)
+            {
+                if (IsFolder(Selection.activeObject))
+                {
+                    m_Path = AssetDatabase.GetAssetPath(Selection.activeObject).Substring(ASSET_FOLER_STRING.Length);
+                }
+                else
+                {
+                    m_Path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(Selection.activeObject).Substring(ASSET_FOLER_STRING.Length));
+                }
+            }
+        }
+
         /*private void OnEnable()
         {
             m_ScriptPrescription.m_Lang = (Language)1;
@@ -75,6 +104,27 @@ namespace Starvoxel.Core
         #endregion
 
         #region Private Methods
+        #region Menu Item Methods
+        [MenuItem("Assets/Create/C# Script", false, 75)]
+        private static void OpenFromAssetsMenu()
+        {
+            Init();
+        }
+        #endregion
+
+        #region Template Methods
+        protected virtual void UpdateTemplateNamesAndTemplate()
+        {
+
+        }
+        #endregion
+
+        #region Header Methods
+        protected virtual void UpdateHeaderNamesAndHeader()
+        {
+
+        }
+        #endregion
 
         #region GUI Methods
         protected virtual void OnGUI()
@@ -101,17 +151,7 @@ namespace Starvoxel.Core
 
                     EditorGUILayout.BeginVertical();
                     {
-                        //We put it as a scroll view incase we end up having a lot of data
-                        m_DataScroll = EditorGUILayout.BeginScrollView(m_DataScroll);
-                        {
-                            EditorGUILayout.BeginVertical();
-                            {
-                                NameGUI();
-                            }
-                            EditorGUILayout.EndVertical();
-                        }
-                        EditorGUILayout.EndScrollView();
-
+                        CustomizationGUI();
                         GUILayout.FlexibleSpace();
                         CreateAndCancelGUI();
                     }
@@ -126,6 +166,9 @@ namespace Starvoxel.Core
             EditorGUILayout.EndVertical();
         }
 
+        /// <summary>
+        /// Preview of what the script will look like.  Want to make this as optimized as possible so that it doesn't lag the editor window
+        /// </summary>
         private void PreviewGUI()
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(Mathf.Max(position.width * 0.3f, position.width - 450f)));
@@ -169,9 +212,22 @@ namespace Starvoxel.Core
             } EditorGUILayout.EndVertical();
         }
 
-        protected void NameGUI()
+        /// <summary>
+        /// All GUI used for the customization of the new script.
+        /// </summary>
+        private void CustomizationGUI()
         {
-            m_Data.ClassName = EditorGUILayout.TextField("Name", m_Data.ClassName);
+            //We put it as a scroll view incase we end up having a lot of data
+            m_DataScroll = EditorGUILayout.BeginScrollView(m_DataScroll);
+            {
+                EditorGUILayout.BeginVertical();
+                {
+                    m_Data.ClassName = EditorGUILayout.TextField("Name", m_Data.ClassName);
+                    EditorGUILayout.LabelField(m_Path);
+                }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndScrollView();
         }
 
         protected void CreateAndCancelGUI()
@@ -195,6 +251,11 @@ namespace Starvoxel.Core
         }
         #endregion
 
+        #region IO Methods
+        private bool IsFolder(Object obj)
+        {
+            return Directory.Exists(AssetDatabase.GetAssetPath(obj));
+        }
         #endregion
 
         #region Helper Methods
@@ -246,7 +307,7 @@ namespace Starvoxel.Core
                     curName = originalList[originalIndex];
                     if (!string.IsNullOrEmpty(curName))
                     {
-                        if (curName.Equals(m_DefaultTemplateName))
+                        if (curName.Equals(m_DefaultHeaderName))
                         {
                             headerNames.Insert(0, curName);
                         }
@@ -258,6 +319,8 @@ namespace Starvoxel.Core
                 }
             }
         }
+        #endregion
+
         #endregion
     }
 }
