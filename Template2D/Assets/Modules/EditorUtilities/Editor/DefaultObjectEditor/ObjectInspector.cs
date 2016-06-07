@@ -44,9 +44,6 @@ namespace Starvoxel.EditorUtilities
 		//properties
 		#endregion
 	
-		#region Unity Methods
-		#endregion
-	
 		#region Public Methods
         public abstract bool IsValid(string path);
 
