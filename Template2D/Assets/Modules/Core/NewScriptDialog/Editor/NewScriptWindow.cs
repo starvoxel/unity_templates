@@ -720,11 +720,11 @@ public class NewScriptWindow : EditorWindow
         return (Selection.activeObject is GameObject);
     }
 
-    /*[MenuItem("Assets/Create/C# Script", false, 75)]
+    [MenuItem("Assets/Create/C# Script", false, 75)]
     private static void OpenFromAssetsMenu()
     {
         Init();
-    }*/
+    }
     #endregion
 
     #region Initialization

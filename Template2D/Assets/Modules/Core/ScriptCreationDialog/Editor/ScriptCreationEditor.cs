@@ -105,7 +105,7 @@ namespace Starvoxel.Core
 
         #region Private Methods
         #region Menu Item Methods
-        [MenuItem("Assets/Create/C# Script", false, 75)]
+        //[MenuItem("Assets/Create/C# Script", false, 75)]
         private static void OpenFromAssetsMenu()
         {
             Init();
