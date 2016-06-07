@@ -7,7 +7,7 @@ namespace BehaviorDesigner.Runtime.Tasks.Movement
     [TaskCategory("Movement")]
     [HelpURL("http://www.opsive.com/assets/BehaviorDesigner/Movement/documentation.php?id=2")]
     [TaskIcon("Assets/Behavior Designer Movement/Editor/Icons/{SkinColor}RotateTowardsIcon.png")]
-    public class RotateTowards : Action
+    public class LookAt : Action
     {
         [Tooltip("Should the 2D version be used?")]
         public bool usePhysics2D;

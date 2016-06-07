@@ -27,8 +27,6 @@ namespace BehaviorDesigner.Runtime.Tasks.Movement.PolyNav
         public SharedFloat fieldOfViewAngle = 90;
         [Tooltip("The distance that the agent can see")]
         public SharedFloat viewDistance = 10;
-        [Tooltip("The object that is within sight")]
-        public SharedGameObject returnedObject;
 
         // The time to wait
         private float waitDuration;
@@ -54,15 +52,6 @@ namespace BehaviorDesigner.Runtime.Tasks.Movement.PolyNav
 
         public override TaskStatus OnUpdate()
         { 
-            //Check to see if the object is within sight
-            returnedObject.Value = MovementUtility.WithinSight2D(transform, Vector3.zero, fieldOfViewAngle.Value, viewDistance.Value, objectLayerMask, Vector3.zero, ignoreLayerMask);
-
-            //If we found something, return success
-            if (returnedObject.Value != null)
-            {
-                return TaskStatus.Success;
-            }
-
             if (HasArrived() && float.IsNaN(startTime))
             {
                 startTime = Time.time;
@@ -95,15 +84,18 @@ namespace BehaviorDesigner.Runtime.Tasks.Movement.PolyNav
 
         public override void OnPause(bool paused)
         {
-            if (paused)
+            if (!float.IsNaN(startTime))
             {
-                // Remember the time that the behavior was paused.
-                pauseTime = Time.time;
-            }
-            else
-            {
-                // Add the difference between Time.time and pauseTime to figure out a new start time.
-                startTime += (Time.time - pauseTime);
+                if (paused)
+                {
+                    // Remember the time that the behavior was paused.
+                    pauseTime = Time.time;
+                }
+                else
+                {
+                    // Add the difference between Time.time and pauseTime to figure out a new start time.
+                    startTime += (Time.time - pauseTime);
+                }
             }
         }
     }
