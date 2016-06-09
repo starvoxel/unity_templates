@@ -24,7 +24,6 @@ using System.Collections;
 #endregion
 
 #region Other Includes
-using Starvoxel.BiteMe;
 #endregion
 #endregion
 
