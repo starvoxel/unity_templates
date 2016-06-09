@@ -38,6 +38,7 @@ namespace Starvoxel.EditorUtilities
 		//public
 	
 		//protected
+        protected ObjectEditor m_Editor;
 	
 		//private
 	
@@ -47,7 +48,12 @@ namespace Starvoxel.EditorUtilities
 		#region Public Methods
         public abstract bool IsValid(string path);
 
-        public abstract void OnInspector(ObjectEditor editor);
+        public virtual void Initialize(ObjectEditor editor)
+        {
+            m_Editor = editor;
+        }
+
+        public abstract void OnInspector();
 		#endregion
 	
 		#region Protected Methods

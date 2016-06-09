@@ -63,6 +63,7 @@ namespace Starvoxel.EditorUtilities
 
                 if (curInspector.IsValid(path))
                 {
+                    curInspector.Initialize(this);
                     m_ValidInspectors.Add(curInspector);
                 }
             }
@@ -79,7 +80,7 @@ namespace Starvoxel.EditorUtilities
             {
                 for (int i = 0; i < m_ValidInspectors.Count; ++i)
                 {
-                    m_ValidInspectors[i].OnInspector(this);
+                    m_ValidInspectors[i].OnInspector();
                 }
             }
         }
