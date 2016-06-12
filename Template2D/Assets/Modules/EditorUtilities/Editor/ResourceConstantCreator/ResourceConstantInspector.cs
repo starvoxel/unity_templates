@@ -38,6 +38,10 @@ using System.IO;
 	{
 		#region Fields & Properties
 		//const
+        private GUIContent TAB_GUI_CONTENT = new GUIContent("Resource Contants");
+        private string FILE_EXTENSION = ".cs";
+        private string ROOT_PATH = "/Scripts/ResourceConstants/";
+
         private const string RESOURCE_FOLDER_NAME = "/Resources/";
         private static readonly List<string> INVALID_FILE_EXTENSIONS = new List<string>() { ".meta" };
 	
@@ -59,6 +63,7 @@ using System.IO;
 		//protected
 	
 		//private
+
         private string m_FullPath;
         private string m_PathStub = null;
         private sResourceConstantData m_Data;
@@ -68,6 +73,10 @@ using System.IO;
         private List<string> m_LocalFiles;
 	
 		//properties
+        public override GUIContent TabContent
+        {
+            get { return TAB_GUI_CONTENT; }
+        }
 		#endregion
 	
 		#region Constructor Methods
@@ -297,14 +306,66 @@ using System.IO;
                 for (int i = 0; i < allFiles.Length; ++i)
                 {
                     allFiles[i] = allFiles[i].Replace('\\', '/');
-                    if (!INVALID_FILE_EXTENSIONS.Contains(Path.GetExtension(allFiles[i])) && !m_Data.Exclusions.Contains(allFiles[i]))
+                    if (IsValidPath(allFiles[i]))
                     {
                         m_LocalFiles.Add(allFiles[i]);
                     }
                 }
             }
+
+            string ns = string.Format("{0}.{1}", CodifyString(PlayerSettings.companyName), CodifyString(PlayerSettings.productName)); // TODO jsmellie: I should probably put this in something shared...  I now use this in multiple places
+            string className = "TestConstants";
+            string path = Application.dataPath + ROOT_PATH + m_PathStub + Path.DirectorySeparatorChar;
+
+            ResourceConstantsGenerator generator = new ResourceConstantsGenerator();
+
+            generator.Session = new Dictionary<string, object>();
+            generator.Session["m_Namespace"] = ns;
+            generator.Session["m_ClassName"] = className;
+            generator.Session["m_ConstantsDictionary"] = new Dictionary<string, string[]>() 
+            {
+                { "Unsorted", m_LocalFiles.ToArray() }
+            };
+
+            generator.Initialize();
+
+            string fileText = generator.TransformText();
+
+            if (!System.IO.Directory.Exists(path))
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+
+            System.IO.File.WriteAllText(path + className + FILE_EXTENSION, fileText);
+
+            AssetDatabase.Refresh();
+        }
+
+        private bool IsValidPath(string path)
+        {
+            bool isValid = true;
+            isValid &= !INVALID_FILE_EXTENSIONS.Contains(Path.GetExtension(path));
+
+            for(int i = 0; i < m_Data.Exclusions.Count; ++i)
+            {
+                isValid &= !path.StartsWith(m_Data.Exclusions[i]);
+            }
+
+            return isValid;
         }
         #endregion
+
+        private static string CodifyString(string value)
+        {
+            while (value.Length > 0 && value[0] >= '0' && value[0] <= '9')
+            {
+                value = value.Remove(0, 1);
+            }
+
+            value = value.Replace(" ", "");
+
+            return value;
+        }
         #endregion
     }
 	

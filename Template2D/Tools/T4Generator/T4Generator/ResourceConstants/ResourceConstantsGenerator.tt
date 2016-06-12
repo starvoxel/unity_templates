@@ -1,0 +1,72 @@
+﻿<#@ template language="C#" linePragmas="false" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="m_Namespace" type="System.String"#>
+<#@ parameter name="m_ClassName" type="System.String"#>
+<#@ parameter name="m_ConstantsDictionary" type="System.Collections.Generic.Dictionary<System.String, System.String[]>"#>
+<#
+#>
+/* --------------------------
+ *
+ * <#= m_ClassName #>.cs
+ *
+ * Description: Static class containing variables for assets in the Resource folder
+ * WARNING: THIS CLASS IS GENERATED.  CHANGES COULD BE LOST.
+ *
+ * -------------------------- */
+#region Includes
+#region System Includes
+using System.Collections;
+using System.Collections.Generic;
+#endregion
+#endregion
+
+namespace <#= m_Namespace #>
+{
+	public static class <#= m_ClassName #>
+	{
+<#
+		//Loop over all the sections of constants
+		int count = 0;
+		foreach(KeyValuePair<string, string[]> pair in m_ConstantsDictionary)
+        {
+			if (count > 0)
+            {
+#>
+
+<#
+            }
+			string regionName = pair.Key;
+#>
+		#region <#= regionName #>
+<#
+			for(int fileIndex = 0; fileIndex < pair.Value.Length; ++fileIndex)
+            {
+				string fileName = Path.GetFileNameWithoutExtension(pair.Value[fileIndex]);
+				string constantName = string.Empty;
+				string extension = Path.GetExtension(pair.Value[fileIndex]);
+
+				for(int charIndex = 0; charIndex < fileName.Length; ++charIndex)
+                {
+					if (char.IsUpper(fileName[charIndex]) && charIndex > 0)
+                    {
+						constantName += '_';
+                    }
+
+					constantName += char.ToUpper(fileName[charIndex]);
+                }
+
+				int extensionStartIndex = pair.Value[fileIndex].LastIndexOf(extension);
+#>
+		public const string <#= constantName #> = @"<#= pair.Value[fileIndex].Substring(0, extensionStartIndex) #>";
+<#
+            }
+#>
+		#endregion
+<#
+			count += 1;
+        }
+#>
+	}
+}

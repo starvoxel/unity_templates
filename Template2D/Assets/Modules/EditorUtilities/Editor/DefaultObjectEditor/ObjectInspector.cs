@@ -43,6 +43,10 @@ namespace Starvoxel.EditorUtilities
 		//private
 	
 		//properties
+        public abstract GUIContent TabContent
+        {
+            get;
+        }
 		#endregion
 	
 		#region Public Methods
