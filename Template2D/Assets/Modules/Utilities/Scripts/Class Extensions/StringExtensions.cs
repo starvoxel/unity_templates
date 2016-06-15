@@ -26,7 +26,7 @@ using System.Collections;
 #endregion
 #endregion
 
- namespace Starvoxel
+namespace Starvoxel.Utilities
 {
 	public static class StringExtensions
     {

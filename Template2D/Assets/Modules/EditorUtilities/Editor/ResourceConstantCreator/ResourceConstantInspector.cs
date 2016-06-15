@@ -69,6 +69,7 @@ using System.IO;
         private sResourceConstantData m_Data;
 
         private ReorderableList m_ExclusionReorderList;
+        private bool m_DataFoldout = true;
 
         private List<string> m_LocalFiles;
 	
@@ -122,53 +123,56 @@ using System.IO;
         {
             if (m_PathStub != null)
             {
-                bool oldGUIEnabled = GUI.enabled;
-                GUI.enabled = true;
+                m_DataFoldout = EditorGUILayout.Foldout(m_DataFoldout, "Data");
 
-                EditorGUILayout.BeginVertical();
+                if (m_DataFoldout)
                 {
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Label("Stub path: ", EditorStyles.boldLabel);
-                        GUILayout.Label(m_PathStub);
-                    }
-                    EditorGUILayout.EndHorizontal();
-
-                    EditorGUILayout.Space();
-
-                    m_Data.IsRecursive = GUILayout.Toggle(m_Data.IsRecursive, "Is Recursive");
-
-                    m_ExclusionReorderList.DoLayoutList();
-
-                    EditorGUILayout.BeginHorizontal();
-                    {
-                        GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Create Constants"))
-                        {
-                            CreateConstants();
-                        }
-                        GUILayout.FlexibleSpace();
-                    }
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.Space();
-                    EditorGUILayout.LabelField("Local Files:");
                     EditorGUI.indentLevel += 1;
-                    if (m_LocalFiles != null)
+                    EditorGUILayout.BeginVertical();
                     {
-                        for(int fileIndex = 0; fileIndex < m_LocalFiles.Count; ++fileIndex)
+                        EditorGUILayout.BeginHorizontal();
                         {
-                            EditorGUILayout.LabelField(m_LocalFiles[fileIndex]);
+                            GUILayout.Label("Stub path: ", EditorStyles.boldLabel);
+                            GUILayout.Label(m_PathStub);
                         }
-                    }
-                    else
-                    {
-                        EditorGUILayout.LabelField("NULL", EditorStyles.boldLabel);
-                    }
+                        EditorGUILayout.EndHorizontal();
 
+                        EditorGUILayout.Space();
+
+                        m_Data.IsRecursive = GUILayout.Toggle(m_Data.IsRecursive, "Is Recursive");
+
+                        m_ExclusionReorderList.DoLayoutList();
+
+                        EditorGUILayout.BeginHorizontal();
+                        {
+                            GUILayout.FlexibleSpace();
+                            if (GUILayout.Button("Create Constants"))
+                            {
+                                CreateConstants();
+                            }
+                            GUILayout.FlexibleSpace();
+                        }
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField("Local Files:");
+                        EditorGUI.indentLevel += 1;
+                        if (m_LocalFiles != null)
+                        {
+                            for (int fileIndex = 0; fileIndex < m_LocalFiles.Count; ++fileIndex)
+                            {
+                                EditorGUILayout.LabelField(m_LocalFiles[fileIndex]);
+                            }
+                        }
+                        else
+                        {
+                            EditorGUILayout.LabelField("NULL", EditorStyles.boldLabel);
+                        }
+
+                        EditorGUI.indentLevel -= 1;
+                    }
+                    EditorGUILayout.EndVertical();
                     EditorGUI.indentLevel -= 1;
                 }
-                EditorGUILayout.EndVertical();
-                GUI.enabled = oldGUIEnabled;
 
                 SaveData();
             }
@@ -179,6 +183,7 @@ using System.IO;
 		#endregion
 	
 		#region Private Methods
+        #region Reorderable List Callbacks
         /// <summary>
         /// Callback for drawing a element in the exclusion element
         /// </summary>
@@ -217,6 +222,7 @@ using System.IO;
         {
             reorderableList.list.Add(string.Empty);
         }
+        #endregion
 
         /// <summary>
         /// Fetches all files inside a directory.

@@ -4,6 +4,6 @@ folderAsset: yes
 timeCreated: 1465265857
 licenseType: Free
 DefaultImporter:
-  userData: '{"IsRecursive":true,"Exclusions":["Assets/Resources/Test/TestMAt2.mat","Assets/Resources/Test/AnotherFolder/TestMAt6.mat"]}'
+  userData: '{"IsRecursive":true,"Exclusions":["Assets/Resources/Test/TestMAt2.mat","Assets/Resources/Test/AnotherFolder/TestMAt6.mat","Assets/Resources/Test/AnotherFolder"]}'
   assetBundleName: 
   assetBundleVariant: 

@@ -90,6 +90,8 @@ namespace Starvoxel.EditorUtilities
         {
             if (m_ValidInspectors != null && m_ValidInspectors.Count > 0)
             {
+                bool oldGUIEnable = GUI.enabled;
+                GUI.enabled = true;
                 if (m_ValidInspectors.Count > 1)
                 {
                     m_SelectedInspector = GUILayout.Toolbar(m_SelectedInspector, m_TabContents);
@@ -102,9 +104,23 @@ namespace Starvoxel.EditorUtilities
                 else
                 {
                     m_SelectedInspector = 0;
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        GUILayout.FlexibleSpace();
+                        EditorGUILayout.LabelField(m_ValidInspectors[m_SelectedInspector].TabContent, EditorStyles.boldLabel);
+                        GUILayout.FlexibleSpace();
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    GUILayout.Space(25.0f);
                 }
 
                 m_ValidInspectors[m_SelectedInspector].OnInspector();
+                GUI.enabled = oldGUIEnable;
+            }
+            // Don't have a valid inspector so just render the default stuff
+            else
+            {
+                DrawDefaultInspector();
             }
         }
     }

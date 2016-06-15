@@ -27,42 +27,45 @@ using System.Collections.Generic;
 using sRandom = System.Random;
 #endregion
 
-public static class ListExtensions
+namespace Starvoxel.Utilities
 {
-    #region Public Methods
-    public static void Shuffle<T>(this IList<T> list)
+    public static class ListExtensions
     {
-        sRandom rng = new sRandom();
-        int n = list.Count;
-        while (n > 1)
+        #region Public Methods
+        public static void Shuffle<T>(this IList<T> list)
         {
-            n--;
-            int k = rng.Next(n + 1);
-            list.Swap(k, n);
-        }
-    }
-
-    public static void Swap<T>(this IList<T> list, int indexA, int indexB)
-    {
-        T value = list[indexA];
-        list[indexA] = list[indexB];
-        list[indexB] = value;
-    }
-
-    public static void Move<T>(this IList<T> list, int startIndex, int endIndex)
-    {
-        if (startIndex > 0 && startIndex < list.Count && endIndex >= 0 && endIndex < list.Count)
-        {
-            T value = list[startIndex];
-            list.RemoveAt(startIndex);
-
-            if (endIndex > startIndex)
+            sRandom rng = new sRandom();
+            int n = list.Count;
+            while (n > 1)
             {
-                endIndex -= 1;
+                n--;
+                int k = rng.Next(n + 1);
+                list.Swap(k, n);
             }
-
-            list.Insert(endIndex, value);
         }
+
+        public static void Swap<T>(this IList<T> list, int indexA, int indexB)
+        {
+            T value = list[indexA];
+            list[indexA] = list[indexB];
+            list[indexB] = value;
+        }
+
+        public static void Move<T>(this IList<T> list, int startIndex, int endIndex)
+        {
+            if (startIndex > 0 && startIndex < list.Count && endIndex >= 0 && endIndex < list.Count)
+            {
+                T value = list[startIndex];
+                list.RemoveAt(startIndex);
+
+                if (endIndex > startIndex)
+                {
+                    endIndex -= 1;
+                }
+
+                list.Insert(endIndex, value);
+            }
+        }
+        #endregion
     }
-    #endregion
 }

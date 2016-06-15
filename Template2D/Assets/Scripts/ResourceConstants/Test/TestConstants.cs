@@ -20,8 +20,6 @@ namespace Starvoxel.Template2D
 		#region Unsorted
 		public const string TEST_M_AT1 = @"Assets/Resources/Test/TestMAt1";
 		public const string TEST_M_AT3 = @"Assets/Resources/Test/TestMAt3";
-		public const string TEST_M_AT4 = @"Assets/Resources/Test/AnotherFolder/TestMAt4";
-		public const string TEST_M_AT5 = @"Assets/Resources/Test/AnotherFolder/TestMAt5";
 		#endregion
 	}
 }
