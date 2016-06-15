@@ -24,6 +24,10 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 #endregion
+
+#region Other Includes
+using Starvoxel.Utilities;
+#endregion
 #endregion
 
 namespace Starvoxel.Core
